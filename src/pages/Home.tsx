@@ -33,7 +33,7 @@ const Home = () => {
       >
         <div className="text-center">
           <motion.img
-            src="/lovable-uploads/logogrande-removebg-preview.png"
+            src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
             alt="Instituto de Olhos Santa Luzia"
             className="mx-auto mb-8 max-w-sm md:max-w-md lg:max-w-lg"
             initial={{ opacity: 0, scale: 0.8 }}

@@ -67,7 +67,7 @@ const ArticleModal = ({ isOpen, onClose, title, content, date }: ArticleModalPro
           {/* Logo para compartilhamento */}
           <div className="flex justify-center mb-6">
             <img 
-              src="/lovable-uploads/logogrande-removebg-preview.png"
+              src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
               alt="Instituto de Olhos Santa Luzia"
               className="h-16 w-auto"
             />
