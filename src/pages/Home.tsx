@@ -6,6 +6,7 @@ import NavigationHeader from "@/components/NavigationHeader";
 import ExpandableCard from "@/components/ExpandableCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ArticleModal from "@/components/ArticleModal";
+import SymptomChecker from "@/components/SymptomChecker";
 import { Footer } from "@/components/ui/footer";
 import { Instagram, Facebook } from "lucide-react";
 
@@ -56,9 +57,9 @@ const Home = () => {
       {/* Header flutuante - só aparece após scroll */}
       {showFloatingNav && <NavigationHeader showLogo={true} />}
 
-      {/* Hero Section com logo principal */}
+      {/* Hero Section com logo principal - posicionado mais acima */}
       <motion.div
-        className="flex flex-col items-center justify-center min-h-screen px-4"
+        className="flex flex-col items-center justify-center min-h-[60vh] px-4 pt-8"
         style={{
           opacity: Math.max(0, 1 - scrollY / 400),
         }}
@@ -67,7 +68,7 @@ const Home = () => {
           <motion.img
             src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
             alt="Instituto de Olhos Santa Luzia"
-            className="mx-auto mb-8 max-w-sm md:max-w-md lg:max-w-lg"
+            className="mx-auto mb-6 max-w-xs md:max-w-sm lg:max-w-md"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -79,12 +80,21 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="space-y-4"
           >
-            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-6">
               Instituto de Olhos Santa Luzia
             </h1>
             <p className="text-lg md:text-xl text-medical-secondary max-w-2xl mx-auto">
               Cuidados oftalmológicos especializados com excelência e tecnologia de ponta
             </p>
+          </motion.div>
+          
+          {/* Seção de pesquisa de sintomas */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <SymptomChecker />
           </motion.div>
         </div>
       </motion.div>
@@ -93,24 +103,24 @@ const Home = () => {
       <div className="py-20 bg-gradient-hero">
         <div className="max-w-4xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl md:text-5xl font-sans text-medical-primary mb-6">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
               Bem vindo ao Instituto de Olhos Santa Luzia
             </h2>
-            <p className="text-lg md:text-xl text-medical-secondary mb-8">
+            <p className="text-lg text-medical-secondary mb-8">
               Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
             </p>
             <div className="grid md:grid-cols-3 gap-8 mt-12">
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
-                <h3 className="text-2xl font-bold text-medical-primary mb-2">+15.000</h3>
-                <p className="text-medical-secondary">Pacientes Atendidos</p>
+                <h3 className="text-xl font-bold text-medical-primary mb-2">+15.000</h3>
+                <p className="text-medical-secondary text-sm">Pacientes Atendidos</p>
               </div>
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
-                <h3 className="text-2xl font-bold text-medical-primary mb-2">+2.000</h3>
-                <p className="text-medical-secondary">Cirurgias Realizadas</p>
+                <h3 className="text-xl font-bold text-medical-primary mb-2">+2.000</h3>
+                <p className="text-medical-secondary text-sm">Cirurgias Realizadas</p>
               </div>
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
-                <h3 className="text-2xl font-bold text-medical-primary mb-2">10+</h3>
-                <p className="text-medical-secondary">Anos de Excelência</p>
+                <h3 className="text-xl font-bold text-medical-primary mb-2">10+</h3>
+                <p className="text-medical-secondary text-sm">Anos de Excelência</p>
               </div>
             </div>
           </div>
@@ -136,7 +146,7 @@ const Home = () => {
         <div className="max-w-4xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="text-3xl md:text-4xl font-sans text-medical-primary mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
                 O que oferecemos?
               </h2>
               <p className="text-lg text-medical-secondary mb-6">
@@ -174,7 +184,7 @@ const Home = () => {
       <div className="py-20 bg-medical-muted/30">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-sans text-medical-primary">Últimos Artigos</h2>
+            <h2 className="text-2xl md:text-3xl font-sans text-medical-primary">Últimos Artigos</h2>
             <div className="flex space-x-2">
               <button
                 onClick={prevArticle}
