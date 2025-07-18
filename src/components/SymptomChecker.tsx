@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const PromptInputContext = createContext({
   isLoading: false,
   value: "",
-  setValue: () => {},
+  setValue: (value: string) => {},
   maxHeight: 240,
   onSubmit: undefined,
   disabled: false,
@@ -126,7 +126,7 @@ function PromptInputAction({
   tooltip,
   children,
   className,
-  side = "top",
+  side = "top" as const,
   ...props
 }) {
   const { disabled } = usePromptInput();
