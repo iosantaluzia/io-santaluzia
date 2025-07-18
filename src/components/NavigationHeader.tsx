@@ -4,6 +4,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Home, Users, Stethoscope, Eye, Zap, Circle, FileText } from "lucide-react";
 
 interface NavigationHeaderProps {
   showLogo: boolean;
@@ -18,15 +19,26 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
   
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const navItems = [
-    { name: "O Instituto", path: "/instituto" },
-    { name: "Corpo clínico", path: "/corpo-clinico" },
-    { name: "Exames complementares", path: "/exames" },
-    { name: "Catarata", path: "/catarata" },
-    { name: "Cirurgia Refrativa", path: "/cirurgia-refrativa" },
-    { name: "Ceratocone", path: "/ceratocone" },
-    { name: "Artigos", path: "/artigos" },
+    { name: "O Instituto", path: "/instituto", icon: Home },
+    { name: "Corpo clínico", path: "/corpo-clinico", icon: Users },
+    { name: "Exames complementares", path: "/exames", icon: Stethoscope },
+    { name: "Catarata", path: "/catarata", icon: Eye },
+    { name: "Cirurgia Refrativa", path: "/cirurgia-refrativa", icon: Zap },
+    { name: "Ceratocone", path: "/ceratocone", icon: Circle },
+    { name: "Artigos", path: "/artigos", icon: FileText },
   ];
 
   return (
@@ -41,7 +53,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             onClick={() => navigate("/")}
           >
             <img 
-              src="/lovable-uploads/logoimg.png" 
+              src="/lovable-uploads/logogrande-removebg-preview.png" 
               alt="Instituto de Olhos Santa Luzia" 
               className="h-8 w-8"
             />
@@ -49,7 +61,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
         )}
         
         <ul
-          className="relative flex w-fit rounded-full border-2 border-medical-primary bg-white p-1"
+          className="relative flex w-fit rounded-full bg-white p-1"
           onMouseLeave={() => setPosition((pv) => ({ ...pv, opacity: 0 }))}
         >
           {navItems.map((item) => (
@@ -58,6 +70,8 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               setPosition={setPosition}
               isActive={location.pathname === item.path}
               onClick={() => navigate(item.path)}
+              isMobile={isMobile}
+              icon={item.icon}
             >
               {item.name}
             </Tab>
@@ -74,11 +88,15 @@ const Tab = ({
   setPosition,
   isActive,
   onClick,
+  isMobile,
+  icon: Icon,
 }: {
   children: React.ReactNode;
   setPosition: any;
   isActive: boolean;
   onClick: () => void;
+  isMobile: boolean;
+  icon: any;
 }) => {
   const ref = useRef<HTMLLIElement>(null);
   
@@ -95,13 +113,21 @@ const Tab = ({
         });
       }}
       onClick={onClick}
-      className={`relative z-10 block cursor-pointer px-2 py-1.5 text-xs uppercase mix-blend-difference md:px-4 md:py-2 md:text-sm transition-colors ${
+      className={`relative z-10 block cursor-pointer px-2 py-1.5 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm ${
         isActive 
-          ? "text-medical-primary font-semibold" 
+          ? "text-white font-semibold" 
           : "text-medical-primary hover:text-medical-secondary"
       }`}
     >
-      {children}
+      {isMobile ? (
+        isActive ? (
+          <span className="text-xs">{children}</span>
+        ) : (
+          <Icon className="w-4 h-4" />
+        )
+      ) : (
+        children
+      )}
     </li>
   );
 };
@@ -110,7 +136,7 @@ const Cursor = ({ position }: { position: any }) => {
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-7 rounded-full bg-medical-secondary md:h-10"
+      className="absolute z-0 h-7 rounded-full bg-medical-primary md:h-10"
     />
   );
 };
