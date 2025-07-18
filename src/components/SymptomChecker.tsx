@@ -12,6 +12,8 @@ const SymptomChecker = () => {
 
   const analyzeWithAPI = async (symptoms: string) => {
     try {
+      console.log('Iniciando análise com API Gemini...');
+      
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
@@ -20,17 +22,58 @@ const SymptomChecker = () => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `Como especialista em oftalmologia, analise os seguintes sintomas oculares e forneça uma análise inicial: "${symptoms}". Responda em português brasileiro de forma educativa e sempre recomende consulta médica para diagnóstico preciso.`
+              text: `Como especialista em oftalmologia, analise os seguintes sintomas oculares e forneça uma análise inicial: "${symptoms}". Responda em português brasileiro de forma educativa, explicando possíveis causas e sempre recomende consulta médica para diagnóstico preciso. Mantenha a resposta concisa e informativa.`
             }]
-          }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 1,
+            topP: 1,
+            maxOutputTokens: 2048,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ]
         })
       });
 
+      console.log('Status da resposta:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro na API:', response.status, errorText);
+        throw new Error(`API Error: ${response.status}`);
+      }
+
       const data = await response.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Não foi possível analisar os sintomas. Recomendamos consulta médica.";
+      console.log('Dados recebidos:', data);
+      
+      const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!analysisText) {
+        console.error('Resposta da API não contém texto:', data);
+        throw new Error('Resposta inválida da API');
+      }
+      
+      return analysisText;
     } catch (error) {
-      console.error('Erro na API:', error);
-      return "Erro ao processar sua consulta. Por favor, tente novamente ou agende uma consulta.";
+      console.error('Erro detalhado na API:', error);
+      return "Erro ao processar sua consulta. Por favor, tente novamente ou agende uma consulta para avaliação presencial.";
     }
   };
 
@@ -45,7 +88,11 @@ const SymptomChecker = () => {
     setAiResponse(null);
     setShowScheduleButton(false);
 
+    console.log('Iniciando análise de sintomas:', input);
+    
     const analysis = await analyzeWithAPI(input);
+    console.log('Análise concluída:', analysis);
+    
     setAiResponse({ type: 'success', message: analysis });
     setShowScheduleButton(true);
     setIsLoading(false);
@@ -96,7 +143,7 @@ const SymptomChecker = () => {
       {aiResponse && (
         <div className="mt-6 p-4 rounded-lg bg-medical-muted/30">
           <p className="font-semibold mb-2 text-medical-primary">Resultado da Análise:</p>
-          <p className="text-medical-secondary italic text-left">
+          <p className="text-medical-secondary italic text-left whitespace-pre-wrap">
             {aiResponse.message}
           </p>
         </div>

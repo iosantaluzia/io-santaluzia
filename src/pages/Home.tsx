@@ -5,6 +5,7 @@ import { Users, Stethoscope, Eye, ChevronLeft, ChevronRight } from "lucide-react
 import NavigationHeader from "@/components/NavigationHeader";
 import ExpandableCard from "@/components/ExpandableCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 import ArticleModal from "@/components/ArticleModal";
 import SymptomChecker from "@/components/SymptomChecker";
 import { Footer } from "@/components/ui/footer";
@@ -227,6 +228,9 @@ const Home = () => {
           <WhatsAppButton />
         </div>
       </div>
+
+      {/* Botão flutuante WhatsApp */}
+      <FloatingWhatsAppButton />
 
       {/* Footer */}
       <Footer

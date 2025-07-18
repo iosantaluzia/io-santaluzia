@@ -2,6 +2,7 @@
 import React from "react";
 import NavigationHeader from "@/components/NavigationHeader";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 import { Footer } from "@/components/ui/footer";
 import { Instagram, Facebook } from "lucide-react";
 
@@ -79,6 +80,9 @@ const Catarata = () => {
           <WhatsAppButton />
         </div>
       </div>
+
+      {/* Botão flutuante WhatsApp */}
+      <FloatingWhatsAppButton />
 
       {/* Footer */}
       <Footer

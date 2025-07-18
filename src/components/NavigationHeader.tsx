@@ -49,13 +49,13 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="cursor-pointer"
+            className="cursor-pointer flex-shrink-0"
             onClick={() => navigate("/")}
           >
             <img 
               src="/lovable-uploads/logoimg.png" 
               alt="Instituto de Olhos Santa Luzia" 
-              className="h-8 w-8"
+              className="h-8 w-8 object-contain"
             />
           </motion.div>
         )}
@@ -113,16 +113,11 @@ const Tab = ({
         });
       }}
       onClick={onClick}
-      className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm ${
+      className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full ${
         isActive 
-          ? "text-white font-semibold" 
-          : "text-medical-primary hover:text-medical-secondary"
+          ? "bg-medical-primary text-white font-semibold" 
+          : "text-medical-primary hover:text-white hover:bg-medical-primary"
       }`}
-      style={isActive ? { 
-        backgroundColor: 'hsl(var(--medical-primary))', 
-        borderRadius: '9999px',
-        color: 'white'
-      } : {}}
     >
       {isMobile ? (
         isActive ? (
