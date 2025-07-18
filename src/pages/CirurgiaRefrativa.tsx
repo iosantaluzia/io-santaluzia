@@ -7,40 +7,37 @@ const CirurgiaRefrativa = () => {
     <div className="min-h-screen bg-background pt-20">
       <NavigationHeader showLogo={true} />
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h1 className="text-3xl md:text-5xl font-serif text-medical-primary mb-8">
-          Cirurgia Refrativa
-        </h1>
-        
-        <p className="text-lg text-medical-secondary mb-12 max-w-3xl">
-          A cirurgia refrativa é um procedimento que corrige erros de refração como miopia, hipermetropia, astigmatismo e presbiopia, proporcionando independência dos óculos e lentes de contato.
-        </p>
-        
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          <div className="bg-white p-6 rounded-lg shadow-soft">
-            <h3 className="text-xl font-semibold text-medical-primary mb-4">Miopia</h3>
-            <p className="text-medical-secondary text-sm">
-              Dificuldade para enxergar objetos distantes. A cirurgia remodela a córnea para focar corretamente a luz na retina.
-            </p>
+        <div className="text-center mb-16">
+          <h1 className="text-3xl md:text-5xl font-serif text-medical-primary mb-8">
+            Cirurgia Refrativa
+          </h1>
+          <p className="text-lg text-medical-secondary max-w-4xl mx-auto mb-8">
+            A cirurgia refrativa tem como objetivo reestabelecer a qualidade de vida dos pacientes e proporcionar a liberdade de óculos e lentes de contato.
+          </p>
+          <div className="relative max-w-2xl mx-auto mb-12">
+            <img 
+              src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=400&fit=crop"
+              alt="Cirurgia Refrativa"
+              className="rounded-lg shadow-medium w-full"
+            />
           </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-soft">
-            <h3 className="text-xl font-semibold text-medical-primary mb-4">Hipermetropia</h3>
-            <p className="text-medical-secondary text-sm">
-              Dificuldade para enxergar objetos próximos. O procedimento aumenta o poder de convergência da córnea.
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-soft">
-            <h3 className="text-xl font-semibold text-medical-primary mb-4">Astigmatismo</h3>
-            <p className="text-medical-secondary text-sm">
-              Visão distorcida em todas as distâncias. A cirurgia corrige a curvatura irregular da córnea.
-            </p>
-          </div>
+        </div>
+
+        <div className="bg-white p-8 rounded-lg shadow-soft mb-12">
+          <h2 className="text-2xl font-serif text-medical-primary mb-6 text-center">
+            Tecnologia de Ponta
+          </h2>
+          <p className="text-medical-secondary text-center max-w-4xl mx-auto mb-6">
+            No Instituto de Olhos Santa Luzia contamos com técnicas avançadas e atualmente o mais novo Excimer Laser de Mato Grosso, o MEL 90 da Zeiss, realizando procedimentos para correção de problemas como hipermetropia, miopia, astigmatismo e presbiopia.
+          </p>
+          <p className="text-medical-secondary text-center max-w-4xl mx-auto">
+            A cirurgia tem recuperação rápida, com resultados visíveis em pouco tempo, proporcionando maior conforto e liberdade para o paciente no seu dia a dia.
+          </p>
         </div>
         
         <div className="bg-gradient-to-r from-medical-accent to-medical-muted p-8 rounded-lg">
           <h3 className="text-2xl font-serif text-medical-primary mb-6 text-center">
-            Vantagens da Cirurgia Refrativa
+            Benefícios da Cirurgia Refrativa
           </h3>
           <div className="grid md:grid-cols-2 gap-6">
             <ul className="space-y-3">
@@ -72,6 +69,9 @@ const CirurgiaRefrativa = () => {
               </li>
             </ul>
           </div>
+          <p className="text-medical-primary text-center mt-8 font-medium">
+            Com ela é possível reduzir ou até mesmo eliminar a dependência de óculos ou lentes de contato, trazendo uma nova perspectiva de vida com mais clareza e liberdade.
+          </p>
         </div>
       </div>
     </div>

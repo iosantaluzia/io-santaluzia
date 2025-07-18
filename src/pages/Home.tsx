@@ -57,28 +57,37 @@ const Home = () => {
         </div>
       </motion.div>
 
-      {/* Conteúdo adicional para permitir scroll */}
+      {/* Seção de boas-vindas */}
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="text-center max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl md:text-5xl font-serif text-medical-primary mb-6">
-            Bem-vindos ao nosso Instituto
-          </h2>
-          <p className="text-lg md:text-xl text-medical-secondary mb-8">
-            Há mais de uma década cuidando da sua visão com dedicação, tecnologia e humanização.
-          </p>
-          <div className="grid md:grid-cols-3 gap-8 mt-12">
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft">
-              <h3 className="text-xl font-semibold text-medical-primary mb-4">+15.000</h3>
-              <p className="text-medical-secondary">Pacientes Atendidos</p>
+        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-3xl md:text-5xl font-serif text-medical-primary mb-6">
+              Bem vindo ao Instituto de Olhos Santa Luzia
+            </h2>
+            <p className="text-lg md:text-xl text-medical-secondary mb-8">
+              Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
+            </p>
+            <div className="grid md:grid-cols-3 gap-8 mt-12">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
+                <h3 className="text-2xl font-bold text-medical-primary mb-2">+15.000</h3>
+                <p className="text-medical-secondary">Pacientes Atendidos</p>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
+                <h3 className="text-2xl font-bold text-medical-primary mb-2">+2.000</h3>
+                <p className="text-medical-secondary">Cirurgias Realizadas</p>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
+                <h3 className="text-2xl font-bold text-medical-primary mb-2">10+</h3>
+                <p className="text-medical-secondary">Anos de Excelência</p>
+              </div>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft">
-              <h3 className="text-xl font-semibold text-medical-primary mb-4">+2.000</h3>
-              <p className="text-medical-secondary">Cirurgias Realizadas</p>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft">
-              <h3 className="text-xl font-semibold text-medical-primary mb-4">10+</h3>
-              <p className="text-medical-secondary">Anos de Excelência</p>
-            </div>
+          </div>
+          <div className="relative">
+            <img 
+              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&h=500&fit=crop"
+              alt="Paciente em consulta oftalmológica"
+              className="rounded-lg shadow-medium w-full"
+            />
           </div>
         </div>
       </div>

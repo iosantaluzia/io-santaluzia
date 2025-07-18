@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -83,8 +84,8 @@ export default {
 				'smooth': 'var(--transition-smooth)'
 			},
 			fontFamily: {
-				'serif': ['Playfair Display', 'serif'],
-				'sans': ['Inter', 'sans-serif']
+				'serif': ['Merriweather', 'serif'],
+				'sans': ['Source Sans Pro', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

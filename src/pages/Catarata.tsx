@@ -7,60 +7,65 @@ const Catarata = () => {
     <div className="min-h-screen bg-background pt-20">
       <NavigationHeader showLogo={true} />
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h1 className="text-3xl md:text-5xl font-serif text-medical-primary mb-8">
-          Cirurgia de Catarata
-        </h1>
-        
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div>
-            <h2 className="text-2xl font-serif text-medical-primary mb-6">
-              O que é Catarata?
-            </h2>
-            <p className="text-medical-secondary mb-6">
-              A catarata é o embaçamento do cristalino (lente natural do olho), que causa diminuição progressiva da visão. É uma das principais causas de cegueira reversível no mundo.
+            <h1 className="text-3xl md:text-5xl font-serif text-medical-primary mb-8">
+              Cirurgia de Catarata
+            </h1>
+            <p className="text-lg text-medical-secondary mb-6">
+              A catarata é uma condição natural que ocorre com o envelhecimento, quando o cristalino do olho, que é responsável por focar a visão, começa a se tornar opaco.
             </p>
-            
-            <h3 className="text-xl font-semibold text-medical-primary mb-4">
-              Sintomas Principais:
-            </h3>
-            <ul className="list-disc list-inside text-medical-secondary space-y-2 mb-8">
-              <li>Visão embaçada ou turva</li>
-              <li>Sensibilidade à luz</li>
-              <li>Dificuldade para enxergar à noite</li>
-              <li>Visão dupla em um olho</li>
-              <li>Mudanças frequentes no grau dos óculos</li>
-            </ul>
+            <p className="text-medical-secondary mb-8">
+              Isso pode causar visão embaçada, dificuldade para enxergar à noite, sensibilidade à luz, e em casos avançados pode levar à cegueira.
+            </p>
+          </div>
+          <div className="relative">
+            <img 
+              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&h=400&fit=crop"
+              alt="Cirurgia de Catarata"
+              className="rounded-lg shadow-medium w-full"
+            />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-medical-accent to-medical-muted p-8 rounded-lg mb-12">
+          <h2 className="text-2xl font-serif text-medical-primary mb-6 text-center">
+            Tratamento Eficaz
+          </h2>
+          <p className="text-medical-primary text-center max-w-3xl mx-auto">
+            A boa notícia é que, para corrigir a catarata, realizamos uma cirurgia indolor, precisa e segura, onde o cristalino opaco é removido e substituído por uma lente artificial, restaurando a visão de forma eficaz.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white p-6 rounded-lg shadow-soft text-center">
+            <div className="w-16 h-16 bg-medical-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-white">1</span>
+            </div>
+            <h3 className="text-xl font-serif text-medical-primary mb-4">Avaliação</h3>
+            <p className="text-sm text-medical-secondary">
+              Exames detalhados para determinar o melhor momento para a cirurgia
+            </p>
           </div>
           
-          <div className="bg-white p-8 rounded-lg shadow-soft">
-            <h3 className="text-xl font-semibold text-medical-primary mb-6">
-              Nossa Abordagem
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-medical-secondary rounded-full flex items-center justify-center text-white text-sm font-bold">1</div>
-                <div>
-                  <h4 className="font-semibold text-medical-primary">Avaliação Completa</h4>
-                  <p className="text-sm text-medical-secondary">Exames detalhados para determinar o melhor momento para a cirurgia</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-medical-secondary rounded-full flex items-center justify-center text-white text-sm font-bold">2</div>
-                <div>
-                  <h4 className="font-semibold text-medical-primary">Cirurgia Personalizada</h4>
-                  <p className="text-sm text-medical-secondary">Técnicas modernas com lentes intraoculares premium</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-medical-secondary rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
-                <div>
-                  <h4 className="font-semibold text-medical-primary">Acompanhamento</h4>
-                  <p className="text-sm text-medical-secondary">Cuidado pós-operatório para garantir a melhor recuperação</p>
-                </div>
-              </div>
+          <div className="bg-white p-6 rounded-lg shadow-soft text-center">
+            <div className="w-16 h-16 bg-medical-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-white">2</span>
             </div>
+            <h3 className="text-xl font-serif text-medical-primary mb-4">Cirurgia</h3>
+            <p className="text-sm text-medical-secondary">
+              Procedimento indolor, preciso e seguro com lentes intraoculares de qualidade
+            </p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-soft text-center">
+            <div className="w-16 h-16 bg-medical-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-white">3</span>
+            </div>
+            <h3 className="text-xl font-serif text-medical-primary mb-4">Recuperação</h3>
+            <p className="text-sm text-medical-secondary">
+              Acompanhamento pós-operatório para garantir a melhor recuperação
+            </p>
           </div>
         </div>
       </div>
