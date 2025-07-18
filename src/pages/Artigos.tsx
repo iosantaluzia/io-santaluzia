@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import NavigationHeader from "@/components/NavigationHeader";
 import ArticleModal from "@/components/ArticleModal";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { Footer } from "@/components/ui/footer";
+import { Instagram, Facebook } from "lucide-react";
 
 const Artigos = () => {
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
@@ -40,8 +43,8 @@ const Artigos = () => {
   return (
     <div className="min-h-screen bg-background pt-20">
       <NavigationHeader showLogo={true} />
-      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h1 className="text-3xl md:text-5xl font-sans font-bold text-medical-primary mb-8">
+      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
+        <h1 className="text-3xl md:text-5xl font-sans font-bold text-gray-800 mb-8">
           Artigos
         </h1>
         <p className="text-lg text-gray-600 mb-12 max-w-3xl">
@@ -80,6 +83,53 @@ const Artigos = () => {
           ))}
         </div>
       </div>
+
+      {/* Botão de agendamento */}
+      <div className="py-12 bg-background">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+          <WhatsAppButton />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <Footer
+        logo={
+          <img 
+            src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
+            alt="Instituto de Olhos Santa Luzia" 
+            className="h-10 w-10 brightness-0 invert"
+          />
+        }
+        brandName="Instituto de Olhos Santa Luzia"
+        socialLinks={[
+          {
+            icon: <Instagram className="h-5 w-5" />,
+            href: "https://www.instagram.com/io.santaluzia/",
+            label: "Instagram",
+          },
+          {
+            icon: <Facebook className="h-5 w-5" />,
+            href: "https://www.facebook.com/institudodeolhossantaluzia",
+            label: "Facebook",
+          },
+        ]}
+        mainLinks={[
+          { href: "/instituto", label: "O Instituto" },
+          { href: "/corpo-clinico", label: "Corpo Clínico" },
+          { href: "/exames", label: "Exames" },
+          { href: "/catarata", label: "Catarata" },
+          { href: "/artigos", label: "Artigos" },
+        ]}
+        legalLinks={[
+          { href: "#", label: "Política de Privacidade" },
+          { href: "#", label: "Termos de Uso" },
+          { href: "#", label: "LGPD" },
+        ]}
+        copyright={{
+          text: "© 2024 Instituto de Olhos Santa Luzia",
+          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
+        }}
+      />
 
       <ArticleModal
         isOpen={!!selectedArticle}

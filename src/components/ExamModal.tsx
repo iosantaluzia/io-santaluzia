@@ -15,9 +15,9 @@ const ExamModal = ({ isOpen, onClose, title, content, image }: ExamModalProps) =
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-medical-muted p-4 flex justify-between items-center">
-          <h2 className="text-2xl font-serif text-medical-primary">{title}</h2>
+          <h2 className="text-2xl font-sans text-gray-800">{title}</h2>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-medical-muted rounded-full transition-colors"
@@ -26,17 +26,23 @@ const ExamModal = ({ isOpen, onClose, title, content, image }: ExamModalProps) =
           </button>
         </div>
         <div className="p-6">
-          <img 
-            src={image}
-            alt={title}
-            className="w-full h-64 object-cover rounded-lg mb-6"
-          />
-          <div className="prose prose-medical max-w-none">
-            {content.split('\n').map((paragraph, index) => (
-              <p key={index} className="text-medical-secondary mb-4">
-                {paragraph}
-              </p>
-            ))}
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
+            <div className="md:col-span-1">
+              <img 
+                src={image}
+                alt={title}
+                className="w-full h-auto object-contain rounded-lg bg-gray-50 p-4"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <div className="prose prose-medical max-w-none">
+                {content.split('\n').map((paragraph, index) => (
+                  <p key={index} className="text-gray-700 mb-4 leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

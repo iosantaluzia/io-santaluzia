@@ -53,7 +53,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             onClick={() => navigate("/")}
           >
             <img 
-              src="/lovable-uploads/logo-circle.png" 
+              src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
               alt="Instituto de Olhos Santa Luzia" 
               className="h-8 w-8"
             />
