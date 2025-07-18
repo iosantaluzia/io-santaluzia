@@ -1,92 +1,65 @@
-
-import { Button } from "@/components/ui/button"
-
+import { Button } from "@/components/ui/button";
 interface FooterProps {
-  logo: React.ReactNode
-  brandName: string
+  logo: React.ReactNode;
+  brandName: string;
   socialLinks: Array<{
-    icon: React.ReactNode
-    href: string
-    label: string
-  }>
+    icon: React.ReactNode;
+    href: string;
+    label: string;
+  }>;
   mainLinks: Array<{
-    href: string
-    label: string
-  }>
+    href: string;
+    label: string;
+  }>;
   legalLinks: Array<{
-    href: string
-    label: string
-  }>
+    href: string;
+    label: string;
+  }>;
   copyright: {
-    text: string
-    license?: string
-  }
+    text: string;
+    license?: string;
+  };
 }
-
 export function Footer({
   logo,
   brandName,
   socialLinks,
   mainLinks,
   legalLinks,
-  copyright,
+  copyright
 }: FooterProps) {
-  return (
-    <footer className="pb-6 pt-16 lg:pb-8 lg:pt-24 bg-medical-primary text-white">
+  return <footer className="pb-6 pt-16 lg:pb-8 lg:pt-24 bg-medical-primary text-white">
       <div className="px-4 lg:px-8 max-w-7xl mx-auto">
         <div className="md:flex md:items-start md:justify-between">
-          <a
-            href="/"
-            className="flex items-center gap-x-2"
-            aria-label={brandName}
-          >
+          <a href="/" className="flex items-center gap-x-2" aria-label={brandName}>
             {logo}
             <span className="font-bold text-xl text-white">{brandName}</span>
           </a>
           <ul className="flex list-none mt-6 md:mt-0 space-x-3">
-            {socialLinks.map((link, i) => (
-              <li key={i}>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white"
-                  asChild
-                >
+            {socialLinks.map((link, i) => <li key={i}>
+                <Button variant="secondary" size="icon" className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white" asChild>
                   <a href={link.href} target="_blank" aria-label={link.label}>
                     {link.icon}
                   </a>
                 </Button>
-              </li>
-            ))}
+              </li>)}
           </ul>
         </div>
         <div className="border-t border-white/20 mt-6 pt-6 md:mt-4 md:pt-8 lg:grid lg:grid-cols-10">
           <nav className="lg:mt-0 lg:col-[4/11]">
             <ul className="list-none flex flex-wrap -my-1 -mx-2 lg:justify-end">
-              {mainLinks.map((link, i) => (
-                <li key={i} className="my-1 mx-2 shrink-0">
-                  <a
-                    href={link.href}
-                    className="text-sm text-white underline-offset-4 hover:underline"
-                  >
+              {mainLinks.map((link, i) => <li key={i} className="my-1 mx-2 shrink-0">
+                  <a href={link.href} className="text-sm text-white underline-offset-4 hover:underline">
                     {link.label}
                   </a>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </nav>
           <div className="mt-6 lg:mt-0 lg:col-[4/11]">
             <ul className="list-none flex flex-wrap -my-1 -mx-3 lg:justify-end">
-              {legalLinks.map((link, i) => (
-                <li key={i} className="my-1 mx-3 shrink-0">
-                  <a
-                    href={link.href}
-                    className="text-sm text-white/80 underline-offset-4 hover:underline"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+              {legalLinks.map((link, i) => <li key={i} className="my-1 mx-3 shrink-0">
+                  
+                </li>)}
             </ul>
           </div>
           <div className="mt-6 text-sm leading-6 text-white/80 whitespace-nowrap lg:mt-0 lg:row-[1/3] lg:col-[1/4]">
@@ -95,6 +68,5 @@ export function Footer({
           </div>
         </div>
       </div>
-    </footer>
-  )
+    </footer>;
 }
