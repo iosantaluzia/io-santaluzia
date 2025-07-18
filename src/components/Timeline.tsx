@@ -39,12 +39,23 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
       ref={containerRef}
     >
       <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="text-lg md:text-4xl mb-4 text-medical-primary max-w-4xl font-sans font-bold">
-          História do Instituto de Olhos Santa Luzia
-        </h2>
-        <p className="text-gray-600 text-sm md:text-base max-w-2xl">
-          Uma década de excelência em oftalmologia, crescimento e inovação no cuidado com a saúde ocular.
-        </p>
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          <div>
+            <h2 className="text-lg md:text-4xl mb-4 text-medical-primary max-w-4xl font-sans font-bold">
+              História do Instituto de Olhos Santa Luzia
+            </h2>
+            <p className="text-gray-600 text-sm md:text-base max-w-2xl">
+              Uma década de excelência em oftalmologia, crescimento e inovação no cuidado com a saúde ocular.
+            </p>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            <img 
+              src="/lovable-uploads/35a55ba7-79f8-4351-a3c0-62d1d39c59f6.png"
+              alt="Instituto de Olhos Santa Luzia - Fachada"
+              className="rounded-lg shadow-medium w-full max-w-sm h-auto object-cover"
+            />
+          </div>
+        </div>
       </div>
 
       <div ref={ref} className="relative max-w-4xl mx-auto pb-20">
