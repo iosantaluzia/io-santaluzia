@@ -10,16 +10,18 @@ const CirurgiaRefrativa = () => {
     <div className="min-h-screen bg-background pt-20">
       <NavigationHeader showLogo={true} />
       <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <div className="text-center mb-16">
-          <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
-            Cirurgia Refrativa
-          </h1>
-          <p className="text-lg text-medical-secondary max-w-4xl mx-auto mb-8">
-            A cirurgia refrativa tem como objetivo reestabelecer a qualidade de vida dos pacientes e proporcionar a liberdade de óculos e lentes de contato.
-          </p>
-          <div className="relative max-w-2xl mx-auto mb-12">
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
+              Cirurgia Refrativa
+            </h1>
+            <p className="text-lg text-medical-secondary max-w-4xl mx-auto mb-8">
+              A cirurgia refrativa tem como objetivo reestabelecer a qualidade de vida dos pacientes e proporcionar a liberdade de óculos e lentes de contato.
+            </p>
+          </div>
+          <div className="relative">
             <img 
-              src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=400&fit=crop"
+              src="/lovable-uploads/9ae22b05-d770-4e0d-b143-fbc9278106e6.png"
               alt="Cirurgia Refrativa"
               className="rounded-lg shadow-medium w-full"
             />
@@ -112,6 +114,8 @@ const CirurgiaRefrativa = () => {
           { href: "/corpo-clinico", label: "Corpo Clínico" },
           { href: "/exames", label: "Exames" },
           { href: "/catarata", label: "Catarata" },
+          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+          { href: "/ceratocone", label: "Ceratocone" },
           { href: "/artigos", label: "Artigos" },
         ]}
         legalLinks={[

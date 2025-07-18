@@ -24,8 +24,8 @@ const Ceratocone = () => {
           </div>
           <div className="relative">
             <img 
-              src="https://images.unsplash.com/photo-1581093458791-9d42ed4c3d0e?w=600&h=400&fit=crop"
-              alt="Ceratocone"
+              src="/lovable-uploads/cf83b478-63b6-4cc7-a3c1-a4b1eb5029fb.png"
+              alt="Lente de contato para ceratocone"
               className="rounded-lg shadow-medium w-full"
             />
           </div>
@@ -53,8 +53,8 @@ const Ceratocone = () => {
             </div>
             <div className="flex items-center justify-center">
               <img 
-                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=300&fit=crop"
-                alt="Lente de contato para ceratocone"
+                src="/lovable-uploads/ca6a3fb8-8270-45cf-97e5-a67feca68a3e.png"
+                alt="Vista detalhada do ceratocone"
                 className="rounded-lg shadow-soft"
               />
             </div>
@@ -148,6 +148,8 @@ const Ceratocone = () => {
           { href: "/corpo-clinico", label: "Corpo Clínico" },
           { href: "/exames", label: "Exames" },
           { href: "/catarata", label: "Catarata" },
+          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+          { href: "/ceratocone", label: "Ceratocone" },
           { href: "/artigos", label: "Artigos" },
         ]}
         legalLinks={[

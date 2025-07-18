@@ -9,16 +9,16 @@ const Catarata = () => {
   return (
     <div className="min-h-screen bg-background pt-20">
       <NavigationHeader showLogo={true} />
-      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
+      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div>
-            <h1 className="text-3xl md:text-5xl font-sans text-gray-800 mb-8">
+            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
               Cirurgia de Catarata
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
+            <p className="text-lg text-medical-secondary mb-6">
               A catarata é uma condição natural que ocorre com o envelhecimento, quando o cristalino do olho, que é responsável por focar a visão, começa a se tornar opaco.
             </p>
-            <p className="text-gray-600 mb-8">
+            <p className="text-medical-secondary mb-8">
               Isso pode causar visão embaçada, dificuldade para enxergar à noite, sensibilidade à luz, e em casos avançados pode levar à cegueira.
             </p>
           </div>
@@ -32,10 +32,10 @@ const Catarata = () => {
         </div>
 
         <div className="bg-gradient-to-r from-medical-accent to-medical-muted p-8 rounded-lg mb-12">
-          <h2 className="text-2xl font-sans text-gray-800 mb-6 text-center">
+          <h2 className="text-2xl font-sans text-medical-primary mb-6 text-center">
             Tratamento Eficaz
           </h2>
-          <p className="text-gray-700 text-center max-w-3xl mx-auto">
+          <p className="text-medical-secondary text-center max-w-3xl mx-auto">
             A boa notícia é que, para corrigir a catarata, realizamos uma cirurgia indolor, precisa e segura, onde o cristalino opaco é removido e substituído por uma lente artificial, restaurando a visão de forma eficaz.
           </p>
         </div>
@@ -45,8 +45,8 @@ const Catarata = () => {
             <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-white">1</span>
             </div>
-            <h3 className="text-xl font-sans text-gray-800 mb-4">Avaliação</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-xl font-sans text-medical-primary mb-4">Avaliação</h3>
+            <p className="text-sm text-medical-secondary">
               Exames detalhados para determinar o melhor momento para a cirurgia
             </p>
           </div>
@@ -55,8 +55,8 @@ const Catarata = () => {
             <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-white">2</span>
             </div>
-            <h3 className="text-xl font-sans text-gray-800 mb-4">Cirurgia</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-xl font-sans text-medical-primary mb-4">Cirurgia</h3>
+            <p className="text-sm text-medical-secondary">
               Procedimento indolor, preciso e seguro com lentes intraoculares de qualidade
             </p>
           </div>
@@ -65,8 +65,8 @@ const Catarata = () => {
             <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-white">3</span>
             </div>
-            <h3 className="text-xl font-sans text-gray-800 mb-4">Recuperação</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-xl font-sans text-medical-primary mb-4">Recuperação</h3>
+            <p className="text-sm text-medical-secondary">
               Acompanhamento pós-operatório para garantir a melhor recuperação
             </p>
           </div>
@@ -75,7 +75,7 @@ const Catarata = () => {
 
       {/* Botão de agendamento */}
       <div className="py-12 bg-background">
-        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+        <div className="max-w-4xl mx-auto px-4 flex justify-center">
           <WhatsAppButton />
         </div>
       </div>
@@ -84,7 +84,7 @@ const Catarata = () => {
       <Footer
         logo={
           <img 
-            src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
+            src="/lovable-uploads/logoimg.png" 
             alt="Instituto de Olhos Santa Luzia" 
             className="h-10 w-10 brightness-0 invert"
           />
@@ -107,6 +107,8 @@ const Catarata = () => {
           { href: "/corpo-clinico", label: "Corpo Clínico" },
           { href: "/exames", label: "Exames" },
           { href: "/catarata", label: "Catarata" },
+          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+          { href: "/ceratocone", label: "Ceratocone" },
           { href: "/artigos", label: "Artigos" },
         ]}
         legalLinks={[

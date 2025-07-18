@@ -109,20 +109,6 @@ const Home = () => {
             <p className="text-lg text-medical-secondary mb-8">
               Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
             </p>
-            <div className="grid md:grid-cols-3 gap-8 mt-12">
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
-                <h3 className="text-xl font-bold text-medical-primary mb-2">+15.000</h3>
-                <p className="text-medical-secondary text-sm">Pacientes Atendidos</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
-                <h3 className="text-xl font-bold text-medical-primary mb-2">+2.000</h3>
-                <p className="text-medical-secondary text-sm">Cirurgias Realizadas</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
-                <h3 className="text-xl font-bold text-medical-primary mb-2">10+</h3>
-                <p className="text-medical-secondary text-sm">Anos de Excelência</p>
-              </div>
-            </div>
           </div>
           <div className="relative">
             <img 
@@ -269,6 +255,8 @@ const Home = () => {
           { href: "/corpo-clinico", label: "Corpo Clínico" },
           { href: "/exames", label: "Exames" },
           { href: "/catarata", label: "Catarata" },
+          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+          { href: "/ceratocone", label: "Ceratocone" },
           { href: "/artigos", label: "Artigos" },
         ]}
         legalLinks={[
