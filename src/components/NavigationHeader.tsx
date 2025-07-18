@@ -53,7 +53,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             onClick={() => navigate("/")}
           >
             <img 
-              src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
+              src="/lovable-uploads/logoimg.png" 
               alt="Instituto de Olhos Santa Luzia" 
               className="h-8 w-8"
             />
@@ -113,7 +113,7 @@ const Tab = ({
         });
       }}
       onClick={onClick}
-      className={`relative z-10 block cursor-pointer px-2 py-1.5 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm ${
+      className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm ${
         isActive 
           ? "text-white font-semibold" 
           : "text-medical-primary hover:text-medical-secondary"
@@ -121,12 +121,12 @@ const Tab = ({
     >
       {isMobile ? (
         isActive ? (
-          <span className="text-xs">{children}</span>
+          <span className="text-xs whitespace-nowrap">{children}</span>
         ) : (
           <Icon className="w-4 h-4" />
         )
       ) : (
-        children
+        <span className="whitespace-nowrap">{children}</span>
       )}
     </li>
   );
@@ -136,7 +136,7 @@ const Cursor = ({ position }: { position: any }) => {
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-7 rounded-full bg-medical-primary md:h-10"
+      className="absolute z-0 h-8 rounded-full bg-medical-primary md:h-10"
     />
   );
 };

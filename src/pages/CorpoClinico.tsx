@@ -1,6 +1,9 @@
 
 import React from "react";
 import NavigationHeader from "@/components/NavigationHeader";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { Footer } from "@/components/ui/footer";
+import { Instagram, Facebook } from "lucide-react";
 
 const CorpoClinico = () => {
   return (
@@ -26,10 +29,10 @@ const CorpoClinico = () => {
                 <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
                   Dra. Fabíola Roque
                 </h2>
-                <p className="text-gray-700 mb-6 text-lg">
+                <p className="text-medical-secondary mb-6 text-lg">
                   Especialista em Catarata, Ceratocone, Lentes de Contato e Cirurgia Refrativa.
                 </p>
-                <div className="space-y-2 text-gray-600">
+                <div className="space-y-2 text-medical-secondary">
                   <p>• Formação em Medicina pela FFFCMPA</p>
                   <p>• Especialização em Oftalmologia pela UFCSPA</p>
                   <p>• Fellow em Segmento Anterior pela Santa Casa de Misericórdia de Porto Alegre</p>
@@ -53,10 +56,10 @@ const CorpoClinico = () => {
                 <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
                   Dr. Matheus Roque
                 </h2>
-                <p className="text-gray-700 mb-6 text-lg">
+                <p className="text-medical-secondary mb-6 text-lg">
                   Especialista em Oftalmologia geral e Oftalmopediatria
                 </p>
-                <div className="space-y-2 text-gray-600">
+                <div className="space-y-2 text-medical-secondary">
                   <p>• Formação em Medicina pela Pontifícia Universidade Católica do Paraná</p>
                   <p>• Especialização em Oftalmologia pelo Hospital de Clínicas da UFPR</p>
                 </div>
@@ -65,6 +68,53 @@ const CorpoClinico = () => {
           </div>
         </div>
       </div>
+
+      {/* Botão de agendamento */}
+      <div className="py-12 bg-background">
+        <div className="max-w-4xl mx-auto px-4 flex justify-center">
+          <WhatsAppButton />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <Footer
+        logo={
+          <img 
+            src="/lovable-uploads/logoimg.png" 
+            alt="Instituto de Olhos Santa Luzia" 
+            className="h-10 w-10 brightness-0 invert"
+          />
+        }
+        brandName="Instituto de Olhos Santa Luzia"
+        socialLinks={[
+          {
+            icon: <Instagram className="h-5 w-5" />,
+            href: "https://www.instagram.com/io.santaluzia/",
+            label: "Instagram",
+          },
+          {
+            icon: <Facebook className="h-5 w-5" />,
+            href: "https://www.facebook.com/institudodeolhossantaluzia",
+            label: "Facebook",
+          },
+        ]}
+        mainLinks={[
+          { href: "/instituto", label: "O Instituto" },
+          { href: "/corpo-clinico", label: "Corpo Clínico" },
+          { href: "/exames", label: "Exames" },
+          { href: "/catarata", label: "Catarata" },
+          { href: "/artigos", label: "Artigos" },
+        ]}
+        legalLinks={[
+          { href: "#", label: "Política de Privacidade" },
+          { href: "#", label: "Termos de Uso" },
+          { href: "#", label: "LGPD" },
+        ]}
+        copyright={{
+          text: "© 2024 Instituto de Olhos Santa Luzia",
+          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
+        }}
+      />
     </div>
   );
 };

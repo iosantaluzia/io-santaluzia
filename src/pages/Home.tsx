@@ -19,7 +19,7 @@ const Home = () => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
-      setShowFloatingNav(currentScrollY > 400);
+      setShowFloatingNav(currentScrollY > 600);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -53,18 +53,17 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header flutuante */}
-      <NavigationHeader showLogo={showFloatingNav} />
+      {/* Header flutuante - só aparece após scroll */}
+      {showFloatingNav && <NavigationHeader showLogo={true} />}
 
-      {/* Logo principal centralizada */}
+      {/* Hero Section com logo principal */}
       <motion.div
         className="flex flex-col items-center justify-center min-h-screen px-4"
         style={{
           opacity: Math.max(0, 1 - scrollY / 400),
-          transform: `translateY(${scrollY * 0.5}px)`,
         }}
       >
-        <div className="text-center max-w-7xl mx-auto">
+        <div className="text-center max-w-4xl mx-auto">
           <motion.img
             src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
             alt="Instituto de Olhos Santa Luzia"
@@ -80,10 +79,10 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="space-y-4"
           >
-            <h1 className="text-2xl md:text-4xl font-sans text-gray-800">
+            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
               Instituto de Olhos Santa Luzia
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-medical-secondary max-w-2xl mx-auto">
               Cuidados oftalmológicos especializados com excelência e tecnologia de ponta
             </p>
           </motion.div>
@@ -91,33 +90,33 @@ const Home = () => {
       </motion.div>
 
       {/* Seção de boas-vindas */}
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
+      <div className="py-20 bg-gradient-hero">
+        <div className="max-w-4xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl md:text-5xl font-sans text-gray-800 mb-6">
+            <h2 className="text-3xl md:text-5xl font-sans text-medical-primary mb-6">
               Bem vindo ao Instituto de Olhos Santa Luzia
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 mb-8">
+            <p className="text-lg md:text-xl text-medical-secondary mb-8">
               Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
             </p>
             <div className="grid md:grid-cols-3 gap-8 mt-12">
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
                 <h3 className="text-2xl font-bold text-medical-primary mb-2">+15.000</h3>
-                <p className="text-gray-600">Pacientes Atendidos</p>
+                <p className="text-medical-secondary">Pacientes Atendidos</p>
               </div>
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
                 <h3 className="text-2xl font-bold text-medical-primary mb-2">+2.000</h3>
-                <p className="text-gray-600">Cirurgias Realizadas</p>
+                <p className="text-medical-secondary">Cirurgias Realizadas</p>
               </div>
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-soft text-center">
                 <h3 className="text-2xl font-bold text-medical-primary mb-2">10+</h3>
-                <p className="text-gray-600">Anos de Excelência</p>
+                <p className="text-medical-secondary">Anos de Excelência</p>
               </div>
             </div>
           </div>
           <div className="relative">
             <img 
-              src="/lovable-uploads/6f0e2320-1b39-403a-ab68-8eeffe8dfc36.png"
+              src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
               alt="Cuidados oftalmológicos especializados"
               className="rounded-lg shadow-medium w-full"
             />
@@ -127,23 +126,23 @@ const Home = () => {
 
       {/* Botão de agendamento após hero */}
       <div className="py-8 bg-gradient-hero">
-        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+        <div className="max-w-4xl mx-auto px-4 flex justify-center">
           <WhatsAppButton />
         </div>
       </div>
 
       {/* Seção O que oferecemos */}
       <div className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="text-3xl md:text-4xl font-sans text-gray-800 mb-6">
+              <h2 className="text-3xl md:text-4xl font-sans text-medical-primary mb-6">
                 O que oferecemos?
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-lg text-medical-secondary mb-6">
                 Estamos aqui para cuidar da sua saúde visual com dedicação e comprometimento. Entre em contato conosco para mais informações e agende sua consulta hoje mesmo. Seus olhos merecem o melhor cuidado!
               </p>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg text-medical-secondary mb-8">
                 Clique e confira um pouco do que nosso serviço dispõe para você:
               </p>
             </div>
@@ -173,9 +172,9 @@ const Home = () => {
 
       {/* Carrossel de Artigos */}
       <div className="py-20 bg-medical-muted/30">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-sans text-gray-800">Últimos Artigos</h2>
+            <h2 className="text-3xl font-sans text-medical-primary">Últimos Artigos</h2>
             <div className="flex space-x-2">
               <button
                 onClick={prevArticle}
@@ -207,13 +206,13 @@ const Home = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <div className="text-sm text-gray-500 mb-2">
+                  <div className="text-sm text-medical-secondary mb-2">
                     {artigo.data}
                   </div>
-                  <h3 className="text-xl font-sans font-bold text-gray-800 mb-3 line-clamp-2">
+                  <h3 className="text-xl font-sans font-bold text-medical-primary mb-3 line-clamp-2">
                     {artigo.titulo}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  <p className="text-medical-secondary text-sm mb-4 line-clamp-2">
                     {artigo.subtitulo}
                   </p>
                   <button className="text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm">
@@ -228,7 +227,7 @@ const Home = () => {
 
       {/* Segundo botão de agendamento */}
       <div className="py-12 bg-background">
-        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+        <div className="max-w-4xl mx-auto px-4 flex justify-center">
           <WhatsAppButton />
         </div>
       </div>
@@ -237,7 +236,7 @@ const Home = () => {
       <Footer
         logo={
           <img 
-            src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
+            src="/lovable-uploads/logoimg.png" 
             alt="Instituto de Olhos Santa Luzia" 
             className="h-10 w-10 brightness-0 invert"
           />

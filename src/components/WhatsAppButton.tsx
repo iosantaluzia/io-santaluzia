@@ -1,5 +1,4 @@
 
-import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface WhatsAppButtonProps {
@@ -17,10 +16,14 @@ const WhatsAppButton = ({ className = "", variant = "default" }: WhatsAppButtonP
       asChild
       size="lg"
       variant={variant}
-      className={`bg-green-600 hover:bg-green-700 text-white ${className}`}
+      className={`bg-medical-primary hover:bg-medical-primary/90 text-white rounded-full px-8 py-4 ${className}`}
     >
-      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-        <MessageCircle className="mr-2 h-5 w-5" />
+      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+        <img 
+          src="/lovable-uploads/bd1edf3a-7fd7-44ce-8135-96dbec8a78fa.png" 
+          alt="WhatsApp" 
+          className="w-6 h-6"
+        />
         Agende sua Consulta
       </a>
     </Button>

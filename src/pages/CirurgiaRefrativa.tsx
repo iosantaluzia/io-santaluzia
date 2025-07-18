@@ -1,14 +1,17 @@
 
 import React from "react";
 import NavigationHeader from "@/components/NavigationHeader";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { Footer } from "@/components/ui/footer";
+import { Instagram, Facebook } from "lucide-react";
 
 const CirurgiaRefrativa = () => {
   return (
     <div className="min-h-screen bg-background pt-20">
       <NavigationHeader showLogo={true} />
-      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
+      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
         <div className="text-center mb-16">
-          <h1 className="text-3xl md:text-5xl font-serif text-medical-primary mb-8">
+          <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
             Cirurgia Refrativa
           </h1>
           <p className="text-lg text-medical-secondary max-w-4xl mx-auto mb-8">
@@ -24,7 +27,7 @@ const CirurgiaRefrativa = () => {
         </div>
 
         <div className="bg-white p-8 rounded-lg shadow-soft mb-12">
-          <h2 className="text-2xl font-serif text-medical-primary mb-6 text-center">
+          <h2 className="text-2xl font-sans text-medical-primary mb-6 text-center">
             Tecnologia de Ponta
           </h2>
           <p className="text-medical-secondary text-center max-w-4xl mx-auto mb-6">
@@ -36,7 +39,7 @@ const CirurgiaRefrativa = () => {
         </div>
         
         <div className="bg-gradient-to-r from-medical-accent to-medical-muted p-8 rounded-lg">
-          <h3 className="text-2xl font-serif text-medical-primary mb-6 text-center">
+          <h3 className="text-2xl font-sans text-medical-primary mb-6 text-center">
             Benefícios da Cirurgia Refrativa
           </h3>
           <div className="grid md:grid-cols-2 gap-6">
@@ -74,6 +77,53 @@ const CirurgiaRefrativa = () => {
           </p>
         </div>
       </div>
+
+      {/* Botão de agendamento */}
+      <div className="py-12 bg-background">
+        <div className="max-w-4xl mx-auto px-4 flex justify-center">
+          <WhatsAppButton />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <Footer
+        logo={
+          <img 
+            src="/lovable-uploads/logoimg.png" 
+            alt="Instituto de Olhos Santa Luzia" 
+            className="h-10 w-10 brightness-0 invert"
+          />
+        }
+        brandName="Instituto de Olhos Santa Luzia"
+        socialLinks={[
+          {
+            icon: <Instagram className="h-5 w-5" />,
+            href: "https://www.instagram.com/io.santaluzia/",
+            label: "Instagram",
+          },
+          {
+            icon: <Facebook className="h-5 w-5" />,
+            href: "https://www.facebook.com/institudodeolhossantaluzia",
+            label: "Facebook",
+          },
+        ]}
+        mainLinks={[
+          { href: "/instituto", label: "O Instituto" },
+          { href: "/corpo-clinico", label: "Corpo Clínico" },
+          { href: "/exames", label: "Exames" },
+          { href: "/catarata", label: "Catarata" },
+          { href: "/artigos", label: "Artigos" },
+        ]}
+        legalLinks={[
+          { href: "#", label: "Política de Privacidade" },
+          { href: "#", label: "Termos de Uso" },
+          { href: "#", label: "LGPD" },
+        ]}
+        copyright={{
+          text: "© 2024 Instituto de Olhos Santa Luzia",
+          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
+        }}
+      />
     </div>
   );
 };
