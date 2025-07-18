@@ -118,6 +118,11 @@ const Tab = ({
           ? "text-white font-semibold" 
           : "text-medical-primary hover:text-medical-secondary"
       }`}
+      style={isActive ? { 
+        backgroundColor: 'hsl(var(--medical-primary))', 
+        borderRadius: '9999px',
+        color: 'white'
+      } : {}}
     >
       {isMobile ? (
         isActive ? (

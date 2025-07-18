@@ -8,27 +8,30 @@ const SymptomChecker = () => {
   const [aiResponse, setAiResponse] = useState<any>(null);
   const [showScheduleButton, setShowScheduleButton] = useState(false);
 
-  // Simulação de análise de sintomas (já que não temos API key)
-  const analyzeSymptoms = (symptoms: string) => {
-    const symptomsLower = symptoms.toLowerCase();
-    
-    if (symptomsLower.includes('embaçada') || symptomsLower.includes('turva')) {
-      return "Visão embaçada pode estar relacionada a problemas refrativos (miopia, hipermetropia, astigmatismo) ou catarata. Em pessoas acima de 60 anos, a catarata é mais comum. Recomenda-se avaliação oftalmológica para diagnóstico preciso.";
+  const apiKey = "AIzaSyByhBtRJM1llpc-wu2Lhc0e1RcpZbBS6aU";
+
+  const analyzeWithAPI = async (symptoms: string) => {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Como especialista em oftalmologia, analise os seguintes sintomas oculares e forneça uma análise inicial: "${symptoms}". Responda em português brasileiro de forma educativa e sempre recomende consulta médica para diagnóstico preciso.`
+            }]
+          }]
+        })
+      });
+
+      const data = await response.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Não foi possível analisar os sintomas. Recomendamos consulta médica.";
+    } catch (error) {
+      console.error('Erro na API:', error);
+      return "Erro ao processar sua consulta. Por favor, tente novamente ou agende uma consulta.";
     }
-    
-    if (symptomsLower.includes('seco') || symptomsLower.includes('coceira')) {
-      return "Olho seco e coceira podem indicar síndrome do olho seco ou alergia ocular. Fatores como uso prolongado de telas, ar condicionado e idade podem contribuir. Tratamento adequado melhora significativamente os sintomas.";
-    }
-    
-    if (symptomsLower.includes('dor') || symptomsLower.includes('pressão')) {
-      return "Dor ou pressão ocular podem estar relacionadas ao glaucoma, especialmente em pessoas acima de 40 anos. Também pode indicar problemas na córnea ou inflamações. Avaliação urgente é recomendada.";
-    }
-    
-    if (symptomsLower.includes('luz') || symptomsLower.includes('sensibilidade')) {
-      return "Sensibilidade à luz pode estar relacionada a problemas na córnea, uveíte ou enxaqueca ocular. Em alguns casos, pode indicar inflamações intraoculares que requerem tratamento específico.";
-    }
-    
-    return "Para uma análise precisa dos seus sintomas, recomendamos uma consulta oftalmológica. Nossos especialistas poderão fazer uma avaliação completa e indicar o melhor tratamento.";
   };
 
   const handleSubmit = async () => {
@@ -42,13 +45,10 @@ const SymptomChecker = () => {
     setAiResponse(null);
     setShowScheduleButton(false);
 
-    // Simular delay da API
-    setTimeout(() => {
-      const analysis = analyzeSymptoms(input);
-      setAiResponse({ type: 'success', message: analysis });
-      setShowScheduleButton(true);
-      setIsLoading(false);
-    }, 1500);
+    const analysis = await analyzeWithAPI(input);
+    setAiResponse({ type: 'success', message: analysis });
+    setShowScheduleButton(true);
+    setIsLoading(false);
   };
 
   const handleSchedule = () => {
