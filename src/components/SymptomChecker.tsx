@@ -49,6 +49,7 @@ function PromptInput({
           setValue: onValueChange ?? handleChange,
           maxHeight,
           onSubmit,
+          disabled: false,
         }}
       >
         <div
@@ -225,10 +226,15 @@ const SymptomChecker = () => {
         onSubmit={handleSubmit}
         className="w-full mb-6 max-w-2xl mx-auto"
       >
-        <PromptInputTextarea placeholder="Descreva seus sintomas oculares (ex: 'visão embaçada e sensibilidade à luz', 'olho seco e coceira')" />
+        <PromptInputTextarea 
+          placeholder="Descreva seus sintomas oculares (ex: 'visão embaçada e sensibilidade à luz', 'olho seco e coceira')" 
+          className=""
+          onKeyDown={() => {}}
+        />
         <PromptInputActions className="justify-end pt-2">
           <PromptInputAction
             tooltip={isLoading ? "Parar pesquisa" : "Pesquisar sintomas"}
+            className=""
           >
             <Button
               variant="default"
