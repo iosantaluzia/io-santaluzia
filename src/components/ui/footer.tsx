@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 interface FooterProps {
   logo: React.ReactNode;
@@ -57,13 +56,7 @@ export function Footer({
             </ul>
           </nav>
           <div className="mt-6 lg:mt-0 lg:col-[4/11]">
-            <ul className="list-none flex flex-wrap -my-1 -mx-3 lg:justify-end">
-              {legalLinks.map((link, i) => <li key={i} className="my-1 mx-3 shrink-0">
-                  <a href={link.href} className="text-sm text-white underline-offset-4 hover:underline">
-                    {link.label}
-                  </a>
-                </li>)}
-            </ul>
+            
           </div>
           <div className="mt-6 text-sm leading-6 text-white/80 whitespace-nowrap lg:mt-0 lg:row-[1/3] lg:col-[1/4]">
             <div>{copyright.text}</div>
