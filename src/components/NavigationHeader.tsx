@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
@@ -53,7 +52,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             onClick={() => navigate("/")}
           >
             <img 
-              src="/lovable-uploads/logoimg.png" 
+              src="/lovable-uploads/logo-circle.png" 
               alt="Instituto de Olhos Santa Luzia" 
               className="h-8 w-8 object-contain"
             />

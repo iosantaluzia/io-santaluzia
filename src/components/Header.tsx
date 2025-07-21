@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Menu, X, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <img src="/lovable-uploads/a89a1d61-75ee-4ff2-8233-42d51ff14f18.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto" />
+            <img src="/lovable-uploads/logo-circle.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto" />
             <div className="hidden sm:block">
               <h1 className="font-serif font-semibold text-lg text-medical-primary">
                 Instituto de Olhos
