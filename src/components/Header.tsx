@@ -29,7 +29,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <img src="/lovable-uploads/logo-circle.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto" />
+            <img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto" />
             <div className="hidden sm:block">
               <h1 className="font-serif font-semibold text-lg text-medical-primary">
                 Instituto de Olhos

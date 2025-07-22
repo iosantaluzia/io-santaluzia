@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import NavigationHeader from "@/components/NavigationHeader";
 import ExamModal from "@/components/ExamModal";
@@ -12,7 +13,7 @@ const Exames = () => {
   const exames = [
     {
       nome: "Microscopia Especular",
-      imagem: "/lovable-uploads/57d6abc6-7f18-4bd7-8445-77010b5cec28.png",
+      imagem: "/lovable-uploads/eeee60e0-4fef-4108-876c-2528c254f163.png", // Using existing valid image
       descricao: "A microscopia especular de córnea é utilizada na oftalmologia para avaliar as células endoteliais da córnea, que são essenciais para a manutenção da transparência corneana.\n\nAo examinar as células endoteliais, os oftalmologistas podem avaliar a saúde da córnea, prever a resposta a tratamentos e monitorar a progressão de doenças ao longo do tempo.\n\nSuas indicações incluem avaliações pré e pós-operatória de cirurgias como: catarata, transplantes de córnea, indicado também para usuários crônicos de lentes de contato, implante de lentes intraoculares e no acompanhamento de doenças corneanas.\n\nÉ um exame indolor e de rápida execução. O paciente deve estar sem lentes de contato caso faça uso. Para sua realização é necessário apenas que o paciente fixe o olhar no alvo dentro do aparelho. Geralmente não necessita de acompanhantes."
     },
     {
@@ -32,7 +33,7 @@ const Exames = () => {
     },
     {
       nome: "Aberrômetro",
-      imagem: "/lovable-uploads/aberrometro-exam.png",
+      imagem: "/lovable-uploads/0ff0a911-1ea7-4d08-ad4c-4d1132189db9.png", // Using existing valid image
       descricao: "O aberrômetro, também conhecido como wavefront analyzer, é um instrumento utilizado na oftalmologia para medir as aberrações ópticas do olho. Essas aberrações são imperfeições na forma da córnea e do cristalino que podem afetar a qualidade da visão.\n\nAvaliação pré-operatória de cirurgias refrativas: Antes de realizar cirurgias refrativas como a LASIK (cirurgia refrativa a laser), o aberrômetro é utilizado para medir e quantificar as aberrações ópticas do olho.\n\nAlém de medir as aberrações ópticas, o aberrômetro também pode avaliar a qualidade da visão do paciente em condições específicas, como luz de dia, luz noturna e diferentes níveis de contraste. Isso pode ajudar os oftalmologistas a entender melhor as necessidades visuais do paciente e planejar o tratamento adequado."
     },
     {
@@ -87,7 +88,7 @@ const Exames = () => {
       <Footer
         logo={
           <img 
-            src="/lovable-uploads/logo-circle.png" 
+            src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
             alt="Instituto de Olhos Santa Luzia" 
             className="h-10 w-10 brightness-0 invert"
           />
