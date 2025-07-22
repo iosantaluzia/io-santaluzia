@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Menu, X, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navItems = [{
@@ -20,6 +21,7 @@ const Header = () => {
     name: "Contato",
     href: "#contato"
   }];
+
   return <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b shadow-soft">
       {/* Top bar with contact info */}
       
@@ -29,7 +31,13 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto" />
+            <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-white">
+              <img 
+                src="/lovable-uploads/e187619e-2328-418d-971f-86200b2bb552.png" 
+                alt="Instituto de Olhos Santa Luzia" 
+                className="h-10 w-10 object-contain animate-spin-slow" 
+              />
+            </div>
             <div className="hidden sm:block">
               <h1 className="font-serif font-semibold text-lg text-medical-primary">
                 Instituto de Olhos
@@ -74,4 +82,5 @@ const Header = () => {
       </div>
     </header>;
 };
+
 export default Header;

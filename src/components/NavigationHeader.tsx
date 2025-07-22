@@ -49,13 +49,13 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="cursor-pointer flex-shrink-0"
+            className="cursor-pointer flex-shrink-0 rounded-full overflow-hidden bg-white h-8 w-8 flex items-center justify-center"
             onClick={() => navigate("/")}
           >
             <img 
-              src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
+              src="/lovable-uploads/e187619e-2328-418d-971f-86200b2bb552.png" 
               alt="Instituto de Olhos Santa Luzia" 
-              className="h-8 w-8 object-contain"
+              className="h-7 w-7 object-contain animate-spin-slow"
             />
           </motion.div>
         )}
