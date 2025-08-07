@@ -23,6 +23,7 @@ import { AdminSidebar } from '@/components/AdminSidebar';
 import { DashboardOverview } from '@/components/DashboardOverview';
 import { AgendamentosSection } from '@/components/AgendamentosSection';
 import { PacientesSection } from '@/components/PacientesSection';
+import { ConsultasSection } from '@/components/ConsultasSection';
 import { ExamesSection } from '@/components/ExamesSection';
 import { EstoqueSection } from '@/components/EstoqueSection';
 import { FinanceiroSection } from '@/components/FinanceiroSection';
@@ -64,6 +65,7 @@ const AdminDashboard = () => {
       overview: 'Visão Geral',
       agendamentos: 'Agendamentos',
       pacientes: 'Pacientes',
+      consultas: 'Consultas',
       exames: 'Exames',
       estoque: 'Estoque',
       financeiro: 'Financeiro'
@@ -92,6 +94,8 @@ const AdminDashboard = () => {
         return <AgendamentosSection />;
       case 'pacientes':
         return <PacientesSection />;
+      case 'consultas':
+        return <ConsultasSection />;
       case 'exames':
         return <ExamesSection />;
       case 'estoque':

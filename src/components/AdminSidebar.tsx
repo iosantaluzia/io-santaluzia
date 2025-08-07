@@ -8,6 +8,7 @@ import {
   FileText, 
   Boxes, 
   HandCoins,
+  Stethoscope,
   ChevronRight,
   Menu
 } from 'lucide-react';
@@ -28,6 +29,7 @@ const sidebarItems = [
   { title: "Visão Geral", url: "#overview", icon: LayoutDashboard },
   { title: "Agendamentos", url: "#agendamentos", icon: Calendar },
   { title: "Pacientes", url: "#pacientes", icon: Users },
+  { title: "Consultas", url: "#consultas", icon: Stethoscope },
   { title: "Exames", url: "#exames", icon: FileText },
   { title: "Estoque", url: "#estoque", icon: Boxes },
   { title: "Financeiro", url: "#financeiro", icon: HandCoins },

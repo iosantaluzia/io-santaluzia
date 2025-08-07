@@ -50,6 +50,222 @@ export type Database = {
         }
         Relationships: []
       }
+      consultations: {
+        Row: {
+          anamnesis: string | null
+          biomicroscopy: string | null
+          consultation_date: string
+          created_at: string
+          created_by: string | null
+          diagnosis: string | null
+          doctor_name: string
+          id: string
+          observations: string | null
+          ocular_pressure_od: string | null
+          ocular_pressure_oe: string | null
+          patient_id: string
+          physical_exam: string | null
+          prescription: string | null
+          status: string | null
+          updated_at: string
+          visual_acuity_od: string | null
+          visual_acuity_oe: string | null
+        }
+        Insert: {
+          anamnesis?: string | null
+          biomicroscopy?: string | null
+          consultation_date?: string
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_name: string
+          id?: string
+          observations?: string | null
+          ocular_pressure_od?: string | null
+          ocular_pressure_oe?: string | null
+          patient_id: string
+          physical_exam?: string | null
+          prescription?: string | null
+          status?: string | null
+          updated_at?: string
+          visual_acuity_od?: string | null
+          visual_acuity_oe?: string | null
+        }
+        Update: {
+          anamnesis?: string | null
+          biomicroscopy?: string | null
+          consultation_date?: string
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_name?: string
+          id?: string
+          observations?: string | null
+          ocular_pressure_od?: string | null
+          ocular_pressure_oe?: string | null
+          patient_id?: string
+          physical_exam?: string | null
+          prescription?: string | null
+          status?: string | null
+          updated_at?: string
+          visual_acuity_od?: string | null
+          visual_acuity_oe?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_files: {
+        Row: {
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          patient_exam_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          patient_exam_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          patient_exam_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_files_patient_exam_id_fkey"
+            columns: ["patient_exam_id"]
+            isOneToOne: false
+            referencedRelation: "patient_exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_exams: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          doctor_name: string | null
+          exam_date: string
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id: string
+          patient_id: string
+          results: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          doctor_name?: string | null
+          exam_date?: string
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id?: string
+          patient_id: string
+          results?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          doctor_name?: string | null
+          exam_date?: string
+          exam_type?: Database["public"]["Enums"]["exam_type"]
+          id?: string
+          patient_id?: string
+          results?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_exams_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          address: string | null
+          allergies: string | null
+          cpf: string
+          created_at: string
+          created_by: string | null
+          date_of_birth: string
+          email: string | null
+          emergency_contact: string | null
+          emergency_phone: string | null
+          id: string
+          medical_history: string | null
+          medications: string | null
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          allergies?: string | null
+          cpf: string
+          created_at?: string
+          created_by?: string | null
+          date_of_birth: string
+          email?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          id?: string
+          medical_history?: string | null
+          medications?: string | null
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          allergies?: string | null
+          cpf?: string
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string
+          email?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          id?: string
+          medical_history?: string | null
+          medications?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -65,6 +281,15 @@ export type Database = {
       }
     }
     Enums: {
+      exam_type:
+        | "pentacam"
+        | "campimetria"
+        | "topografia"
+        | "microscopia_especular"
+        | "oct"
+        | "retinografia"
+        | "angiofluoresceinografia"
+        | "ultrassom_ocular"
       user_role: "admin" | "doctor" | "secretary"
     }
     CompositeTypes: {
@@ -193,6 +418,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      exam_type: [
+        "pentacam",
+        "campimetria",
+        "topografia",
+        "microscopia_especular",
+        "oct",
+        "retinografia",
+        "angiofluoresceinografia",
+        "ultrassom_ocular",
+      ],
       user_role: ["admin", "doctor", "secretary"],
     },
   },
