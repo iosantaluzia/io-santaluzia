@@ -53,9 +53,9 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             onClick={() => navigate("/")}
           >
             <img 
-              src="/lovable-uploads/e187619e-2328-418d-971f-86200b2bb552.png" 
+              src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
               alt="Instituto de Olhos Santa Luzia" 
-              className="h-7 w-7 object-contain animate-spin-slow"
+              className="h-7 w-7 object-contain"
             />
           </motion.div>
         )}

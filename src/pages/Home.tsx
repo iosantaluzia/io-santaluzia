@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Stethoscope, Eye, ChevronLeft, ChevronRight } from "lucide-react";
@@ -67,7 +66,7 @@ const Home = () => {
       >
         <div className="text-center max-w-4xl mx-auto">
           <motion.img
-            src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
+            src="/lovable-uploads/logoiosantaluzia-removebg-preview.png"
             alt="Instituto de Olhos Santa Luzia"
             className="mx-auto mb-6 max-w-xs md:max-w-sm lg:max-w-md"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -236,7 +235,7 @@ const Home = () => {
       <Footer
         logo={
           <img 
-            src="/lovable-uploads/logoimg.png" 
+            src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
             alt="Instituto de Olhos Santa Luzia" 
             className="h-10 w-10 brightness-0 invert"
           />

@@ -33,9 +33,9 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-white">
               <img 
-                src="/lovable-uploads/e187619e-2328-418d-971f-86200b2bb552.png" 
+                src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
                 alt="Instituto de Olhos Santa Luzia" 
-                className="h-10 w-10 object-contain animate-spin-slow" 
+                className="h-10 w-10 object-contain" 
               />
             </div>
             <div className="hidden sm:block">
