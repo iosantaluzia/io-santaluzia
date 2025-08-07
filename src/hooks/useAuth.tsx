@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 interface AppUser {
   id: string;
@@ -28,9 +27,11 @@ export function useAuth() {
   });
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
         setAuthState(prev => ({
           ...prev,
           session,
@@ -38,10 +39,7 @@ export function useAuth() {
         }));
 
         if (session?.user) {
-          // Fetch app user data after auth state change
-          setTimeout(async () => {
-            await fetchAppUser(session.user.id);
-          }, 0);
+          await fetchAppUser(session.user.id);
         } else {
           setAuthState(prev => ({
             ...prev,
@@ -52,8 +50,10 @@ export function useAuth() {
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
+      
       setAuthState(prev => ({
         ...prev,
         session,
@@ -72,15 +72,22 @@ export function useAuth() {
 
   const fetchAppUser = async (authUserId: string) => {
     try {
+      console.log('Fetching app user for auth_user_id:', authUserId);
+      
       const { data, error } = await supabase
         .from('app_users')
         .select('*')
         .eq('auth_user_id', authUserId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching app user:', error);
+        if (error.code !== 'PGRST116') {
+          console.error('Unexpected error:', error);
+        }
       }
+
+      console.log('App user data:', data);
 
       setAuthState(prev => ({
         ...prev,
@@ -95,68 +102,45 @@ export function useAuth() {
 
   const signInWithUsername = async (username: string, password: string) => {
     try {
-      // Verificar se usuário existe na tabela app_users
-      const { data: existingAppUser } = await supabase
-        .from('app_users')
-        .select('*')
-        .eq('username', username.toLowerCase())
-        .single();
+      console.log('Attempting login with username:', username);
+      
+      // Mapear username para email
+      const emailMap: Record<string, string> = {
+        'matheus': 'matheus@iosantaluzia.com',
+        'fabiola': 'fabiola@iosantaluzia.com',
+        'iosantaluzia': 'iosantaluzia@iosantaluzia.com'
+      };
 
-      if (!existingAppUser) {
+      const email = emailMap[username.toLowerCase()];
+      if (!email) {
         return { data: null, error: { message: 'Usuário não encontrado' } };
       }
 
-      // Se já tem auth_user_id, fazer login normal
-      if (existingAppUser.auth_user_id) {
-        const email = `${username.toLowerCase()}@iosantaluzia.com`;
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
+      console.log('Login attempt with email:', email);
 
-        if (!error && data.user) {
-          // Update last login
-          setTimeout(async () => {
-            await supabase
-              .from('app_users')
-              .update({ last_login: new Date().toISOString() })
-              .eq('auth_user_id', data.user.id);
-          }, 0);
-        }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
+      if (error) {
+        console.error('Login error:', error);
         return { data, error };
-      } else {
-        // Criar conta Supabase Auth automaticamente
-        const email = `${username.toLowerCase()}@iosantaluzia.com`;
+      }
+
+      if (data.user) {
+        console.log('Login successful for user:', data.user.email);
         
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              username: username.toLowerCase()
-            }
-          }
-        });
-
-        if (signUpError) {
-          return { data: null, error: signUpError };
-        }
-
-        if (signUpData.user) {
-          // Vincular o app_user ao auth_user
+        // Update last login
+        setTimeout(async () => {
           await supabase
             .from('app_users')
-            .update({ 
-              auth_user_id: signUpData.user.id,
-              last_login: new Date().toISOString()
-            })
-            .eq('username', username.toLowerCase());
-
-          return { data: signUpData, error: null };
-        }
+            .update({ last_login: new Date().toISOString() })
+            .eq('auth_user_id', data.user.id);
+        }, 0);
       }
+
+      return { data, error: null };
     } catch (error) {
       console.error('Error in signInWithUsername:', error);
       return { data: null, error: { message: 'Erro inesperado' } };

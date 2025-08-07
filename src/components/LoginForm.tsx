@@ -22,6 +22,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   // If user is authenticated and has approved app user, auto login
   React.useEffect(() => {
     if (user && appUser && appUser.approved) {
+      console.log('Auto-login for approved user:', appUser.username, appUser.role);
       onLogin(appUser.username, appUser.role);
     } else if (user && appUser && !appUser.approved) {
       toast.error('Usuário aguardando aprovação');
@@ -30,6 +31,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('Login form submitted with username:', username);
     
     // Validar se é um dos usuários permitidos
     const allowedUsers = ['matheus', 'fabiola', 'iosantaluzia'];
@@ -46,9 +49,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setLoading(true);
 
     try {
-      const { error } = await signInWithUsername(username, password);
+      const { data, error } = await signInWithUsername(username, password);
       
       if (error) {
+        console.error('Login failed:', error);
         if (error.message.includes('Invalid login credentials')) {
           toast.error('Nome de usuário ou senha incorretos');
         } else if (error.message.includes('Usuário não encontrado')) {
@@ -59,9 +63,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         return;
       }
 
-      // Success will be handled by useEffect above
-      toast.success('Login realizado com sucesso!');
+      if (data?.user) {
+        console.log('Login successful, waiting for app user data...');
+        toast.success('Login realizado com sucesso!');
+      }
     } catch (error) {
+      console.error('Unexpected login error:', error);
       toast.error('Erro inesperado');
     } finally {
       setLoading(false);
