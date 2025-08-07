@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Search, AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, AlertTriangle, RefreshCw, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SymptomChecker = () => {
@@ -11,6 +11,7 @@ const SymptomChecker = () => {
     message: string;
   } | null>(null);
   const [showScheduleButton, setShowScheduleButton] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const analyzeSymptoms = async (symptoms: string) => {
     try {
@@ -38,6 +39,16 @@ const SymptomChecker = () => {
       throw error;
     }
   };
+
+  // Auto-scroll to results when they appear
+  useEffect(() => {
+    if (response && resultRef.current) {
+      resultRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  }, [response]);
 
   const handleSubmit = async () => {
     if (!input.trim()) {
@@ -162,25 +173,43 @@ const SymptomChecker = () => {
       )}
 
       {response && (
-        <div className={`mt-6 p-4 rounded-lg ${
-          response.type === 'success' 
-            ? 'bg-medical-muted/30' 
-            : 'bg-red-50 border border-red-200'
-        }`}>
+        <div 
+          ref={resultRef}
+          className={`mt-6 p-4 rounded-lg border ${
+            response.type === 'success' 
+              ? 'bg-medical-muted/20 border-medical-muted' 
+              : 'bg-red-50 border-red-200'
+          }`}
+        >
           {response.type === 'success' ? (
-            <>
-              <p className="font-semibold mb-2 text-medical-primary">Resultado da Análise:</p>
-              <p className="text-medical-secondary text-left whitespace-pre-wrap leading-relaxed">
-                {response.message}
-              </p>
-            </>
+            <div className="flex flex-col lg:flex-row gap-4 items-start">
+              <div className="flex-1 text-left">
+                <p className="font-semibold mb-2 text-medical-primary">Resultado da Análise:</p>
+                <p className="text-medical-secondary leading-relaxed text-sm">
+                  {response.message}
+                </p>
+                <p className="text-xs text-medical-secondary/70 mt-3 italic">
+                  ⚠️ Esta análise é apenas informativa. Consulte nosso corpo clínico para diagnóstico preciso.
+                </p>
+              </div>
+              
+              <div className="flex-shrink-0 lg:ml-4">
+                <button 
+                  onClick={handleSchedule}
+                  className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-3 rounded-lg hover:bg-medical-secondary transition-colors text-sm font-medium shadow-soft"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Agendar Consulta
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
                 <p className="font-semibold text-red-700">Erro na Análise</p>
               </div>
-              <p className="text-red-600 mb-3">{response.message}</p>
+              <p className="text-red-600 mb-3 text-sm">{response.message}</p>
               <button 
                 onClick={handleRetry}
                 className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-2 rounded-lg hover:bg-medical-secondary transition-colors text-sm"
@@ -190,22 +219,6 @@ const SymptomChecker = () => {
               </button>
             </>
           )}
-        </div>
-      )}
-
-      {showScheduleButton && (
-        <div className="mt-8">
-          <div className="bg-gradient-to-r from-medical-primary/10 to-medical-secondary/10 rounded-lg p-6 mb-4">
-            <p className="text-lg text-medical-secondary mb-4 font-medium">
-              ⚠️ Esta análise é apenas informativa. Para um diagnóstico preciso e tratamento adequado, recomendamos uma consulta com nosso corpo clínico especializado.
-            </p>
-          </div>
-          <button 
-            onClick={handleSchedule}
-            className="bg-medical-primary text-white px-8 py-4 rounded-lg shadow-soft hover:bg-medical-secondary transition-colors text-lg font-semibold"
-          >
-            Agendar Consulta
-          </button>
         </div>
       )}
     </div>
