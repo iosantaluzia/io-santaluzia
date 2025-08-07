@@ -39,7 +39,8 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const handleSectionClick = (url: string) => {
     const section = url.replace('#', '');
@@ -47,7 +48,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
   };
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible>
+    <Sidebar className={isCollapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
           <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-white">
@@ -57,7 +58,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
               className="h-6 w-6 object-contain animate-spin-slow" 
             />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div>
               <h2 className="text-sm font-semibold text-cinza-escuro">Admin Panel</h2>
               <p className="text-xs text-gray-500">Santa Luzia</p>
@@ -82,7 +83,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                       className="w-full flex items-center"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!isCollapsed && <span>{item.title}</span>}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
