@@ -1,55 +1,73 @@
 
 import React, { useState } from 'react';
-import { Eye, EyeOff, User, Lock } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginFormProps {
   onLogin: (username: string, role: string) => void;
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  
+  const { signIn, signUp, appUser, user } = useAuth();
 
-  // Mock users - in real app this would come from Supabase
-  const mockUsers = {
-    'matheus': { password: 'iosantaluzia', role: 'doctor', approved: true },
-    'fabiola': { password: 'iosantaluzia', role: 'doctor', approved: true },
-    'iosantaluzia': { password: 'iosantaluzia', role: 'secretary', approved: true }
-  };
+  // If user is authenticated and has approved app user, auto login
+  React.useEffect(() => {
+    if (user && appUser && appUser.approved) {
+      onLogin(appUser.username, appUser.role);
+    } else if (user && appUser && !appUser.approved) {
+      toast.error('Usuário aguardando aprovação');
+    }
+  }, [user, appUser, onLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Mock authentication - replace with Supabase auth
-      const user = mockUsers[username.toLowerCase() as keyof typeof mockUsers];
-      
-      if (!user) {
-        toast.error('Usuário não encontrado');
-        return;
-      }
+      if (isSignUp) {
+        const { error } = await signUp(email, password, username);
+        
+        if (error) {
+          if (error.message.includes('already registered')) {
+            toast.error('Email já cadastrado');
+          } else {
+            toast.error('Erro ao criar conta: ' + error.message);
+          }
+          return;
+        }
 
-      if (user.password !== password) {
-        toast.error('Senha incorreta');
-        return;
-      }
+        toast.success('Conta criada! Verifique seu email e faça login.');
+        setIsSignUp(false);
+        setEmail('');
+        setPassword('');
+        setUsername('');
+      } else {
+        const { error } = await signIn(email, password);
+        
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error('Email ou senha incorretos');
+          } else {
+            toast.error('Erro ao fazer login: ' + error.message);
+          }
+          return;
+        }
 
-      if (!user.approved) {
-        toast.error('Usuário aguardando aprovação');
-        return;
+        // Success will be handled by useEffect above
       }
-
-      toast.success(`Bem-vindo, ${username}!`);
-      onLogin(username, user.role);
     } catch (error) {
-      toast.error('Erro ao fazer login');
+      toast.error('Erro inesperado');
     } finally {
       setLoading(false);
     }
@@ -64,22 +82,43 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             alt="Instituto de Olhos Santa Luzia" 
             className="h-16 w-16 object-contain mx-auto mb-4" 
           />
-          <h2 className="text-3xl font-bold text-cinza-escuro">Admin Panel</h2>
+          <h2 className="text-3xl font-bold text-cinza-escuro">
+            {isSignUp ? 'Criar Conta' : 'Admin Panel'}
+          </h2>
           <p className="text-gray-600 mt-2">Instituto de Olhos Santa Luzia</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {isSignUp && (
+            <div>
+              <Label htmlFor="username">Nome de Usuário</Label>
+              <div className="relative">
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="pl-10"
+                  placeholder="Digite seu nome de usuário"
+                  maxLength={20}
+                />
+                <User className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              </div>
+            </div>
+          )}
+
           <div>
-            <Label htmlFor="username">Usuário</Label>
+            <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="pl-10"
-                placeholder="Digite seu usuário"
+                placeholder="Digite seu email"
               />
               <User className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             </div>
@@ -114,14 +153,26 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             disabled={loading}
             className="w-full bg-bege-principal hover:bg-marrom-acentuado"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? 'Processando...' : (isSignUp ? 'Criar Conta' : 'Entrar')}
           </Button>
         </form>
 
-        <div className="text-center text-sm text-gray-600">
-          <p>Usuários de demonstração:</p>
-          <p>matheus, fabiola, iosantaluzia</p>
-          <p>Senha: iosantaluzia</p>
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-bege-principal hover:text-marrom-acentuado text-sm font-medium"
+          >
+            {isSignUp ? 'Já tem conta? Fazer login' : 'Não tem conta? Criar uma'}
+          </button>
+        </div>
+
+        <div className="text-center text-sm text-gray-600 space-y-1">
+          <p><strong>Usuários pré-cadastrados:</strong></p>
+          <p>matheus@iosantaluzia.com (Médico)</p>
+          <p>fabiola@iosantaluzia.com (Médica)</p>
+          <p>iosantaluzia@iosantaluzia.com (Secretária)</p>
+          <p className="text-xs mt-2">Todos com senha: <strong>iosantaluzia</strong></p>
         </div>
       </div>
     </div>

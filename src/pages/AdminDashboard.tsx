@@ -27,24 +27,33 @@ import { ExamesSection } from '@/components/ExamesSection';
 import { EstoqueSection } from '@/components/EstoqueSection';
 import { FinanceiroSection } from '@/components/FinanceiroSection';
 import { UserManagement } from '@/components/UserManagement';
+import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ username: string; role: string } | null>(null);
+  const { isAuthenticated, appUser, signOut, loading } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
   const [showUserManagement, setShowUserManagement] = useState(false);
 
-  const handleLogin = (username: string, role: string) => {
-    setCurrentUser({ username, role });
-    setIsAuthenticated(true);
+  const handleLogin = () => {
+    // This is now handled by the useAuth hook automatically
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await signOut();
     setActiveSection('overview');
     setShowUserManagement(false);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-bege-principal"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
@@ -60,6 +69,15 @@ const AdminDashboard = () => {
       financeiro: 'Financeiro'
     };
     return titles[section as keyof typeof titles] || 'Painel';
+  };
+
+  const getRoleName = (role: string) => {
+    const roles = {
+      admin: 'Administrador',
+      doctor: 'Médico',
+      secretary: 'Secretária'
+    };
+    return roles[role as keyof typeof roles] || role;
   };
 
   const renderContent = () => {
@@ -159,10 +177,9 @@ const AdminDashboard = () => {
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-cinza-escuro capitalize">{currentUser?.username}</span>
+                  <span className="text-sm font-medium text-cinza-escuro capitalize">{appUser?.username}</span>
                   <span className="text-xs text-gray-500">
-                    {currentUser?.role === 'doctor' ? 'Médico' : 
-                     currentUser?.role === 'secretary' ? 'Secretaria' : 'Admin'}
+                    {getRoleName(appUser?.role || '')}
                   </span>
                 </div>
               </div>

@@ -1,78 +1,150 @@
 
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2, UserCheck, UserX, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   id: string;
   username: string;
   role: 'admin' | 'doctor' | 'secretary';
   approved: boolean;
-  lastLogin?: string;
-  createdBy: string;
+  last_login?: string;
+  created_by?: string;
+  auth_user_id?: string;
 }
 
 export function UserManagement() {
-  const [users, setUsers] = useState<User[]>([
-    { id: '1', username: 'matheus', role: 'doctor', approved: true, lastLogin: '2024-01-15 09:30', createdBy: 'system' },
-    { id: '2', username: 'fabiola', role: 'doctor', approved: true, lastLogin: '2024-01-14 14:20', createdBy: 'system' },
-    { id: '3', username: 'iosantaluzia', role: 'secretary', approved: true, lastLogin: '2024-01-15 08:00', createdBy: 'system' },
-    { id: '4', username: 'novousuario', role: 'secretary', approved: false, createdBy: 'matheus' }
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({
     username: '',
-    password: '',
     role: 'secretary' as User['role']
   });
 
-  const handleCreateUser = () => {
-    if (!newUser.username || !newUser.password) {
-      toast.error('Preencha todos os campos obrigatórios');
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching users:', error);
+        toast.error('Erro ao carregar usuários');
+        return;
+      }
+
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error in fetchUsers:', error);
+      toast.error('Erro ao carregar usuários');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    if (!newUser.username) {
+      toast.error('Preencha o nome do usuário');
       return;
     }
 
-    const user: User = {
-      id: Date.now().toString(),
-      username: newUser.username.toLowerCase(),
-      role: newUser.role,
-      approved: true,
-      createdBy: 'admin'
-    };
+    try {
+      const { error } = await supabase
+        .from('app_users')
+        .insert([{
+          username: newUser.username.toLowerCase(),
+          role: newUser.role,
+          approved: false,
+          created_by: 'admin'
+        }]);
 
-    setUsers([...users, user]);
-    setNewUser({ username: '', password: '', role: 'secretary' });
-    setShowCreateForm(false);
-    toast.success('Usuário criado com sucesso');
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast.error('Nome de usuário já existe');
+        } else {
+          toast.error('Erro ao criar usuário');
+        }
+        return;
+      }
+
+      setNewUser({ username: '', role: 'secretary' });
+      setShowCreateForm(false);
+      toast.success('Usuário criado com sucesso');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.error('Erro ao criar usuário');
+    }
   };
 
-  const handleApproveUser = (userId: string) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, approved: true } : user
-    ));
-    toast.success('Usuário aprovado');
+  const handleApproveUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('app_users')
+        .update({ approved: true })
+        .eq('id', userId);
+
+      if (error) {
+        toast.error('Erro ao aprovar usuário');
+        return;
+      }
+
+      toast.success('Usuário aprovado');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error approving user:', error);
+      toast.error('Erro ao aprovar usuário');
+    }
   };
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(user => user.id !== userId));
-    toast.success('Usuário removido');
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('app_users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) {
+        toast.error('Erro ao remover usuário');
+        return;
+      }
+
+      toast.success('Usuário removido');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Erro ao remover usuário');
+    }
   };
 
   const getRoleName = (role: string) => {
     const roles = {
       admin: 'Administrador',
       doctor: 'Médico',
-      secretary: 'Secretaria'
+      secretary: 'Secretária'
     };
     return roles[role as keyof typeof roles];
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bege-principal"></div>
+      </div>
+    );
+  }
 
   const pendingUsers = users.filter(user => !user.approved);
   const approvedUsers = users.filter(user => user.approved);
@@ -104,24 +176,13 @@ export function UserManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="new-password">Senha</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                  placeholder="Senha (máx. 8 caracteres)"
-                  maxLength={8}
-                />
-              </div>
-              <div>
                 <Label>Função</Label>
                 <Select value={newUser.role} onValueChange={(value: User['role']) => setNewUser({...newUser, role: value})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="secretary">Secretaria</SelectItem>
+                    <SelectItem value="secretary">Secretária</SelectItem>
                     <SelectItem value="doctor">Médico</SelectItem>
                     <SelectItem value="admin">Administrador</SelectItem>
                   </SelectContent>
@@ -150,7 +211,7 @@ export function UserManagement() {
                 <div>
                   <span className="font-medium">{user.username}</span>
                   <span className="text-sm text-gray-600 ml-2">({getRoleName(user.role)})</span>
-                  <span className="text-xs text-gray-500 ml-2">Criado por: {user.createdBy}</span>
+                  <span className="text-xs text-gray-500 ml-2">Criado por: {user.created_by}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={() => handleApproveUser(user.id)} className="bg-green-600 hover:bg-green-700">
@@ -192,11 +253,15 @@ export function UserManagement() {
                     <span className="text-sm text-gray-600">{getRoleName(user.role)}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600">{user.lastLogin || 'Nunca'}</span>
+                    <span className="text-sm text-gray-600">
+                      {user.last_login ? new Date(user.last_login).toLocaleString('pt-BR') : 'Nunca'}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                      Ativo
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.auth_user_id ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {user.auth_user_id ? 'Ativo' : 'Pendente Login'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -204,7 +269,7 @@ export function UserManagement() {
                       <Button size="sm" variant="ghost">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-800">
+                      <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-800" onClick={() => handleDeleteUser(user.id)}>
                         <UserX className="h-4 w-4" />
                       </Button>
                     </div>
