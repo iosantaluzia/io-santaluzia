@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { Bell, Settings, User, Search } from 'lucide-react';
+import { Bell, Settings, User, Search, LogOut } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from '@/components/ui/button';
 import { 
   Breadcrumb,
   BreadcrumbItem,
@@ -10,7 +11,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
+import { LoginForm } from '@/components/LoginForm';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { DashboardOverview } from '@/components/DashboardOverview';
 import { AgendamentosSection } from '@/components/AgendamentosSection';
@@ -18,9 +26,29 @@ import { PacientesSection } from '@/components/PacientesSection';
 import { ExamesSection } from '@/components/ExamesSection';
 import { EstoqueSection } from '@/components/EstoqueSection';
 import { FinanceiroSection } from '@/components/FinanceiroSection';
+import { UserManagement } from '@/components/UserManagement';
 
 const AdminDashboard = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ username: string; role: string } | null>(null);
   const [activeSection, setActiveSection] = useState('overview');
+  const [showUserManagement, setShowUserManagement] = useState(false);
+
+  const handleLogin = (username: string, role: string) => {
+    setCurrentUser({ username, role });
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setActiveSection('overview');
+    setShowUserManagement(false);
+  };
+
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
 
   const getSectionTitle = (section: string) => {
     const titles = {
@@ -35,6 +63,10 @@ const AdminDashboard = () => {
   };
 
   const renderContent = () => {
+    if (showUserManagement) {
+      return <UserManagement />;
+    }
+
     switch (activeSection) {
       case 'overview':
         return <DashboardOverview onSectionChange={setActiveSection} />;
@@ -68,16 +100,21 @@ const AdminDashboard = () => {
                   <BreadcrumbItem>
                     <BreadcrumbLink 
                       className="cursor-pointer"
-                      onClick={() => setActiveSection('overview')}
+                      onClick={() => {
+                        setActiveSection('overview');
+                        setShowUserManagement(false);
+                      }}
                     >
                       Admin
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  {activeSection !== 'overview' && (
+                  {(activeSection !== 'overview' || showUserManagement) && (
                     <>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem>
-                        <BreadcrumbPage>{getSectionTitle(activeSection)}</BreadcrumbPage>
+                        <BreadcrumbPage>
+                          {showUserManagement ? 'Gerenciar Usuários' : getSectionTitle(activeSection)}
+                        </BreadcrumbPage>
                       </BreadcrumbItem>
                     </>
                   )}
@@ -98,14 +135,36 @@ const AdminDashboard = () => {
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
               </button>
-              <button className="p-2 text-gray-600 hover:text-cinza-escuro">
-                <Settings className="h-5 w-5" />
-              </button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="p-2 text-gray-600 hover:text-cinza-escuro">
+                    <Settings className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setShowUserManagement(!showUserManagement)}>
+                    <User className="h-4 w-4 mr-2" />
+                    Gerenciar Usuários
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <div className="flex items-center space-x-2">
                 <div className="h-8 w-8 rounded-full bg-bege-principal flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm font-medium text-cinza-escuro">Admin</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-cinza-escuro capitalize">{currentUser?.username}</span>
+                  <span className="text-xs text-gray-500">
+                    {currentUser?.role === 'doctor' ? 'Médico' : 
+                     currentUser?.role === 'secretary' ? 'Secretaria' : 'Admin'}
+                  </span>
+                </div>
               </div>
             </div>
           </header>

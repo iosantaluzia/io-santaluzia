@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
-import { ChevronRight, Columns, PanelLeft } from 'lucide-react';
+import { ChevronRight, Columns, PanelLeft, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AppointmentForm } from './AppointmentForm';
 
 export function AgendamentosSection() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('double');
+  const [showAppointmentForm, setShowAppointmentForm] = useState(false);
 
   const timeSlotsMatheus = [
     { time: '09:00', patient: 'Ana Silva', status: 'Confirmado' },
@@ -119,6 +120,15 @@ export function AgendamentosSection() {
           <p className="mt-4 text-center text-gray-600 font-semibold">
             Agendamentos para: {formatDate(selectedDate)}
           </p>
+          
+          {/* Novo botão para criar agendamento */}
+          <Button 
+            onClick={() => setShowAppointmentForm(true)}
+            className="mt-4 bg-bege-principal hover:bg-marrom-acentuado"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Agendamento
+          </Button>
         </div>
 
         {/* Colunas de Agendamento */}
@@ -176,6 +186,12 @@ export function AgendamentosSection() {
           )}
         </div>
       </div>
+
+      <AppointmentForm 
+        isOpen={showAppointmentForm}
+        onClose={() => setShowAppointmentForm(false)}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 }
