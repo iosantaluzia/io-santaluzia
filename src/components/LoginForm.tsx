@@ -17,7 +17,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const { signInWithUsername, appUser, user } = useAuth();
+  const { signInWithUsername, appUser, user, error: authError } = useAuth();
 
   // If user is authenticated and has approved app user, auto login
   React.useEffect(() => {
@@ -26,8 +26,17 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       onLogin(appUser.username, appUser.role);
     } else if (user && appUser && !appUser.approved) {
       toast.error('Usuário aguardando aprovação');
+    } else if (user && !appUser) {
+      toast.error('Sua conta não está vinculada ao painel administrativo');
     }
   }, [user, appUser, onLogin]);
+
+  // Show auth error if present
+  React.useEffect(() => {
+    if (authError) {
+      toast.error(authError);
+    }
+  }, [authError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

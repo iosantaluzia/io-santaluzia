@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { Bell, Settings, User, Search, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bell, Settings, User, Search, LogOut, AlertTriangle, RotateCcw } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import { 
@@ -24,9 +23,23 @@ import { LazyComponents } from '@/components/LazyComponents';
 import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
-  const { isAuthenticated, appUser, signOut, loading } = useAuth();
+  const { isAuthenticated, appUser, signOut, loading, error, retry, user } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
   const [showUserManagement, setShowUserManagement] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
+
+  // Show timeout message after 6 seconds of loading
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 6000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setLoadingTimeout(false);
+    }
+  }, [loading]);
 
   const handleLogin = () => {
     // This is now handled by the useAuth hook automatically
@@ -42,7 +55,13 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) {
+  const handleRetry = () => {
+    setLoadingTimeout(false);
+    retry();
+  };
+
+  // Show loading state
+  if (loading && !loadingTimeout) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -53,6 +72,63 @@ const AdminDashboard = () => {
     );
   }
 
+  // Show timeout message
+  if (loading && loadingTimeout) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md p-8">
+          <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Carregamento Demorado
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Não foi possível carregar seus dados de acesso. Isso pode ser devido a uma conexão lenta ou problemas temporários.
+          </p>
+          <div className="space-y-3">
+            <Button onClick={handleRetry} className="w-full">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Tentar Novamente
+            </Button>
+            <Button variant="outline" onClick={handleLogout} className="w-full">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md p-8">
+          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Erro de Acesso
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {error}
+          </p>
+          <div className="space-y-3">
+            {user && (
+              <Button onClick={handleRetry} className="w-full">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Tentar Novamente
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleLogout} className="w-full">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }

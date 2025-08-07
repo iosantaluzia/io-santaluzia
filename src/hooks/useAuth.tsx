@@ -16,6 +16,7 @@ interface AuthState {
   session: Session | null;
   appUser: AppUser | null;
   loading: boolean;
+  error: string | null;
 }
 
 export function useAuth() {
@@ -23,29 +24,38 @@ export function useAuth() {
     user: null,
     session: null,
     appUser: null,
-    loading: true
+    loading: true,
+    error: null
   });
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
+        if (!mounted) return;
+
         setAuthState(prev => ({
           ...prev,
           session,
-          user: session?.user ?? null
+          user: session?.user ?? null,
+          error: null
         }));
 
         if (session?.user) {
           await fetchAppUser(session.user.id);
         } else {
-          setAuthState(prev => ({
-            ...prev,
-            appUser: null,
-            loading: false
-          }));
+          if (mounted) {
+            setAuthState(prev => ({
+              ...prev,
+              appUser: null,
+              loading: false,
+              error: null
+            }));
+          }
         }
       }
     );
@@ -54,49 +64,102 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session check:', session?.user?.email);
       
+      if (!mounted) return;
+
       setAuthState(prev => ({
         ...prev,
         session,
-        user: session?.user ?? null
+        user: session?.user ?? null,
+        error: null
       }));
 
       if (session?.user) {
         fetchAppUser(session.user.id);
       } else {
-        setAuthState(prev => ({ ...prev, loading: false }));
+        if (mounted) {
+          setAuthState(prev => ({ ...prev, loading: false }));
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchAppUser = async (authUserId: string) => {
+    const startTime = Date.now();
+    console.log('Fetching app user for auth_user_id:', authUserId, 'at', new Date().toISOString());
+    
     try {
-      console.log('Fetching app user for auth_user_id:', authUserId);
-      
-      const { data, error } = await supabase
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout')), 8000);
+      });
+
+      // Create the query promise
+      const queryPromise = supabase
         .from('app_users')
         .select('*')
         .eq('auth_user_id', authUserId)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data found
+
+      // Race between timeout and query
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+      const elapsedTime = Date.now() - startTime;
+      console.log('App user query completed in', elapsedTime, 'ms');
 
       if (error) {
         console.error('Error fetching app user:', error);
-        if (error.code !== 'PGRST116') {
-          console.error('Unexpected error:', error);
-        }
+        setAuthState(prev => ({
+          ...prev,
+          appUser: null,
+          loading: false,
+          error: 'Erro ao carregar dados do usuário'
+        }));
+        return;
       }
 
       console.log('App user data:', data);
 
+      if (!data) {
+        console.log('No app user found for this auth user');
+        setAuthState(prev => ({
+          ...prev,
+          appUser: null,
+          loading: false,
+          error: 'Sua conta não está vinculada ao sistema'
+        }));
+        return;
+      }
+
       setAuthState(prev => ({
         ...prev,
-        appUser: data || null,
-        loading: false
+        appUser: data,
+        loading: false,
+        error: null
       }));
     } catch (error) {
-      console.error('Error in fetchAppUser:', error);
-      setAuthState(prev => ({ ...prev, loading: false }));
+      const elapsedTime = Date.now() - startTime;
+      console.error('Error in fetchAppUser after', elapsedTime, 'ms:', error);
+      
+      if (error instanceof Error && error.message === 'Timeout') {
+        setAuthState(prev => ({
+          ...prev,
+          appUser: null,
+          loading: false,
+          error: 'Timeout ao carregar dados - tente novamente'
+        }));
+      } else {
+        setAuthState(prev => ({
+          ...prev,
+          appUser: null,
+          loading: false,
+          error: 'Erro inesperado ao carregar dados'
+        }));
+      }
     }
   };
 
@@ -149,13 +212,30 @@ export function useAuth() {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
+    if (!error) {
+      setAuthState({
+        user: null,
+        session: null,
+        appUser: null,
+        loading: false,
+        error: null
+      });
+    }
     return { error };
+  };
+
+  const retry = () => {
+    if (authState.user) {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      fetchAppUser(authState.user.id);
+    }
   };
 
   return {
     ...authState,
     signInWithUsername,
     signOut,
+    retry,
     isAuthenticated: !!authState.user && !!authState.appUser && authState.appUser.approved
   };
 }
