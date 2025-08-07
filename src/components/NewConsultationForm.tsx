@@ -221,7 +221,7 @@ export function NewConsultationForm({ patient, onBack, onSaved }: NewConsultatio
           <label className="block text-sm font-medium text-gray-700 mb-2">Biomicroscopia</label>
           <Textarea
             value={formData.biomicroscopy}
-            onChange={(e) => handleInputChange('biomicroscopia', e.target.value)}
+            onChange={(e) => handleInputChange('biomicroscopy', e.target.value)}
             placeholder="Achados da biomicroscopia (lâmpada de fenda)..."
             rows={3}
           />

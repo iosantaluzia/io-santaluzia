@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, User, Clock, FileText, Plus, ArrowLeft } from 'lucide-react';
+import { Search, Filter, User, Clock, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { PatientDetails } from './PatientDetails';
 
@@ -26,6 +26,7 @@ export function ConsultasSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPatients();
@@ -33,6 +34,9 @@ export function ConsultasSection() {
 
   const fetchPatients = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('patients')
         .select(`
@@ -43,13 +47,14 @@ export function ConsultasSection() {
 
       if (error) {
         console.error('Erro ao buscar pacientes:', error);
+        setError('Erro ao carregar pacientes');
         return;
       }
 
       const patientsWithLastConsultation = data?.map(patient => ({
         ...patient,
         last_consultation: patient.consultations?.length > 0 
-          ? new Date(Math.max(...patient.consultations.map(c => new Date(c.consultation_date).getTime()))).toLocaleDateString('pt-BR')
+          ? new Date(Math.max(...patient.consultations.map((c: any) => new Date(c.consultation_date).getTime()))).toLocaleDateString('pt-BR')
           : 'Nenhuma consulta',
         condition: patient.medical_history ? 'Acompanhamento' : 'Primeira consulta'
       })) || [];
@@ -58,6 +63,7 @@ export function ConsultasSection() {
       setFilteredPatients(patientsWithLastConsultation);
     } catch (error) {
       console.error('Erro ao carregar pacientes:', error);
+      setError('Erro inesperado ao carregar dados');
     } finally {
       setLoading(false);
     }
@@ -78,7 +84,7 @@ export function ConsultasSection() {
 
   const handleBackToList = () => {
     setSelectedPatient(null);
-    fetchPatients(); // Refresh data when returning to list
+    fetchPatients();
   };
 
   if (selectedPatient) {
@@ -87,6 +93,19 @@ export function ConsultasSection() {
         patient={selectedPatient} 
         onBack={handleBackToList}
       />
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={fetchPatients}>
+            Tentar Novamente
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -192,7 +211,7 @@ export function ConsultasSection() {
           </table>
         </div>
 
-        {filteredPatients.length === 0 && (
+        {filteredPatients.length === 0 && !loading && (
           <div className="text-center py-8">
             <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500">

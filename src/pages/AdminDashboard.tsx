@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Settings, User, Search, LogOut } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
@@ -34,16 +34,48 @@ const AdminDashboard = () => {
   const { isAuthenticated, appUser, signOut, loading } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
   const [showUserManagement, setShowUserManagement] = useState(false);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+
+  // Add timeout to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        setDashboardError('Tempo esgotado para carregar o dashboard');
+      }
+    }, 10000); // 10 seconds timeout
+
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   const handleLogin = () => {
     // This is now handled by the useAuth hook automatically
+    setDashboardError(null);
   };
 
   const handleLogout = async () => {
-    await signOut();
-    setActiveSection('overview');
-    setShowUserManagement(false);
+    try {
+      await signOut();
+      setActiveSection('overview');
+      setShowUserManagement(false);
+      setDashboardError(null);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      setDashboardError('Erro ao fazer logout');
+    }
   };
+
+  if (dashboardError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{dashboardError}</p>
+          <Button onClick={() => window.location.reload()}>
+            Recarregar Página
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -83,27 +115,39 @@ const AdminDashboard = () => {
   };
 
   const renderContent = () => {
-    if (showUserManagement) {
-      return <UserManagement />;
-    }
+    try {
+      if (showUserManagement) {
+        return <UserManagement />;
+      }
 
-    switch (activeSection) {
-      case 'overview':
-        return <DashboardOverview onSectionChange={setActiveSection} />;
-      case 'agendamentos':
-        return <AgendamentosSection />;
-      case 'pacientes':
-        return <PacientesSection />;
-      case 'consultas':
-        return <ConsultasSection />;
-      case 'exames':
-        return <ExamesSection />;
-      case 'estoque':
-        return <EstoqueSection />;
-      case 'financeiro':
-        return <FinanceiroSection />;
-      default:
-        return <DashboardOverview onSectionChange={setActiveSection} />;
+      switch (activeSection) {
+        case 'overview':
+          return <DashboardOverview onSectionChange={setActiveSection} />;
+        case 'agendamentos':
+          return <AgendamentosSection />;
+        case 'pacientes':
+          return <PacientesSection />;
+        case 'consultas':
+          return <ConsultasSection />;
+        case 'exames':
+          return <ExamesSection />;
+        case 'estoque':
+          return <EstoqueSection />;
+        case 'financeiro':
+          return <FinanceiroSection />;
+        default:
+          return <DashboardOverview onSectionChange={setActiveSection} />;
+      }
+    } catch (error) {
+      console.error('Error rendering content:', error);
+      return (
+        <div className="p-4 text-center">
+          <p className="text-red-600 mb-4">Erro ao carregar seção</p>
+          <Button onClick={() => setActiveSection('overview')}>
+            Voltar ao Início
+          </Button>
+        </div>
+      );
     }
   };
 
