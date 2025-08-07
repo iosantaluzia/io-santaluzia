@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Eye, EyeOff, User, Lock, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,14 +12,12 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   
-  const { signIn, signUp, appUser, user } = useAuth();
+  const { signInWithUsername, appUser, user } = useAuth();
 
   // If user is authenticated and has approved app user, auto login
   React.useEffect(() => {
@@ -32,40 +30,37 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar se é um dos usuários permitidos
+    const allowedUsers = ['matheus', 'fabiola', 'iosantaluzia'];
+    if (!allowedUsers.includes(username.toLowerCase())) {
+      toast.error('Usuário não autorizado. Use: matheus, fabiola ou iosantaluzia');
+      return;
+    }
+
+    if (password !== 'iosantaluzia') {
+      toast.error('Senha incorreta');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password, username);
-        
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('Email já cadastrado');
-          } else {
-            toast.error('Erro ao criar conta: ' + error.message);
-          }
-          return;
+      const { error } = await signInWithUsername(username, password);
+      
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('Nome de usuário ou senha incorretos');
+        } else if (error.message.includes('Usuário não encontrado')) {
+          toast.error('Usuário não encontrado');
+        } else {
+          toast.error('Erro ao fazer login: ' + error.message);
         }
-
-        toast.success('Conta criada! Verifique seu email e faça login.');
-        setIsSignUp(false);
-        setEmail('');
-        setPassword('');
-        setUsername('');
-      } else {
-        const { error } = await signIn(email, password);
-        
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('Email ou senha incorretos');
-          } else {
-            toast.error('Erro ao fazer login: ' + error.message);
-          }
-          return;
-        }
-
-        // Success will be handled by useEffect above
+        return;
       }
+
+      // Success will be handled by useEffect above
+      toast.success('Login realizado com sucesso!');
     } catch (error) {
       toast.error('Erro inesperado');
     } finally {
@@ -82,43 +77,23 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             alt="Instituto de Olhos Santa Luzia" 
             className="h-16 w-16 object-contain mx-auto mb-4" 
           />
-          <h2 className="text-3xl font-bold text-cinza-escuro">
-            {isSignUp ? 'Criar Conta' : 'Admin Panel'}
-          </h2>
+          <h2 className="text-3xl font-bold text-cinza-escuro">Admin Panel</h2>
           <p className="text-gray-600 mt-2">Instituto de Olhos Santa Luzia</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {isSignUp && (
-            <div>
-              <Label htmlFor="username">Nome de Usuário</Label>
-              <div className="relative">
-                <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="pl-10"
-                  placeholder="Digite seu nome de usuário"
-                  maxLength={20}
-                />
-                <User className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              </div>
-            </div>
-          )}
-
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Nome de Usuário</Label>
             <div className="relative">
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 className="pl-10"
-                placeholder="Digite seu email"
+                placeholder="Digite seu nome de usuário"
+                maxLength={20}
               />
               <User className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             </div>
@@ -135,7 +110,6 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 required
                 className="pl-10 pr-10"
                 placeholder="Digite sua senha"
-                maxLength={8}
               />
               <Lock className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <button
@@ -153,26 +127,16 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             disabled={loading}
             className="w-full bg-bege-principal hover:bg-marrom-acentuado"
           >
-            {loading ? 'Processando...' : (isSignUp ? 'Criar Conta' : 'Entrar')}
+            {loading ? 'Processando...' : 'Entrar'}
           </Button>
         </form>
 
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-bege-principal hover:text-marrom-acentuado text-sm font-medium"
-          >
-            {isSignUp ? 'Já tem conta? Fazer login' : 'Não tem conta? Criar uma'}
-          </button>
-        </div>
-
         <div className="text-center text-sm text-gray-600 space-y-1">
-          <p><strong>Usuários pré-cadastrados:</strong></p>
-          <p>matheus@iosantaluzia.com (Médico)</p>
-          <p>fabiola@iosantaluzia.com (Médica)</p>
-          <p>iosantaluzia@iosantaluzia.com (Secretária)</p>
-          <p className="text-xs mt-2">Todos com senha: <strong>iosantaluzia</strong></p>
+          <p><strong>Usuários disponíveis:</strong></p>
+          <p><strong>matheus</strong> (Médico)</p>
+          <p><strong>fabiola</strong> (Médica)</p>
+          <p><strong>iosantaluzia</strong> (Secretária)</p>
+          <p className="text-xs mt-2">Senha para todos: <strong>iosantaluzia</strong></p>
         </div>
       </div>
     </div>

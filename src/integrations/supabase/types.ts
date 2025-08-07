@@ -55,7 +55,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_auth_user_if_needed: {
+        Args: { username_param: string; password_param: string }
+        Returns: {
+          user_id: string
+          email: string
+          success: boolean
+        }[]
+      }
     }
     Enums: {
       user_role: "admin" | "doctor" | "secretary"

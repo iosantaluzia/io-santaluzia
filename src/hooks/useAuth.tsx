@@ -93,40 +93,74 @@ export function useAuth() {
     }
   };
 
-  const signUp = async (email: string, password: string, username: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          username: username.toLowerCase()
+  const signInWithUsername = async (username: string, password: string) => {
+    try {
+      // Verificar se usuário existe na tabela app_users
+      const { data: existingAppUser } = await supabase
+        .from('app_users')
+        .select('*')
+        .eq('username', username.toLowerCase())
+        .single();
+
+      if (!existingAppUser) {
+        return { data: null, error: { message: 'Usuário não encontrado' } };
+      }
+
+      // Se já tem auth_user_id, fazer login normal
+      if (existingAppUser.auth_user_id) {
+        const email = `${username.toLowerCase()}@iosantaluzia.com`;
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (!error && data.user) {
+          // Update last login
+          setTimeout(async () => {
+            await supabase
+              .from('app_users')
+              .update({ last_login: new Date().toISOString() })
+              .eq('auth_user_id', data.user.id);
+          }, 0);
+        }
+
+        return { data, error };
+      } else {
+        // Criar conta Supabase Auth automaticamente
+        const email = `${username.toLowerCase()}@iosantaluzia.com`;
+        
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              username: username.toLowerCase()
+            }
+          }
+        });
+
+        if (signUpError) {
+          return { data: null, error: signUpError };
+        }
+
+        if (signUpData.user) {
+          // Vincular o app_user ao auth_user
+          await supabase
+            .from('app_users')
+            .update({ 
+              auth_user_id: signUpData.user.id,
+              last_login: new Date().toISOString()
+            })
+            .eq('username', username.toLowerCase());
+
+          return { data: signUpData, error: null };
         }
       }
-    });
-
-    return { data, error };
-  };
-
-  const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (!error && data.user) {
-      // Update last login
-      setTimeout(async () => {
-        await supabase
-          .from('app_users')
-          .update({ last_login: new Date().toISOString() })
-          .eq('auth_user_id', data.user.id);
-      }, 0);
+    } catch (error) {
+      console.error('Error in signInWithUsername:', error);
+      return { data: null, error: { message: 'Erro inesperado' } };
     }
-
-    return { data, error };
   };
 
   const signOut = async () => {
@@ -136,8 +170,7 @@ export function useAuth() {
 
   return {
     ...authState,
-    signUp,
-    signIn,
+    signInWithUsername,
     signOut,
     isAuthenticated: !!authState.user && !!authState.appUser && authState.appUser.approved
   };
