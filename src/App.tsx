@@ -13,6 +13,7 @@ import CirurgiaRefrativa from "./pages/CirurgiaRefrativa";
 import Ceratocone from "./pages/Ceratocone";
 import Artigos from "./pages/Artigos";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/cirurgia-refrativa" element={<CirurgiaRefrativa />} />
           <Route path="/ceratocone" element={<Ceratocone />} />
           <Route path="/artigos" element={<Artigos />} />
+          <Route path="/admin-dashboard-santa-luzia" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

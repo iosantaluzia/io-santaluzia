@@ -68,7 +68,10 @@ export default {
 					secondary: 'hsl(var(--medical-secondary))',
 					accent: 'hsl(var(--medical-accent))',
 					muted: 'hsl(var(--medical-muted))'
-				}
+				},
+				'cinza-escuro': 'hsl(220, 13%, 18%)',
+				'bege-principal': 'hsl(35, 77%, 49%)',
+				'marrom-acentuado': 'hsl(25, 47%, 35%)'
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
