@@ -36,33 +36,67 @@ export function ConsultasSection() {
     try {
       setLoading(true);
       setError(null);
+      console.log('Iniciando busca de pacientes...');
       
-      const { data, error } = await supabase
+      // Primeira query simplificada - apenas dados dos pacientes
+      const { data: patientsData, error: patientsError } = await supabase
         .from('patients')
-        .select(`
-          *,
-          consultations(consultation_date)
-        `)
+        .select('*')
         .order('name');
 
-      if (error) {
-        console.error('Erro ao buscar pacientes:', error);
+      if (patientsError) {
+        console.error('Erro ao buscar pacientes:', patientsError);
         setError('Erro ao carregar pacientes');
         return;
       }
 
-      const patientsWithLastConsultation = data?.map(patient => ({
-        ...patient,
-        last_consultation: patient.consultations?.length > 0 
-          ? new Date(Math.max(...patient.consultations.map((c: any) => new Date(c.consultation_date).getTime()))).toLocaleDateString('pt-BR')
-          : 'Nenhuma consulta',
-        condition: patient.medical_history ? 'Acompanhamento' : 'Primeira consulta'
-      })) || [];
+      console.log('Pacientes carregados:', patientsData?.length || 0);
 
-      setPatients(patientsWithLastConsultation);
-      setFilteredPatients(patientsWithLastConsultation);
+      if (!patientsData) {
+        setPatients([]);
+        setFilteredPatients([]);
+        return;
+      }
+
+      // Segunda query para buscar as últimas consultas
+      const patientIds = patientsData.map(p => p.id);
+      let lastConsultations: { [key: string]: string } = {};
+      
+      if (patientIds.length > 0) {
+        try {
+          const { data: consultationsData, error: consultationsError } = await supabase
+            .from('consultations')
+            .select('patient_id, consultation_date')
+            .in('patient_id', patientIds)
+            .order('consultation_date', { ascending: false });
+
+          if (consultationsError) {
+            console.warn('Erro ao buscar consultas:', consultationsError);
+          } else if (consultationsData) {
+            // Agrupa por patient_id e pega a data mais recente
+            consultationsData.forEach(consultation => {
+              if (!lastConsultations[consultation.patient_id]) {
+                lastConsultations[consultation.patient_id] = new Date(consultation.consultation_date).toLocaleDateString('pt-BR');
+              }
+            });
+          }
+        } catch (consultError) {
+          console.warn('Erro ao processar consultas:', consultError);
+        }
+      }
+
+      // Monta os dados finais dos pacientes
+      const patientsWithConsultations = patientsData.map(patient => ({
+        ...patient,
+        last_consultation: lastConsultations[patient.id] || 'Nenhuma consulta',
+        condition: patient.medical_history ? 'Acompanhamento' : 'Primeira consulta'
+      }));
+
+      console.log('Dados processados com sucesso');
+      setPatients(patientsWithConsultations);
+      setFilteredPatients(patientsWithConsultations);
     } catch (error) {
-      console.error('Erro ao carregar pacientes:', error);
+      console.error('Erro inesperado ao carregar pacientes:', error);
       setError('Erro inesperado ao carregar dados');
     } finally {
       setLoading(false);
@@ -70,21 +104,40 @@ export function ConsultasSection() {
   };
 
   useEffect(() => {
-    const filtered = patients.filter(patient =>
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.cpf.includes(searchTerm) ||
-      patient.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredPatients(filtered);
+    if (!searchTerm) {
+      setFilteredPatients(patients);
+      return;
+    }
+
+    try {
+      const filtered = patients.filter(patient =>
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.cpf.includes(searchTerm) ||
+        patient.id.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPatients(filtered);
+    } catch (filterError) {
+      console.error('Erro ao filtrar pacientes:', filterError);
+      setFilteredPatients(patients);
+    }
   }, [searchTerm, patients]);
 
   const handlePatientSelect = (patient: Patient) => {
-    setSelectedPatient(patient);
+    try {
+      setSelectedPatient(patient);
+    } catch (error) {
+      console.error('Erro ao selecionar paciente:', error);
+    }
   };
 
   const handleBackToList = () => {
-    setSelectedPatient(null);
-    fetchPatients();
+    try {
+      setSelectedPatient(null);
+      fetchPatients();
+    } catch (error) {
+      console.error('Erro ao voltar à lista:', error);
+      setSelectedPatient(null);
+    }
   };
 
   if (selectedPatient) {

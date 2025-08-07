@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Bell, Settings, User, Search, LogOut } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
@@ -20,36 +20,16 @@ import {
 
 import { LoginForm } from '@/components/LoginForm';
 import { AdminSidebar } from '@/components/AdminSidebar';
-import { DashboardOverview } from '@/components/DashboardOverview';
-import { AgendamentosSection } from '@/components/AgendamentosSection';
-import { PacientesSection } from '@/components/PacientesSection';
-import { ConsultasSection } from '@/components/ConsultasSection';
-import { ExamesSection } from '@/components/ExamesSection';
-import { EstoqueSection } from '@/components/EstoqueSection';
-import { FinanceiroSection } from '@/components/FinanceiroSection';
-import { UserManagement } from '@/components/UserManagement';
+import { LazyComponents } from '@/components/LazyComponents';
 import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
   const { isAuthenticated, appUser, signOut, loading } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
   const [showUserManagement, setShowUserManagement] = useState(false);
-  const [dashboardError, setDashboardError] = useState<string | null>(null);
-
-  // Add timeout to prevent infinite loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) {
-        setDashboardError('Tempo esgotado para carregar o dashboard');
-      }
-    }, 10000); // 10 seconds timeout
-
-    return () => clearTimeout(timer);
-  }, [loading]);
 
   const handleLogin = () => {
     // This is now handled by the useAuth hook automatically
-    setDashboardError(null);
   };
 
   const handleLogout = async () => {
@@ -57,25 +37,10 @@ const AdminDashboard = () => {
       await signOut();
       setActiveSection('overview');
       setShowUserManagement(false);
-      setDashboardError(null);
     } catch (error) {
       console.error('Error during logout:', error);
-      setDashboardError('Erro ao fazer logout');
     }
   };
-
-  if (dashboardError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{dashboardError}</p>
-          <Button onClick={() => window.location.reload()}>
-            Recarregar Página
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -117,26 +82,26 @@ const AdminDashboard = () => {
   const renderContent = () => {
     try {
       if (showUserManagement) {
-        return <UserManagement />;
+        return <LazyComponents.UserManagement />;
       }
 
       switch (activeSection) {
         case 'overview':
-          return <DashboardOverview onSectionChange={setActiveSection} />;
+          return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
         case 'agendamentos':
-          return <AgendamentosSection />;
+          return <LazyComponents.AgendamentosSection />;
         case 'pacientes':
-          return <PacientesSection />;
+          return <LazyComponents.PacientesSection />;
         case 'consultas':
-          return <ConsultasSection />;
+          return <LazyComponents.ConsultasSection />;
         case 'exames':
-          return <ExamesSection />;
+          return <LazyComponents.ExamesSection />;
         case 'estoque':
-          return <EstoqueSection />;
+          return <LazyComponents.EstoqueSection />;
         case 'financeiro':
-          return <FinanceiroSection />;
+          return <LazyComponents.FinanceiroSection />;
         default:
-          return <DashboardOverview onSectionChange={setActiveSection} />;
+          return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
       }
     } catch (error) {
       console.error('Error rendering content:', error);
