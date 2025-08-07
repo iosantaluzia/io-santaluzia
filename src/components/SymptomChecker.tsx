@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, AlertTriangle, RefreshCw, Calendar } from 'lucide-react';
+import { Search, AlertTriangle, RefreshCw, Calendar, ArrowDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SymptomChecker = () => {
@@ -115,6 +115,16 @@ const SymptomChecker = () => {
     setShowScheduleButton(false);
   };
 
+  const scrollToSite = () => {
+    const siteSection = document.getElementById('site');
+    if (siteSection) {
+      siteSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto text-center">
       <p className="text-lg text-medical-secondary mb-6">
@@ -158,6 +168,17 @@ const SymptomChecker = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Botão Continuar no site - sempre visível */}
+      <div className="mb-8">
+        <button
+          onClick={scrollToSite}
+          className="inline-flex items-center gap-2 text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm group"
+        >
+          Continuar no site
+          <ArrowDown className="h-4 w-4 group-hover:translate-y-1 transition-transform" />
+        </button>
       </div>
 
       {isLoading && (
@@ -219,6 +240,19 @@ const SymptomChecker = () => {
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {/* Botão adicional Continuar no site após resultados */}
+      {response && (
+        <div className="mt-6 pt-4 border-t border-medical-muted/30">
+          <button
+            onClick={scrollToSite}
+            className="inline-flex items-center gap-2 text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm group"
+          >
+            Continuar explorando o site
+            <ArrowDown className="h-4 w-4 group-hover:translate-y-1 transition-transform" />
+          </button>
         </div>
       )}
     </div>

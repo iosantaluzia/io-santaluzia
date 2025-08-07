@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Stethoscope, Eye, ChevronLeft, ChevronRight } from "lucide-react";
@@ -87,20 +88,31 @@ const Home = () => {
               Cuidados oftalmológicos especializados com excelência e tecnologia de ponta
             </p>
           </motion.div>
-          
-          {/* Seção de pesquisa de sintomas */}
+        </div>
+      </motion.div>
+
+      {/* Seção dedicada à IA */}
+      <section id="ia" className="py-16 bg-gradient-to-br from-medical-muted/10 to-medical-accent/5">
+        <div className="max-w-4xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
+            className="text-center"
           >
+            <h2 className="text-2xl md:text-3xl font-sans text-medical-primary mb-4">
+              Análise Inteligente de Sintomas
+            </h2>
+            <p className="text-lg text-medical-secondary mb-8 max-w-2xl mx-auto">
+              Nossa IA especializada ajuda você a entender seus sintomas oculares de forma rápida e confiável
+            </p>
             <SymptomChecker />
           </motion.div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* Seção de boas-vindas */}
-      <div className="py-20 bg-gradient-hero">
+      {/* Seção de boas-vindas - agora com ID "site" e scroll offset */}
+      <section id="site" className="py-20 bg-gradient-hero scroll-mt-20">
         <div className="max-w-4xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
@@ -118,7 +130,7 @@ const Home = () => {
             />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Botão de agendamento após hero */}
       <div className="py-8 bg-gradient-hero">
