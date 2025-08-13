@@ -1,5 +1,5 @@
 
-import { useState, useEffect, lazy, ComponentType } from 'react';
+import { useState, useEffect, ComponentType } from 'react';
 
 interface UseLazyComponentReturn<T> {
   Component: ComponentType<T> | null;
