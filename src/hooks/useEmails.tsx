@@ -76,17 +76,23 @@ export function useEmails() {
     return 'financeiro@iosantaluzia.com.br';
   };
 
-  // Buscar emails via Edge Function com filtros baseados no usuário
+  // Buscar emails diretamente do banco de dados com filtros baseados no usuário
   const { data: emails = [], isLoading, error } = useQuery({
     queryKey: ['emails', currentUser?.username],
     queryFn: async () => {
-      const emailAccount = getEmailAccount();
-      const { data, error } = await supabase.functions.invoke('email-sync', {
-        body: { emailAccount }
-      });
-      if (error) throw error;
+      console.log('Buscando emails do banco de dados...');
       
-      let filteredEmails = data.emails || [];
+      const { data, error } = await supabase
+        .from('emails')
+        .select('*')
+        .order('date_received', { ascending: false });
+      
+      if (error) {
+        console.error('Erro ao buscar emails:', error);
+        throw error;
+      }
+      
+      let filteredEmails = data || [];
       
       // Filtrar emails baseado no tipo de usuário
       if (currentUser?.username === 'financeiro') {
@@ -95,24 +101,29 @@ export function useEmails() {
           email.to_email === 'financeiro@iosantaluzia.com.br' ||
           email.from_email === 'financeiro@iosantaluzia.com.br'
         );
+        console.log(`Usuário financeiro: ${filteredEmails.length} emails filtrados`);
       } else if (currentUser?.role === 'doctor') {
         // Médicos não veem emails financeiros
         filteredEmails = filteredEmails.filter((email: Email) => 
           email.to_email !== 'financeiro@iosantaluzia.com.br' &&
           email.from_email !== 'financeiro@iosantaluzia.com.br'
         );
+        console.log(`Médico: ${filteredEmails.length} emails filtrados (sem financeiros)`);
       }
       // Secretárias (role: secretary) veem TODOS os emails - incluindo os financeiros
-      // Não precisa de filtro adicional para secretárias
+      else {
+        console.log(`Secretária/Admin: ${filteredEmails.length} emails (todos)`);
+      }
       
       return filteredEmails as Email[];
     },
     enabled: !!currentUser, // Só executa quando o usuário estiver carregado
   });
 
-  // Sincronizar emails
+  // Sincronizar emails via Edge Function
   const syncEmailsMutation = useMutation({
     mutationFn: async () => {
+      console.log('Iniciando sincronização via Edge Function...');
       const emailAccount = getEmailAccount();
       const { data, error } = await supabase.functions.invoke('email-sync', {
         body: { emailAccount }
@@ -158,12 +169,14 @@ export function useEmails() {
     },
   });
 
-  // Marcar como lido (via Edge Function)
+  // Marcar como lido (direto no banco)
   const markAsReadMutation = useMutation({
     mutationFn: async (emailId: string) => {
-      const { error } = await supabase.functions.invoke('email-update', {
-        body: { emailId, action: 'mark_read' }
-      });
+      const { error } = await supabase
+        .from('emails')
+        .update({ is_read: true, updated_at: new Date().toISOString() })
+        .eq('id', emailId);
+      
       if (error) throw error;
     },
     onSuccess: () => {
@@ -171,12 +184,14 @@ export function useEmails() {
     },
   });
 
-  // Marcar como favorito (via Edge Function)
+  // Marcar como favorito (direto no banco)
   const toggleStarMutation = useMutation({
     mutationFn: async ({ emailId, isStarred }: { emailId: string; isStarred: boolean }) => {
-      const { error } = await supabase.functions.invoke('email-update', {
-        body: { emailId, action: 'toggle_star', isStarred }
-      });
+      const { error } = await supabase
+        .from('emails')
+        .update({ is_starred: !isStarred, updated_at: new Date().toISOString() })
+        .eq('id', emailId);
+      
       if (error) throw error;
     },
     onSuccess: () => {

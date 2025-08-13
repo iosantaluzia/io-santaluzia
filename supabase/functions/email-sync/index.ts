@@ -36,72 +36,49 @@ async function connectImap(emailAccount?: string) {
   console.log('Conectando ao servidor IMAP: email-ssl.com.br:993');
   console.log('Conta de email:', emailAccount || emailUser);
   
-  // Por enquanto, vamos usar emails mock específicos por conta
-  // Em produção, implementaríamos a conexão IMAP real aqui
+  // Emails mock específicos por conta
   const mockEmails: ImapEmail[] = [];
 
   // Emails para conta financeiro@iosantaluzia.com.br
   if (emailAccount === 'financeiro@iosantaluzia.com.br' || emailUser.includes('financeiro')) {
     mockEmails.push(
       {
-        messageId: '<fin-001@supplier.com>',
-        subject: 'Fatura de Equipamentos Médicos - Vencimento 25/01',
-        from: { name: 'MedEquip Brasil', address: 'financeiro@medequip.com.br' },
+        messageId: '<fin-004@supplier.com>',
+        subject: 'Nova Fatura - Material Cirúrgico',
+        from: { name: 'Cirúrgica Central', address: 'vendas@cirurgicacentral.com.br' },
         to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
         date: new Date(),
-        text: 'Prezados, segue em anexo a fatura dos equipamentos oftalmológicos com vencimento em 25/01/2025.',
-        html: '<p>Prezados,</p><p>Segue em anexo a fatura dos equipamentos oftalmológicos com vencimento em 25/01/2025.</p><p>Valor: R$ 15.420,00</p>',
+        text: 'Prezados, segue fatura referente aos materiais cirúrgicos adquiridos.',
+        html: '<p>Prezados,</p><p>Segue fatura referente aos materiais cirúrgicos adquiridos.</p><p>Valor: R$ 8.750,00</p>',
         flags: ['UNSEEN'],
-        size: 2048,
-        attachments: [{ filename: 'fatura_202501.pdf', size: 250000 }]
+        size: 1800,
+        attachments: [{ filename: 'fatura_materiais.pdf', size: 180000 }]
       },
       {
-        messageId: '<fin-002@bank.com>',
-        subject: 'Extrato Bancário - Janeiro 2025',
-        from: { name: 'Banco do Brasil', address: 'noreply@bb.com.br' },
+        messageId: '<fin-005@bank.com>',
+        subject: 'Cobrança Automática Processada',
+        from: { name: 'Banco Santander', address: 'noreply@santander.com.br' },
         to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
-        date: new Date(Date.now() - 86400000),
-        text: 'Extrato bancário da conta corrente disponível.',
-        html: '<p>Extrato bancário da conta corrente disponível.</p>',
-        flags: ['SEEN'],
-        size: 1024
-      },
-      {
-        messageId: '<fin-003@governo.br>',
-        subject: 'Notificação Fiscal - Declaração Mensal',
-        from: { name: 'Receita Federal', address: 'noreply@receita.fazenda.gov.br' },
-        to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
-        date: new Date(Date.now() - 172800000),
-        text: 'Lembrete: Declaração mensal deve ser enviada até 20/01/2025.',
-        html: '<p>Lembrete: Declaração mensal deve ser enviada até 20/01/2025.</p>',
+        date: new Date(Date.now() - 3600000), // 1 hora atrás
+        text: 'Cobrança automática no valor de R$ 2.340,00 foi processada com sucesso.',
+        html: '<p>Cobrança automática no valor de R$ 2.340,00 foi processada com sucesso.</p>',
         flags: ['UNSEEN'],
-        size: 1500
+        size: 900
       }
     );
   } else {
     // Emails para conta principal iosantaluzia@iosantaluzia.com.br
     mockEmails.push(
       {
-        messageId: '<main-001@paciente.com>',
-        subject: 'Consulta de Retorno - Maria Silva',
-        from: { name: 'Maria Silva', address: 'maria.silva@gmail.com' },
+        messageId: '<main-003@paciente.com>',
+        subject: 'Dúvida sobre Pós-Operatório',
+        from: { name: 'João Santos', address: 'joao.santos@gmail.com' },
         to: [{ name: 'Instituto Oftalmológico Santa Luzia', address: 'iosantaluzia@iosantaluzia.com.br' }],
         date: new Date(),
-        text: 'Bom dia! Gostaria de agendar uma consulta de retorno para próxima semana.',
-        html: '<p>Bom dia!</p><p>Gostaria de agendar uma consulta de retorno para próxima semana.</p>',
+        text: 'Doutor, tenho algumas dúvidas sobre os cuidados pós-operatórios.',
+        html: '<p>Doutor,</p><p>Tenho algumas dúvidas sobre os cuidados pós-operatórios.</p>',
         flags: ['UNSEEN'],
-        size: 1024
-      },
-      {
-        messageId: '<main-002@convenio.com>',
-        subject: 'Autorização de Cirurgia Aprovada',
-        from: { name: 'Unimed Santa Luzia', address: 'autorizacoes@unimed.com.br' },
-        to: [{ name: 'Instituto Oftalmológico Santa Luzia', address: 'iosantaluzia@iosantaluzia.com.br' }],
-        date: new Date(Date.now() - 86400000),
-        text: 'A autorização para cirurgia de catarata foi aprovada.',
-        html: '<p>A autorização para cirurgia de catarata foi aprovada.</p>',
-        flags: ['SEEN'],
-        size: 1500
+        size: 1200
       }
     );
   }
@@ -125,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Iniciando sincronização de emails...');
     console.log('Conta específica:', emailAccount);
     
-    // Conectar ao servidor IMAP
+    // Conectar ao servidor IMAP e obter emails mock
     const emails = await connectImap(emailAccount);
     
     let processedCount = 0;
