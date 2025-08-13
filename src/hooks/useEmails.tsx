@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -105,7 +104,8 @@ export function useEmails() {
           email.from_email !== 'financeiro@iosantaluzia.com.br'
         );
       }
-      // Secretárias (role: secretary) veem todos os emails
+      // Secretárias (role: secretary) veem TODOS os emails - incluindo os financeiros
+      // Não precisa de filtro adicional para secretárias
       
       return filteredEmails as Email[];
     },

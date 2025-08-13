@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -222,11 +221,12 @@ export function useAuth() {
     try {
       console.log('Attempting login with username:', username);
       
-      // Mapear username para email
+      // Mapear username para email - INCLUINDO o usuário financeiro
       const emailMap: Record<string, string> = {
         'matheus': 'matheus@iosantaluzia.com',
         'fabiola': 'fabiola@iosantaluzia.com',
-        'iosantaluzia': 'iosantaluzia@iosantaluzia.com'
+        'iosantaluzia': 'iosantaluzia@iosantaluzia.com',
+        'financeiro': 'financeiro@iosantaluzia.com'
       };
 
       const email = emailMap[username.toLowerCase()];
