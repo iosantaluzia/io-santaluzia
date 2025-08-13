@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 interface SendEmailRequest {
+  from?: string;
   to: string;
   cc?: string[];
   bcc?: string[];
@@ -25,6 +26,7 @@ async function sendSmtpEmail(emailData: SendEmailRequest) {
   }
 
   console.log('Enviando email via SMTP: email-ssl.com.br:465');
+  console.log('De:', emailData.from || emailUser);
   console.log('Para:', emailData.to);
   console.log('Assunto:', emailData.subject);
   
@@ -63,6 +65,12 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Determinar email de origem
+    const fromEmail = emailData.from || Deno.env.get('EMAIL_USER')!;
+    const fromName = fromEmail.includes('financeiro') 
+      ? 'Financeiro - Instituto Oftalmológico Santa Luzia'
+      : 'Instituto Oftalmológico Santa Luzia';
+
     console.log('Enviando email...');
     
     // Enviar email via SMTP
@@ -74,8 +82,8 @@ const handler = async (req: Request): Promise<Response> => {
       .insert({
         message_id: result.messageId,
         subject: emailData.subject,
-        from_email: Deno.env.get('EMAIL_USER')!,
-        from_name: 'Instituto Oftalmológico Santa Luzia',
+        from_email: fromEmail,
+        from_name: fromName,
         to_email: emailData.to,
         cc_emails: emailData.cc || [],
         bcc_emails: emailData.bcc || [],

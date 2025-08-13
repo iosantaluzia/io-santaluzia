@@ -25,7 +25,7 @@ interface ImapEmail {
   headers?: any;
 }
 
-async function connectImap() {
+async function connectImap(emailAccount?: string) {
   const emailUser = Deno.env.get('EMAIL_USER');
   const emailPassword = Deno.env.get('EMAIL_PASSWORD');
   
@@ -34,45 +34,77 @@ async function connectImap() {
   }
 
   console.log('Conectando ao servidor IMAP: email-ssl.com.br:993');
+  console.log('Conta de email:', emailAccount || emailUser);
   
-  // Por enquanto, vamos simular emails para testar a interface
+  // Por enquanto, vamos usar emails mock específicos por conta
   // Em produção, implementaríamos a conexão IMAP real aqui
-  const mockEmails: ImapEmail[] = [
-    {
-      messageId: '<test-001@iosantaluzia.com.br>',
-      subject: 'Consulta de Retorno - Maria Silva',
-      from: { name: 'Maria Silva', address: 'maria.silva@gmail.com' },
-      to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
-      date: new Date(),
-      text: 'Bom dia! Gostaria de agendar uma consulta de retorno para próxima semana. Meu último exame foi em dezembro e preciso fazer o acompanhamento.',
-      html: '<p>Bom dia!</p><p>Gostaria de agendar uma consulta de retorno para próxima semana. Meu último exame foi em dezembro e preciso fazer o acompanhamento.</p>',
-      flags: ['UNSEEN'],
-      size: 1024
-    },
-    {
-      messageId: '<test-002@supplier.com>',
-      subject: 'Proposta Comercial - Equipamentos Oftalmológicos',
-      from: { name: 'João Fornecedor', address: 'joao@medequip.com.br' },
-      to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
-      date: new Date(Date.now() - 86400000), // 1 dia atrás
-      text: 'Prezados, segue em anexo nossa proposta para equipamentos oftalmológicos conforme solicitado.',
-      html: '<p>Prezados,</p><p>Segue em anexo nossa proposta para equipamentos oftalmológicos conforme solicitado.</p>',
-      flags: ['SEEN'],
-      size: 2048,
-      attachments: [{ filename: 'proposta_equipamentos.pdf', size: 150000 }]
-    },
-    {
-      messageId: '<test-003@paciente.com>',
-      subject: 'Dúvida sobre Cirurgia de Catarata',
-      from: { name: 'José Santos', address: 'jose.santos@hotmail.com' },
-      to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
-      date: new Date(Date.now() - 172800000), // 2 dias atrás
-      text: 'Olá, gostaria de tirar algumas dúvidas sobre o procedimento de cirurgia de catarata e os valores.',
-      html: '<p>Olá,</p><p>Gostaria de tirar algumas dúvidas sobre o procedimento de cirurgia de catarata e os valores.</p>',
-      flags: ['SEEN'],
-      size: 856
-    }
-  ];
+  const mockEmails: ImapEmail[] = [];
+
+  // Emails para conta financeiro@iosantaluzia.com.br
+  if (emailAccount === 'financeiro@iosantaluzia.com.br' || emailUser.includes('financeiro')) {
+    mockEmails.push(
+      {
+        messageId: '<fin-001@supplier.com>',
+        subject: 'Fatura de Equipamentos Médicos - Vencimento 25/01',
+        from: { name: 'MedEquip Brasil', address: 'financeiro@medequip.com.br' },
+        to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
+        date: new Date(),
+        text: 'Prezados, segue em anexo a fatura dos equipamentos oftalmológicos com vencimento em 25/01/2025.',
+        html: '<p>Prezados,</p><p>Segue em anexo a fatura dos equipamentos oftalmológicos com vencimento em 25/01/2025.</p><p>Valor: R$ 15.420,00</p>',
+        flags: ['UNSEEN'],
+        size: 2048,
+        attachments: [{ filename: 'fatura_202501.pdf', size: 250000 }]
+      },
+      {
+        messageId: '<fin-002@bank.com>',
+        subject: 'Extrato Bancário - Janeiro 2025',
+        from: { name: 'Banco do Brasil', address: 'noreply@bb.com.br' },
+        to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
+        date: new Date(Date.now() - 86400000),
+        text: 'Extrato bancário da conta corrente disponível.',
+        html: '<p>Extrato bancário da conta corrente disponível.</p>',
+        flags: ['SEEN'],
+        size: 1024
+      },
+      {
+        messageId: '<fin-003@governo.br>',
+        subject: 'Notificação Fiscal - Declaração Mensal',
+        from: { name: 'Receita Federal', address: 'noreply@receita.fazenda.gov.br' },
+        to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
+        date: new Date(Date.now() - 172800000),
+        text: 'Lembrete: Declaração mensal deve ser enviada até 20/01/2025.',
+        html: '<p>Lembrete: Declaração mensal deve ser enviada até 20/01/2025.</p>',
+        flags: ['UNSEEN'],
+        size: 1500
+      }
+    );
+  } else {
+    // Emails para conta principal iosantaluzia@iosantaluzia.com.br
+    mockEmails.push(
+      {
+        messageId: '<main-001@paciente.com>',
+        subject: 'Consulta de Retorno - Maria Silva',
+        from: { name: 'Maria Silva', address: 'maria.silva@gmail.com' },
+        to: [{ name: 'Instituto Oftalmológico Santa Luzia', address: 'iosantaluzia@iosantaluzia.com.br' }],
+        date: new Date(),
+        text: 'Bom dia! Gostaria de agendar uma consulta de retorno para próxima semana.',
+        html: '<p>Bom dia!</p><p>Gostaria de agendar uma consulta de retorno para próxima semana.</p>',
+        flags: ['UNSEEN'],
+        size: 1024
+      },
+      {
+        messageId: '<main-002@convenio.com>',
+        subject: 'Autorização de Cirurgia Aprovada',
+        from: { name: 'Unimed Santa Luzia', address: 'autorizacoes@unimed.com.br' },
+        to: [{ name: 'Instituto Oftalmológico Santa Luzia', address: 'iosantaluzia@iosantaluzia.com.br' }],
+        date: new Date(Date.now() - 86400000),
+        text: 'A autorização para cirurgia de catarata foi aprovada.',
+        html: '<p>A autorização para cirurgia de catarata foi aprovada.</p>',
+        flags: ['SEEN'],
+        size: 1500
+      }
+    );
+  }
 
   return mockEmails;
 }
@@ -87,10 +119,14 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Obter informações do usuário da requisição
+    const { emailAccount } = await req.json().catch(() => ({}));
+
     console.log('Iniciando sincronização de emails...');
+    console.log('Conta específica:', emailAccount);
     
     // Conectar ao servidor IMAP
-    const emails = await connectImap();
+    const emails = await connectImap(emailAccount);
     
     let processedCount = 0;
     let newCount = 0;
@@ -140,11 +176,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sincronização concluída. Processados: ${processedCount}, Novos: ${newCount}`);
 
+    // Buscar todos os emails para retornar
+    const { data: allEmails, error: fetchError } = await supabase
+      .from('emails')
+      .select('*')
+      .order('date_received', { ascending: false });
+
+    if (fetchError) {
+      console.error('Erro ao buscar emails:', fetchError);
+      throw fetchError;
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         processed: processedCount,
         new: newCount,
+        emails: allEmails || [],
         message: 'Sincronização de emails concluída com sucesso'
       }),
       {

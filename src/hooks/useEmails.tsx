@@ -36,23 +36,89 @@ export interface EmailDraft {
   reply_to_email_id?: string;
 }
 
+// Hook para obter informações do usuário atual
+function useCurrentUser() {
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Buscar dados do app_user
+        const { data: appUser } = await supabase
+          .from('app_users')
+          .select('*')
+          .eq('auth_user_id', user.id)
+          .single();
+        
+        setCurrentUser(appUser);
+      }
+    };
+
+    getCurrentUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      getCurrentUser();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return currentUser;
+}
+
 export function useEmails() {
   const queryClient = useQueryClient();
+  const currentUser = useCurrentUser();
 
-  // Buscar emails via Edge Function
+  // Definir conta de email baseada no usuário
+  const getEmailAccount = () => {
+    if (currentUser?.username === 'financeiro') {
+      return 'financeiro@iosantaluzia.com.br';
+    }
+    return 'iosantaluzia@iosantaluzia.com.br';
+  };
+
+  // Buscar emails via Edge Function com filtros baseados no usuário
   const { data: emails = [], isLoading, error } = useQuery({
-    queryKey: ['emails'],
+    queryKey: ['emails', currentUser?.username],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('email-sync');
+      const emailAccount = getEmailAccount();
+      const { data, error } = await supabase.functions.invoke('email-sync', {
+        body: { emailAccount }
+      });
       if (error) throw error;
-      return data.emails as Email[];
+      
+      let filteredEmails = data.emails || [];
+      
+      // Filtrar emails baseado no tipo de usuário
+      if (currentUser?.username === 'financeiro') {
+        // Usuário financeiro vê apenas emails da conta financeiro@iosantaluzia.com.br
+        filteredEmails = filteredEmails.filter((email: Email) => 
+          email.to_email === 'financeiro@iosantaluzia.com.br' ||
+          email.from_email === 'financeiro@iosantaluzia.com.br'
+        );
+      } else if (currentUser?.role === 'doctor') {
+        // Médicos não veem emails financeiros
+        filteredEmails = filteredEmails.filter((email: Email) => 
+          email.to_email !== 'financeiro@iosantaluzia.com.br' &&
+          email.from_email !== 'financeiro@iosantaluzia.com.br'
+        );
+      }
+      // Secretárias (role: secretary) veem todos os emails
+      
+      return filteredEmails as Email[];
     },
+    enabled: !!currentUser, // Só executa quando o usuário estiver carregado
   });
 
   // Sincronizar emails
   const syncEmailsMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('email-sync');
+      const emailAccount = getEmailAccount();
+      const { data, error } = await supabase.functions.invoke('email-sync', {
+        body: { emailAccount }
+      });
       if (error) throw error;
       return data;
     },
@@ -69,8 +135,10 @@ export function useEmails() {
   // Enviar email
   const sendEmailMutation = useMutation({
     mutationFn: async (emailData: EmailDraft) => {
+      const fromEmail = getEmailAccount();
       const { data, error } = await supabase.functions.invoke('email-send', {
         body: {
+          from: fromEmail,
           to: emailData.to_email,
           cc: emailData.cc_emails,
           bcc: emailData.bcc_emails,
@@ -122,6 +190,8 @@ export function useEmails() {
     emails,
     isLoading,
     error,
+    currentUser,
+    emailAccount: getEmailAccount(),
     syncEmails: syncEmailsMutation.mutate,
     isSyncing: syncEmailsMutation.isPending,
     sendEmail: sendEmailMutation.mutate,

@@ -15,12 +15,14 @@ import {
   ReplyAll,
   Forward,
   MoreHorizontal,
-  RefreshCw
+  RefreshCw,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { useEmails, type Email, type EmailDraft } from '@/hooks/useEmails';
 import { toast } from 'sonner';
 
@@ -28,6 +30,8 @@ export function EmailSection() {
   const { 
     emails, 
     isLoading, 
+    currentUser,
+    emailAccount,
     syncEmails, 
     isSyncing, 
     sendEmail, 
@@ -48,13 +52,15 @@ export function EmailSection() {
 
   // Auto-sync emails every 5 minutes
   useEffect(() => {
-    syncEmails();
-    const interval = setInterval(() => {
+    if (currentUser) {
       syncEmails();
-    }, 5 * 60 * 1000);
+      const interval = setInterval(() => {
+        syncEmails();
+      }, 5 * 60 * 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser]);
 
   const folders = [
     { id: 'inbox', name: 'Caixa de Entrada', icon: Inbox, count: emails.filter(e => e.folder === 'inbox').length },
@@ -140,7 +146,7 @@ export function EmailSection() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !currentUser) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bege-principal"></div>
@@ -154,6 +160,33 @@ export function EmailSection() {
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
+          {/* Informações do usuário e conta */}
+          <div className="mb-4 p-3 bg-bege-principal/10 rounded-lg">
+            <div className="flex items-center space-x-2 mb-2">
+              <User className="h-4 w-4 text-bege-principal" />
+              <span className="text-sm font-medium text-bege-principal">
+                {currentUser.username}
+              </span>
+              <Badge variant="outline" className="text-xs">
+                {currentUser.role === 'secretary' ? 'Secretária' : 
+                 currentUser.role === 'doctor' ? 'Médico' : 'Admin'}
+              </Badge>
+            </div>
+            <div className="text-xs text-gray-600">
+              Email: {emailAccount}
+            </div>
+            {currentUser.username === 'financeiro' && (
+              <div className="text-xs text-orange-600 mt-1">
+                🔒 Acesso apenas aos emails financeiros
+              </div>
+            )}
+            {currentUser.role === 'doctor' && (
+              <div className="text-xs text-blue-600 mt-1">
+                ℹ️ Emails financeiros não visíveis
+              </div>
+            )}
+          </div>
+
           <Button 
             onClick={handleCompose}
             className="w-full bg-bege-principal hover:bg-marrom-acentuado mb-2"
@@ -213,39 +246,59 @@ export function EmailSection() {
 
         <ScrollArea className="flex-1">
           <div className="divide-y divide-gray-100">
-            {filteredEmails.map((email) => (
-              <div
-                key={email.id}
-                onClick={() => handleEmailClick(email)}
-                className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                  selectedEmail?.id === email.id ? 'bg-bege-principal/5 border-r-2 border-bege-principal' : ''
-                } ${!email.is_read ? 'bg-blue-50' : ''}`}
-              >
-                <div className="flex items-start justify-between mb-1">
-                  <span className={`text-sm ${!email.is_read ? 'font-semibold' : 'font-medium'} text-gray-900 truncate`}>
-                    {email.from_name || email.from_email}
-                  </span>
-                  <div className="flex items-center space-x-1 ml-2">
-                    {email.is_starred && (
-                      <button onClick={(e) => {
-                        e.stopPropagation();
-                        toggleStar({ emailId: email.id, isStarred: email.is_starred });
-                      }}>
-                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                      </button>
-                    )}
-                    {email.has_attachments && <Paperclip className="h-3 w-3 text-gray-400" />}
-                    <span className="text-xs text-gray-500">{formatDate(email.date_received)}</span>
-                  </div>
-                </div>
-                <h3 className={`text-sm ${!email.is_read ? 'font-semibold' : ''} text-gray-900 mb-1 truncate`}>
-                  {email.subject}
-                </h3>
-                <p className="text-xs text-gray-600 truncate">
-                  {email.content_text?.slice(0, 100) || email.content_html?.replace(/<[^>]*>/g, '').slice(0, 100) || ''}
-                </p>
+            {filteredEmails.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                <Mail className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Nenhum email encontrado</p>
+                {currentUser.username === 'financeiro' && (
+                  <p className="text-xs mt-2">
+                    Você só pode ver emails da conta financeiro@iosantaluzia.com.br
+                  </p>
+                )}
               </div>
-            ))}
+            ) : (
+              filteredEmails.map((email) => (
+                <div
+                  key={email.id}
+                  onClick={() => handleEmailClick(email)}
+                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    selectedEmail?.id === email.id ? 'bg-bege-principal/5 border-r-2 border-bege-principal' : ''
+                  } ${!email.is_read ? 'bg-blue-50' : ''}`}
+                >
+                  <div className="flex items-start justify-between mb-1">
+                    <span className={`text-sm ${!email.is_read ? 'font-semibold' : 'font-medium'} text-gray-900 truncate`}>
+                      {email.from_name || email.from_email}
+                    </span>
+                    <div className="flex items-center space-x-1 ml-2">
+                      {email.is_starred && (
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStar({ emailId: email.id, isStarred: email.is_starred });
+                        }}>
+                          <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                        </button>
+                      )}
+                      {email.has_attachments && <Paperclip className="h-3 w-3 text-gray-400" />}
+                      <span className="text-xs text-gray-500">{formatDate(email.date_received)}</span>
+                    </div>
+                  </div>
+                  <h3 className={`text-sm ${!email.is_read ? 'font-semibold' : ''} text-gray-900 mb-1 truncate`}>
+                    {email.subject}
+                  </h3>
+                  <p className="text-xs text-gray-600 truncate">
+                    {email.content_text?.slice(0, 100) || email.content_html?.replace(/<[^>]*>/g, '').slice(0, 100) || ''}
+                  </p>
+                  {/* Indicador de email financeiro */}
+                  {(email.to_email === 'financeiro@iosantaluzia.com.br' || email.from_email === 'financeiro@iosantaluzia.com.br') && (
+                    <div className="mt-1">
+                      <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                        💰 Financeiro
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </ScrollArea>
       </div>
@@ -256,6 +309,7 @@ export function EmailSection() {
           <div className="flex-1 flex flex-col">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Nova Mensagem</h2>
+              <p className="text-sm text-gray-600 mt-1">Enviando de: {emailAccount}</p>
             </div>
             <div className="flex-1 p-4 space-y-4">
               <div>
@@ -331,6 +385,14 @@ export function EmailSection() {
                 </div>
                 <span>{formatDate(selectedEmail.date_received)}</span>
               </div>
+              {/* Indicador de email financeiro no cabeçalho */}
+              {(selectedEmail.to_email === 'financeiro@iosantaluzia.com.br' || selectedEmail.from_email === 'financeiro@iosantaluzia.com.br') && (
+                <div className="mt-2">
+                  <Badge variant="outline" className="text-orange-600 border-orange-200">
+                    💰 Email Financeiro
+                  </Badge>
+                </div>
+              )}
             </div>
             <ScrollArea className="flex-1 p-4">
               <div className="prose max-w-none">
@@ -349,6 +411,11 @@ export function EmailSection() {
             <div className="text-center text-gray-500">
               <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Selecione um email para visualizar</p>
+              {emails.length === 0 && (
+                <p className="text-sm mt-2">
+                  Clique em "Atualizar" para sincronizar seus emails
+                </p>
+              )}
             </div>
           </div>
         )}
