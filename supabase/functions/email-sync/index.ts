@@ -26,41 +26,51 @@ interface ImapEmail {
 }
 
 async function connectImap() {
-  // Esta é uma simulação da conexão IMAP
-  // Em produção, usaríamos uma biblioteca como node-imap ou similar
   const emailUser = Deno.env.get('EMAIL_USER');
   const emailPassword = Deno.env.get('EMAIL_PASSWORD');
   
   if (!emailUser || !emailPassword) {
-    throw new Error('Email credentials not configured');
+    throw new Error('Credenciais de email não configuradas');
   }
 
-  console.log('Connecting to IMAP server: email-ssl.com.br:993');
+  console.log('Conectando ao servidor IMAP: email-ssl.com.br:993');
   
-  // Simulação de emails recebidos (substituir por implementação IMAP real)
+  // Por enquanto, vamos simular emails para testar a interface
+  // Em produção, implementaríamos a conexão IMAP real aqui
   const mockEmails: ImapEmail[] = [
     {
-      messageId: '<mock-001@test.com>',
-      subject: 'Consulta de Retorno',
-      from: { name: 'Maria Silva', address: 'maria@example.com' },
-      to: [{ name: 'Financeiro', address: 'financeiro@iosantaluzia.com.br' }],
+      messageId: '<test-001@iosantaluzia.com.br>',
+      subject: 'Consulta de Retorno - Maria Silva',
+      from: { name: 'Maria Silva', address: 'maria.silva@gmail.com' },
+      to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
       date: new Date(),
-      text: 'Gostaria de agendar uma consulta de retorno para próxima semana.',
-      html: '<p>Gostaria de agendar uma consulta de retorno para próxima semana.</p>',
+      text: 'Bom dia! Gostaria de agendar uma consulta de retorno para próxima semana. Meu último exame foi em dezembro e preciso fazer o acompanhamento.',
+      html: '<p>Bom dia!</p><p>Gostaria de agendar uma consulta de retorno para próxima semana. Meu último exame foi em dezembro e preciso fazer o acompanhamento.</p>',
       flags: ['UNSEEN'],
       size: 1024
     },
     {
-      messageId: '<mock-002@supplier.com>',
-      subject: 'Proposta Comercial - Equipamentos',
-      from: { name: 'João Fornecedor', address: 'joao@supplier.com' },
-      to: [{ name: 'Financeiro', address: 'financeiro@iosantaluzia.com.br' }],
-      date: new Date(Date.now() - 86400000), // 1 day ago
-      text: 'Segue nossa proposta para equipamentos oftalmológicos.',
-      html: '<p>Segue nossa proposta para equipamentos oftalmológicos.</p>',
+      messageId: '<test-002@supplier.com>',
+      subject: 'Proposta Comercial - Equipamentos Oftalmológicos',
+      from: { name: 'João Fornecedor', address: 'joao@medequip.com.br' },
+      to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
+      date: new Date(Date.now() - 86400000), // 1 dia atrás
+      text: 'Prezados, segue em anexo nossa proposta para equipamentos oftalmológicos conforme solicitado.',
+      html: '<p>Prezados,</p><p>Segue em anexo nossa proposta para equipamentos oftalmológicos conforme solicitado.</p>',
       flags: ['SEEN'],
       size: 2048,
-      attachments: [{ filename: 'proposta.pdf', size: 50000 }]
+      attachments: [{ filename: 'proposta_equipamentos.pdf', size: 150000 }]
+    },
+    {
+      messageId: '<test-003@paciente.com>',
+      subject: 'Dúvida sobre Cirurgia de Catarata',
+      from: { name: 'José Santos', address: 'jose.santos@hotmail.com' },
+      to: [{ name: 'Financeiro IO Santa Luzia', address: 'financeiro@iosantaluzia.com.br' }],
+      date: new Date(Date.now() - 172800000), // 2 dias atrás
+      text: 'Olá, gostaria de tirar algumas dúvidas sobre o procedimento de cirurgia de catarata e os valores.',
+      html: '<p>Olá,</p><p>Gostaria de tirar algumas dúvidas sobre o procedimento de cirurgia de catarata e os valores.</p>',
+      flags: ['SEEN'],
+      size: 856
     }
   ];
 
@@ -77,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('Starting email sync...');
+    console.log('Iniciando sincronização de emails...');
     
     // Conectar ao servidor IMAP
     const emails = await connectImap();
@@ -118,24 +128,24 @@ const handler = async (req: Request): Promise<Response> => {
           });
 
         if (insertError) {
-          console.error('Error inserting email:', insertError);
+          console.error('Erro ao inserir email:', insertError);
         } else {
           newCount++;
-          console.log(`Inserted new email: ${email.subject}`);
+          console.log(`Novo email inserido: ${email.subject}`);
         }
       }
       
       processedCount++;
     }
 
-    console.log(`Email sync completed. Processed: ${processedCount}, New: ${newCount}`);
+    console.log(`Sincronização concluída. Processados: ${processedCount}, Novos: ${newCount}`);
 
     return new Response(
       JSON.stringify({
         success: true,
         processed: processedCount,
         new: newCount,
-        message: 'Email sync completed successfully'
+        message: 'Sincronização de emails concluída com sucesso'
       }),
       {
         status: 200,
@@ -144,7 +154,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
   } catch (error) {
-    console.error('Error in email-sync:', error);
+    console.error('Erro na sincronização de emails:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

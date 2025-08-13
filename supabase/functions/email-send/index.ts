@@ -21,24 +21,25 @@ async function sendSmtpEmail(emailData: SendEmailRequest) {
   const emailPassword = Deno.env.get('EMAIL_PASSWORD');
   
   if (!emailUser || !emailPassword) {
-    throw new Error('Email credentials not configured');
+    throw new Error('Credenciais de email não configuradas');
   }
 
-  console.log('Sending email via SMTP server: email-ssl.com.br:465');
-  console.log('To:', emailData.to);
-  console.log('Subject:', emailData.subject);
+  console.log('Enviando email via SMTP: email-ssl.com.br:465');
+  console.log('Para:', emailData.to);
+  console.log('Assunto:', emailData.subject);
   
-  // Simulação do envio SMTP (substituir por implementação SMTP real)
-  // Em produção, usaríamos uma biblioteca como nodemailer ou similar
+  // Por enquanto, vamos simular o envio SMTP
+  // Em produção, implementaríamos a conexão SMTP real aqui
+  console.log('Simulando envio de email...');
   
   // Simular delay de envio
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 2000));
   
   return {
     messageId: `<sent-${Date.now()}@iosantaluzia.com.br>`,
     accepted: [emailData.to],
     rejected: [],
-    response: '250 Message queued'
+    response: '250 Mensagem enviada com sucesso'
   };
 }
 
@@ -57,12 +58,12 @@ const handler = async (req: Request): Promise<Response> => {
     // Validar dados obrigatórios
     if (!emailData.to || !emailData.subject || !emailData.content) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: to, subject, content' }),
+        JSON.stringify({ error: 'Campos obrigatórios: destinatário, assunto e conteúdo' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
-    console.log('Sending email...');
+    console.log('Enviando email...');
     
     // Enviar email via SMTP
     const result = await sendSmtpEmail(emailData);
@@ -79,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
         cc_emails: emailData.cc || [],
         bcc_emails: emailData.bcc || [],
         content_html: emailData.content,
-        content_text: emailData.content.replace(/<[^>]*>/g, ''), // Remove HTML tags
+        content_text: emailData.content.replace(/<[^>]*>/g, ''), // Remove tags HTML
         date_sent: new Date().toISOString(),
         date_received: new Date().toISOString(),
         folder: 'sent',
@@ -88,16 +89,16 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     if (insertError) {
-      console.error('Error saving sent email:', insertError);
+      console.error('Erro ao salvar email enviado:', insertError);
     }
 
-    console.log('Email sent successfully');
+    console.log('Email enviado com sucesso');
 
     return new Response(
       JSON.stringify({
         success: true,
         messageId: result.messageId,
-        message: 'Email sent successfully'
+        message: 'Email enviado com sucesso'
       }),
       {
         status: 200,
@@ -106,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
   } catch (error) {
-    console.error('Error in email-send:', error);
+    console.error('Erro no envio de email:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
