@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -28,16 +28,21 @@ export function useAuth() {
     error: null
   });
 
+  // Cache para evitar múltiplas chamadas desnecessárias
+  const appUserCache = useRef<{ [key: string]: AppUser | null }>({});
+  const fetchingAppUser = useRef<{ [key: string]: Promise<void> }>({});
+
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener
+    // Set up auth state listener - NUNCA usar async aqui para evitar deadlock
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (!mounted) return;
 
+        // Apenas atualizações síncronas de estado aqui
         setAuthState(prev => ({
           ...prev,
           session,
@@ -45,17 +50,24 @@ export function useAuth() {
           error: null
         }));
 
+        // Diferir chamadas ao Supabase usando setTimeout para evitar deadlock
         if (session?.user) {
-          await fetchAppUser(session.user.id);
+          setTimeout(() => {
+            if (mounted) {
+              fetchAppUserSafely(session.user.id);
+            }
+          }, 0);
         } else {
-          if (mounted) {
-            setAuthState(prev => ({
-              ...prev,
-              appUser: null,
-              loading: false,
-              error: null
-            }));
-          }
+          setTimeout(() => {
+            if (mounted) {
+              setAuthState(prev => ({
+                ...prev,
+                appUser: null,
+                loading: false,
+                error: null
+              }));
+            }
+          }, 0);
         }
       }
     );
@@ -74,7 +86,7 @@ export function useAuth() {
       }));
 
       if (session?.user) {
-        fetchAppUser(session.user.id);
+        fetchAppUserSafely(session.user.id);
       } else {
         if (mounted) {
           setAuthState(prev => ({ ...prev, loading: false }));
@@ -85,27 +97,64 @@ export function useAuth() {
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      // Limpar cache e requests pendentes
+      appUserCache.current = {};
+      fetchingAppUser.current = {};
     };
   }, []);
+
+  const fetchAppUserSafely = async (authUserId: string) => {
+    console.log('fetchAppUserSafely called for:', authUserId);
+
+    // Verificar cache primeiro
+    if (appUserCache.current[authUserId] !== undefined) {
+      console.log('Using cached app user data');
+      setAuthState(prev => ({
+        ...prev,
+        appUser: appUserCache.current[authUserId],
+        loading: false,
+        error: null
+      }));
+      return;
+    }
+
+    // Verificar se já está buscando para este usuário
+    if (fetchingAppUser.current[authUserId]) {
+      console.log('Already fetching app user, waiting...');
+      try {
+        await fetchingAppUser.current[authUserId];
+      } catch (error) {
+        console.log('Fetch in progress failed:', error);
+      }
+      return;
+    }
+
+    // Criar promessa de fetch
+    fetchingAppUser.current[authUserId] = fetchAppUser(authUserId);
+    
+    try {
+      await fetchingAppUser.current[authUserId];
+    } finally {
+      delete fetchingAppUser.current[authUserId];
+    }
+  };
 
   const fetchAppUser = async (authUserId: string) => {
     const startTime = Date.now();
     console.log('Fetching app user for auth_user_id:', authUserId, 'at', new Date().toISOString());
     
     try {
-      // Create a timeout promise
+      // Timeout reduzido para 3 segundos
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout')), 8000);
+        setTimeout(() => reject(new Error('Timeout')), 3000);
       });
 
-      // Create the query promise
       const queryPromise = supabase
         .from('app_users')
         .select('*')
         .eq('auth_user_id', authUserId)
-        .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data found
+        .maybeSingle();
 
-      // Race between timeout and query
       const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       const elapsedTime = Date.now() - startTime;
@@ -113,6 +162,7 @@ export function useAuth() {
 
       if (error) {
         console.error('Error fetching app user:', error);
+        appUserCache.current[authUserId] = null;
         setAuthState(prev => ({
           ...prev,
           appUser: null,
@@ -126,6 +176,7 @@ export function useAuth() {
 
       if (!data) {
         console.log('No app user found for this auth user');
+        appUserCache.current[authUserId] = null;
         setAuthState(prev => ({
           ...prev,
           appUser: null,
@@ -135,6 +186,8 @@ export function useAuth() {
         return;
       }
 
+      // Cache do resultado
+      appUserCache.current[authUserId] = data;
       setAuthState(prev => ({
         ...prev,
         appUser: data,
@@ -144,6 +197,8 @@ export function useAuth() {
     } catch (error) {
       const elapsedTime = Date.now() - startTime;
       console.error('Error in fetchAppUser after', elapsedTime, 'ms:', error);
+      
+      appUserCache.current[authUserId] = null;
       
       if (error instanceof Error && error.message === 'Timeout') {
         setAuthState(prev => ({
@@ -194,13 +249,17 @@ export function useAuth() {
       if (data.user) {
         console.log('Login successful for user:', data.user.email);
         
-        // Update last login
+        // Update last login - usar setTimeout para não bloquear
         setTimeout(async () => {
-          await supabase
-            .from('app_users')
-            .update({ last_login: new Date().toISOString() })
-            .eq('auth_user_id', data.user.id);
-        }, 0);
+          try {
+            await supabase
+              .from('app_users')
+              .update({ last_login: new Date().toISOString() })
+              .eq('auth_user_id', data.user.id);
+          } catch (updateError) {
+            console.log('Failed to update last login:', updateError);
+          }
+        }, 100);
       }
 
       return { data, error: null };
@@ -211,6 +270,12 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    console.log('Signing out...');
+    
+    // Limpar cache antes do logout
+    appUserCache.current = {};
+    fetchingAppUser.current = {};
+    
     const { error } = await supabase.auth.signOut();
     if (!error) {
       setAuthState({
@@ -225,9 +290,12 @@ export function useAuth() {
   };
 
   const retry = () => {
+    console.log('Retrying auth...');
     if (authState.user) {
+      // Limpar cache para forçar nova busca
+      delete appUserCache.current[authState.user.id];
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      fetchAppUser(authState.user.id);
+      fetchAppUserSafely(authState.user.id);
     }
   };
 
