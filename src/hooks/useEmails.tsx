@@ -82,7 +82,8 @@ export function useEmails() {
     queryFn: async () => {
       console.log('Buscando emails do banco de dados...');
       
-      const { data, error } = await supabase
+      // Use explicit typing to avoid TypeScript errors with the missing types
+      const { data, error } = await (supabase as any)
         .from('emails')
         .select('*')
         .order('date_received', { ascending: false });
@@ -92,7 +93,7 @@ export function useEmails() {
         throw error;
       }
       
-      let filteredEmails = data || [];
+      let filteredEmails = (data || []) as Email[];
       
       // Filtrar emails baseado no tipo de usuário
       if (currentUser?.username === 'financeiro') {
@@ -115,7 +116,7 @@ export function useEmails() {
         console.log(`Secretária/Admin: ${filteredEmails.length} emails (todos)`);
       }
       
-      return filteredEmails as Email[];
+      return filteredEmails;
     },
     enabled: !!currentUser, // Só executa quando o usuário estiver carregado
   });
@@ -172,7 +173,7 @@ export function useEmails() {
   // Marcar como lido (direto no banco)
   const markAsReadMutation = useMutation({
     mutationFn: async (emailId: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('emails')
         .update({ is_read: true, updated_at: new Date().toISOString() })
         .eq('id', emailId);
@@ -187,7 +188,7 @@ export function useEmails() {
   // Marcar como favorito (direto no banco)
   const toggleStarMutation = useMutation({
     mutationFn: async ({ emailId, isStarred }: { emailId: string; isStarred: boolean }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('emails')
         .update({ is_starred: !isStarred, updated_at: new Date().toISOString() })
         .eq('id', emailId);
