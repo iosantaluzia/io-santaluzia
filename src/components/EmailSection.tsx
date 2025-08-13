@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Mail, 
   Inbox, 
@@ -10,89 +10,144 @@ import {
   Archive, 
   MailPlus,
   Search,
-  Filter,
   Paperclip,
   Reply,
   ReplyAll,
   Forward,
-  MoreHorizontal
+  MoreHorizontal,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEmails, type Email, type EmailDraft } from '@/hooks/useEmails';
+import { toast } from 'sonner';
 
 export function EmailSection() {
-  const [selectedEmail, setSelectedEmail] = useState(null);
+  const { 
+    emails, 
+    isLoading, 
+    syncEmails, 
+    isSyncing, 
+    sendEmail, 
+    isSending,
+    markAsRead,
+    toggleStar
+  } = useEmails();
+
+  const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [activeFolder, setActiveFolder] = useState('inbox');
   const [isComposing, setIsComposing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [emailDraft, setEmailDraft] = useState<EmailDraft>({
+    to_email: '',
+    subject: '',
+    content_html: ''
+  });
 
-  // Dados mockados de emails
-  const emails = [
-    {
-      id: 1,
-      from: 'paciente@email.com',
-      to: 'financeiro@iosantaluzia.com.br',
-      subject: 'Dúvida sobre consulta',
-      preview: 'Gostaria de saber sobre os horários disponíveis...',
-      content: 'Olá, gostaria de saber sobre os horários disponíveis para consulta oftalmológica. Tenho disponibilidade nas manhãs de terça e quinta-feira.',
-      date: '10:30',
-      isRead: false,
-      isStarred: false,
-      hasAttachment: false
-    },
-    {
-      id: 2,
-      from: 'fornecedor@medical.com',
-      to: 'financeiro@iosantaluzia.com.br',
-      subject: 'Proposta de equipamentos',
-      preview: 'Segue em anexo nossa proposta comercial...',
-      content: 'Prezados, seguem em anexo nossa proposta comercial para equipamentos oftalmológicos. Aguardamos retorno para agendarmos uma apresentação.',
-      date: 'Ontem',
-      isRead: true,
-      isStarred: true,
-      hasAttachment: true
-    },
-    {
-      id: 3,
-      from: 'sistema@iosantaluzia.com.br',
-      to: 'financeiro@iosantaluzia.com.br',
-      subject: 'Relatório mensal de faturamento',
-      preview: 'Relatório automático do sistema...',
-      content: 'Relatório automático gerado pelo sistema com o faturamento do mês anterior. Receita total: R$ 45.000,00.',
-      date: '2 dias',
-      isRead: true,
-      isStarred: false,
-      hasAttachment: true
-    }
-  ];
+  // Auto-sync emails every 5 minutes
+  useEffect(() => {
+    syncEmails();
+    const interval = setInterval(() => {
+      syncEmails();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const folders = [
-    { id: 'inbox', name: 'Caixa de Entrada', icon: Inbox, count: 3 },
-    { id: 'sent', name: 'Enviados', icon: Send, count: 0 },
-    { id: 'drafts', name: 'Rascunhos', icon: FileEdit, count: 1 },
-    { id: 'starred', name: 'Favoritos', icon: Star, count: 1 },
-    { id: 'archived', name: 'Arquivados', icon: Archive, count: 12 },
-    { id: 'trash', name: 'Lixeira', icon: Trash2, count: 0 }
+    { id: 'inbox', name: 'Caixa de Entrada', icon: Inbox, count: emails.filter(e => e.folder === 'inbox').length },
+    { id: 'sent', name: 'Enviados', icon: Send, count: emails.filter(e => e.folder === 'sent').length },
+    { id: 'drafts', name: 'Rascunhos', icon: FileEdit, count: 0 },
+    { id: 'starred', name: 'Favoritos', icon: Star, count: emails.filter(e => e.is_starred).length },
+    { id: 'archived', name: 'Arquivados', icon: Archive, count: emails.filter(e => e.folder === 'archived').length },
+    { id: 'trash', name: 'Lixeira', icon: Trash2, count: emails.filter(e => e.folder === 'trash').length }
   ];
 
-  const filteredEmails = emails.filter(email => 
-    email.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    email.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    email.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEmails = emails.filter(email => {
+    const matchesSearch = 
+      email.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.from_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (email.from_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFolder = activeFolder === 'starred' 
+      ? email.is_starred 
+      : email.folder === activeFolder;
+    
+    return matchesSearch && matchesFolder;
+  });
 
-  const handleEmailClick = (email) => {
+  const handleEmailClick = (email: Email) => {
     setSelectedEmail(email);
     setIsComposing(false);
+    
+    if (!email.is_read) {
+      markAsRead(email.id);
+    }
   };
 
   const handleCompose = () => {
     setIsComposing(true);
     setSelectedEmail(null);
+    setEmailDraft({
+      to_email: '',
+      subject: '',
+      content_html: ''
+    });
   };
+
+  const handleReply = (email: Email) => {
+    setIsComposing(true);
+    setSelectedEmail(null);
+    setEmailDraft({
+      to_email: email.from_email,
+      subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
+      content_html: `<br><br>---<br>Em ${new Date(email.date_received).toLocaleString()}, ${email.from_name || email.from_email} escreveu:<br>${email.content_html || email.content_text || ''}`,
+      reply_to_email_id: email.id
+    });
+  };
+
+  const handleSendEmail = () => {
+    if (!emailDraft.to_email || !emailDraft.subject) {
+      toast.error('Preencha o destinatário e o assunto');
+      return;
+    }
+
+    sendEmail(emailDraft);
+    setIsComposing(false);
+    setEmailDraft({
+      to_email: '',
+      subject: '',
+      content_html: ''
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) {
+      return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    } else if (days === 1) {
+      return 'Ontem';
+    } else if (days < 7) {
+      return `${days} dias`;
+    } else {
+      return date.toLocaleDateString('pt-BR');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bege-principal"></div>
+        <span className="ml-2">Carregando emails...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-gray-50">
@@ -101,10 +156,19 @@ export function EmailSection() {
         <div className="p-4 border-b border-gray-200">
           <Button 
             onClick={handleCompose}
-            className="w-full bg-bege-principal hover:bg-marrom-acentuado"
+            className="w-full bg-bege-principal hover:bg-marrom-acentuado mb-2"
           >
             <MailPlus className="h-4 w-4 mr-2" />
             Escrever
+          </Button>
+          <Button 
+            onClick={() => syncEmails()}
+            disabled={isSyncing}
+            variant="outline"
+            className="w-full"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Sincronizando...' : 'Atualizar'}
           </Button>
         </div>
 
@@ -155,22 +219,31 @@ export function EmailSection() {
                 onClick={() => handleEmailClick(email)}
                 className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
                   selectedEmail?.id === email.id ? 'bg-bege-principal/5 border-r-2 border-bege-principal' : ''
-                } ${!email.isRead ? 'bg-blue-50' : ''}`}
+                } ${!email.is_read ? 'bg-blue-50' : ''}`}
               >
                 <div className="flex items-start justify-between mb-1">
-                  <span className={`text-sm ${!email.isRead ? 'font-semibold' : 'font-medium'} text-gray-900 truncate`}>
-                    {email.from}
+                  <span className={`text-sm ${!email.is_read ? 'font-semibold' : 'font-medium'} text-gray-900 truncate`}>
+                    {email.from_name || email.from_email}
                   </span>
                   <div className="flex items-center space-x-1 ml-2">
-                    {email.isStarred && <Star className="h-3 w-3 text-yellow-400 fill-current" />}
-                    {email.hasAttachment && <Paperclip className="h-3 w-3 text-gray-400" />}
-                    <span className="text-xs text-gray-500">{email.date}</span>
+                    {email.is_starred && (
+                      <button onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStar({ emailId: email.id, isStarred: email.is_starred });
+                      }}>
+                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                      </button>
+                    )}
+                    {email.has_attachments && <Paperclip className="h-3 w-3 text-gray-400" />}
+                    <span className="text-xs text-gray-500">{formatDate(email.date_received)}</span>
                   </div>
                 </div>
-                <h3 className={`text-sm ${!email.isRead ? 'font-semibold' : ''} text-gray-900 mb-1 truncate`}>
+                <h3 className={`text-sm ${!email.is_read ? 'font-semibold' : ''} text-gray-900 mb-1 truncate`}>
                   {email.subject}
                 </h3>
-                <p className="text-xs text-gray-600 truncate">{email.preview}</p>
+                <p className="text-xs text-gray-600 truncate">
+                  {email.content_text?.slice(0, 100) || email.content_html?.replace(/<[^>]*>/g, '').slice(0, 100) || ''}
+                </p>
               </div>
             ))}
           </div>
@@ -187,17 +260,27 @@ export function EmailSection() {
             <div className="flex-1 p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Para:</label>
-                <Input placeholder="destinatario@email.com" />
+                <Input 
+                  placeholder="destinatario@email.com"
+                  value={emailDraft.to_email}
+                  onChange={(e) => setEmailDraft({ ...emailDraft, to_email: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Assunto:</label>
-                <Input placeholder="Assunto do email" />
+                <Input 
+                  placeholder="Assunto do email"
+                  value={emailDraft.subject}
+                  onChange={(e) => setEmailDraft({ ...emailDraft, subject: e.target.value })}
+                />
               </div>
               <div className="flex-1 flex flex-col">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem:</label>
                 <Textarea 
                   placeholder="Digite sua mensagem aqui..."
                   className="flex-1 min-h-[300px] resize-none"
+                  value={emailDraft.content_html}
+                  onChange={(e) => setEmailDraft({ ...emailDraft, content_html: e.target.value })}
                 />
               </div>
               <div className="flex justify-between items-center pt-4">
@@ -211,9 +294,13 @@ export function EmailSection() {
                   <Button variant="outline" onClick={() => setIsComposing(false)}>
                     Cancelar
                   </Button>
-                  <Button className="bg-bege-principal hover:bg-marrom-acentuado">
+                  <Button 
+                    className="bg-bege-principal hover:bg-marrom-acentuado"
+                    onClick={handleSendEmail}
+                    disabled={isSending}
+                  >
                     <Send className="h-4 w-4 mr-1" />
-                    Enviar
+                    {isSending ? 'Enviando...' : 'Enviar'}
                   </Button>
                 </div>
               </div>
@@ -225,11 +312,8 @@ export function EmailSection() {
               <div className="flex justify-between items-start mb-2">
                 <h2 className="text-lg font-semibold text-gray-900">{selectedEmail.subject}</h2>
                 <div className="flex space-x-1">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleReply(selectedEmail)}>
                     <Reply className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <ReplyAll className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="sm">
                     <Forward className="h-4 w-4" />
@@ -241,18 +325,22 @@ export function EmailSection() {
               </div>
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <div>
-                  <span className="font-medium">{selectedEmail.from}</span>
+                  <span className="font-medium">{selectedEmail.from_name || selectedEmail.from_email}</span>
                   <span className="mx-2">para</span>
-                  <span>{selectedEmail.to}</span>
+                  <span>{selectedEmail.to_email}</span>
                 </div>
-                <span>{selectedEmail.date}</span>
+                <span>{formatDate(selectedEmail.date_received)}</span>
               </div>
             </div>
             <ScrollArea className="flex-1 p-4">
               <div className="prose max-w-none">
-                <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                  {selectedEmail.content}
-                </p>
+                {selectedEmail.content_html ? (
+                  <div dangerouslySetInnerHTML={{ __html: selectedEmail.content_html }} />
+                ) : (
+                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+                    {selectedEmail.content_text}
+                  </p>
+                )}
               </div>
             </ScrollArea>
           </div>
