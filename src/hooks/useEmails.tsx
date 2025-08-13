@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,12 +71,9 @@ export function useEmails() {
   const queryClient = useQueryClient();
   const currentUser = useCurrentUser();
 
-  // Definir conta de email baseada no usuário
+  // Sempre usar a conta financeiro@iosantaluzia.com.br para todos os usuários
   const getEmailAccount = () => {
-    if (currentUser?.username === 'financeiro') {
-      return 'financeiro@iosantaluzia.com.br';
-    }
-    return 'iosantaluzia@iosantaluzia.com.br';
+    return 'financeiro@iosantaluzia.com.br';
   };
 
   // Buscar emails via Edge Function com filtros baseados no usuário
