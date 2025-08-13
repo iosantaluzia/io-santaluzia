@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Bell, Settings, User, Search, LogOut, AlertTriangle, RotateCcw } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -40,10 +41,6 @@ const AdminDashboard = () => {
       setLoadingTimeout(false);
     }
   }, [loading]);
-
-  const handleLogin = () => {
-    // This is now handled by the useAuth hook automatically
-  };
 
   const handleLogout = async () => {
     try {
@@ -130,7 +127,7 @@ const AdminDashboard = () => {
 
   // Show login form if not authenticated
   if (!isAuthenticated) {
-    return <LoginForm onLogin={handleLogin} />;
+    return <LoginForm />;
   }
 
   const getSectionTitle = (section: string) => {
