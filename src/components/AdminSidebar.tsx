@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -9,7 +8,7 @@ import {
   Boxes, 
   HandCoins,
   Stethoscope,
-  ChevronRight,
+  Mail,
   Menu
 } from 'lucide-react';
 import {
@@ -33,6 +32,7 @@ const sidebarItems = [
   { title: "Exames", url: "#exames", icon: FileText },
   { title: "Estoque", url: "#estoque", icon: Boxes },
   { title: "Financeiro", url: "#financeiro", icon: HandCoins },
+  { title: "Email", url: "#email", icon: Mail },
 ];
 
 interface AdminSidebarProps {

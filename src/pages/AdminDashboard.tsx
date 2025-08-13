@@ -141,7 +141,8 @@ const AdminDashboard = () => {
       consultas: 'Consultas',
       exames: 'Exames',
       estoque: 'Estoque',
-      financeiro: 'Financeiro'
+      financeiro: 'Financeiro',
+      email: 'Email'
     };
     return titles[section as keyof typeof titles] || 'Painel';
   };
@@ -176,6 +177,8 @@ const AdminDashboard = () => {
           return <LazyComponents.EstoqueSection />;
         case 'financeiro':
           return <LazyComponents.FinanceiroSection />;
+        case 'email':
+          return <LazyComponents.EmailSection />;
         default:
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
       }

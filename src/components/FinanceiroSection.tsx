@@ -1,21 +1,69 @@
 
-import React from 'react';
-import { TrendingUp, DollarSign, Calendar, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, DollarSign, Calendar, FileText, Filter, User } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/hooks/useAuth';
 
 export function FinanceiroSection() {
-  const financialData = {
+  const { appUser } = useAuth();
+  const [selectedDoctor, setSelectedDoctor] = useState('all');
+  
+  // Dados financeiros mockados - em produção viriam do banco
+  const doctorsData = {
+    'dr-silva': {
+      name: 'Dr. Silva',
+      monthlyRevenue: 25000,
+      dailyAverage: 833,
+      pendingPayments: 3500,
+      totalPatients: 65,
+      transactions: [
+        { id: 1, patient: 'Ana Silva', service: 'Consulta Oftalmológica', amount: 250, date: '05/08/2024', status: 'Pago' },
+        { id: 2, patient: 'Bruno Costa', service: 'Exame de Acuidade Visual', amount: 150, date: '04/08/2024', status: 'Pago' },
+      ]
+    },
+    'dr-santos': {
+      name: 'Dr. Santos',
+      monthlyRevenue: 20000,
+      dailyAverage: 667,
+      pendingPayments: 5000,
+      totalPatients: 55,
+      transactions: [
+        { id: 3, patient: 'Carla Dias', service: 'Cirurgia de Catarata', amount: 3500, date: '04/08/2024', status: 'Pendente' },
+        { id: 4, patient: 'Daniel Rocha', service: 'Mapeamento de Retina', amount: 400, date: '03/08/2024', status: 'Pago' },
+      ]
+    }
+  };
+
+  // Dados consolidados para conta financeiro
+  const consolidatedData = {
     monthlyRevenue: 45000,
     dailyAverage: 1500,
     pendingPayments: 8500,
-    totalPatients: 120
+    totalPatients: 120,
+    transactions: [
+      ...doctorsData['dr-silva'].transactions,
+      ...doctorsData['dr-santos'].transactions
+    ]
   };
 
-  const recentTransactions = [
-    { id: 1, patient: 'Ana Silva', service: 'Consulta Oftalmológica', amount: 250, date: '05/08/2024', status: 'Pago' },
-    { id: 2, patient: 'Bruno Costa', service: 'Cirurgia de Catarata', amount: 3500, date: '04/08/2024', status: 'Pendente' },
-    { id: 3, patient: 'Carla Dias', service: 'Exame de Acuidade Visual', amount: 150, date: '04/08/2024', status: 'Pago' },
-    { id: 4, patient: 'Daniel Rocha', service: 'Mapeamento de Retina', amount: 400, date: '03/08/2024', status: 'Pago' },
-  ];
+  // Determinar dados a exibir baseado no perfil do usuário
+  const getFinancialData = () => {
+    if (appUser?.role === 'doctor') {
+      // Médico vê apenas seus dados - simulando pelo username
+      const doctorKey = `dr-${appUser.username}`;
+      return doctorsData[doctorKey] || doctorsData['dr-silva'];
+    } else if (appUser?.role === 'admin' || appUser?.username === 'financeiro') {
+      // Admin e financeiro veem dados consolidados ou filtrados
+      if (selectedDoctor === 'all') {
+        return consolidatedData;
+      }
+      return doctorsData[selectedDoctor] || consolidatedData;
+    }
+    return consolidatedData;
+  };
+
+  const financialData = getFinancialData();
+  const canViewAllDoctors = appUser?.role === 'admin' || appUser?.username === 'financeiro';
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -26,7 +74,36 @@ export function FinanceiroSection() {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold text-cinza-escuro mb-4">Relatórios Financeiros</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-cinza-escuro">Relatórios Financeiros</h2>
+        
+        {canViewAllDoctors && (
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Selecione o médico" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Médicos</SelectItem>
+                <SelectItem value="dr-silva">Dr. Silva</SelectItem>
+                <SelectItem value="dr-santos">Dr. Santos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      {appUser?.role === 'doctor' && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-blue-600" />
+            <span className="text-sm text-blue-800">
+              Visualizando seus dados financeiros pessoais
+            </span>
+          </div>
+        </div>
+      )}
       
       {/* Cards de Resumo Financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -72,7 +149,12 @@ export function FinanceiroSection() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
-        <h3 className="text-xl font-semibold text-cinza-escuro mb-4">Transações Recentes</h3>
+        <h3 className="text-xl font-semibold text-cinza-escuro mb-4">
+          Transações Recentes
+          {selectedDoctor !== 'all' && financialData.name && (
+            <span className="text-sm font-normal text-gray-600 ml-2">- {financialData.name}</span>
+          )}
+        </h3>
 
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-md">
@@ -86,7 +168,7 @@ export function FinanceiroSection() {
               </tr>
             </thead>
             <tbody className="text-gray-600 text-sm font-light">
-              {recentTransactions.map(transaction => (
+              {financialData.transactions.map(transaction => (
                 <tr key={transaction.id} className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="py-3 px-6 text-left font-medium">{transaction.patient}</td>
                   <td className="py-3 px-6 text-left">{transaction.service}</td>
