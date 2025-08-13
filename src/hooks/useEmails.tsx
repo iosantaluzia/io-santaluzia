@@ -39,17 +39,13 @@ export interface EmailDraft {
 export function useEmails() {
   const queryClient = useQueryClient();
 
-  // Buscar emails
+  // Buscar emails via Edge Function
   const { data: emails = [], isLoading, error } = useQuery({
     queryKey: ['emails'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('emails')
-        .select('*')
-        .order('date_received', { ascending: false });
-
+      const { data, error } = await supabase.functions.invoke('email-sync');
       if (error) throw error;
-      return data as Email[];
+      return data.emails as Email[];
     },
   });
 
@@ -62,7 +58,7 @@ export function useEmails() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['emails'] });
-      toast.success(`Sincronização concluída. ${data.new} novos emails.`);
+      toast.success(`Sincronização concluída. ${data.new || 0} novos emails.`);
     },
     onError: (error) => {
       console.error('Error syncing emails:', error);
@@ -96,13 +92,12 @@ export function useEmails() {
     },
   });
 
-  // Marcar como lido
+  // Marcar como lido (via Edge Function)
   const markAsReadMutation = useMutation({
     mutationFn: async (emailId: string) => {
-      const { error } = await supabase
-        .from('emails')
-        .update({ is_read: true })
-        .eq('id', emailId);
+      const { error } = await supabase.functions.invoke('email-update', {
+        body: { emailId, action: 'mark_read' }
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -110,13 +105,12 @@ export function useEmails() {
     },
   });
 
-  // Marcar como favorito
+  // Marcar como favorito (via Edge Function)
   const toggleStarMutation = useMutation({
     mutationFn: async ({ emailId, isStarred }: { emailId: string; isStarred: boolean }) => {
-      const { error } = await supabase
-        .from('emails')
-        .update({ is_starred: !isStarred })
-        .eq('id', emailId);
+      const { error } = await supabase.functions.invoke('email-update', {
+        body: { emailId, action: 'toggle_star', isStarred }
+      });
       if (error) throw error;
     },
     onSuccess: () => {
