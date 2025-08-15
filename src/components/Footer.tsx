@@ -1,3 +1,4 @@
+
 import { Phone, Mail, MapPin, Instagram, Facebook, Linkedin } from "lucide-react";
 
 const Footer = () => {
@@ -52,26 +53,20 @@ const Footer = () => {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
-            <div className="flex items-center space-x-3 mb-6">
+            <div className="flex items-center justify-center mb-6">
               <img 
-                src="/lovable-uploads/a89a1d61-75ee-4ff2-8233-42d51ff14f18.png" 
+                src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
                 alt="Instituto de Olhos Santa Luzia" 
-                className="h-12 w-auto brightness-0 invert"
+                className="h-16 w-auto brightness-0 invert"
               />
-              <div>
-                <h3 className="font-serif font-semibold text-lg">
-                  Instituto de Olhos
-                </h3>
-                <p className="text-sm text-white/80">Santa Luzia</p>
-              </div>
             </div>
-            <p className="text-white/80 mb-6 leading-relaxed">
+            <p className="text-white/80 mb-6 leading-relaxed text-center">
               Mais de 15 anos cuidando da saúde dos seus olhos com excelência, 
               tecnologia de ponta e atendimento humanizado.
             </p>
             
             {/* Social Links */}
-            <div className="flex space-x-4">
+            <div className="flex justify-center space-x-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}

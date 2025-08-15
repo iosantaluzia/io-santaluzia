@@ -31,11 +31,11 @@ const Header = () => {
             className="flex items-center space-x-3 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center bg-white">
+            <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center">
               <img 
-                src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
+                src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
                 alt="Instituto de Olhos Santa Luzia" 
-                className="h-10 w-10 object-contain" 
+                className="h-12 w-12 object-contain animate-spin-slow" 
               />
             </div>
             <div className="hidden sm:block">
