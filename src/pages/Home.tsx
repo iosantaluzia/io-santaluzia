@@ -106,11 +106,20 @@ const Home = () => {
             { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
             { icon: <Facebook className="h-5 w-5" />, href: "https://www.facebook.com/profile.php?id=100063558400559", label: "Facebook" },
           ]}
-          contactInfo={[
-            { icon: <Phone className="h-5 w-5" />, text: "(66) 3531-2323", href: "tel:+556635312323" },
-            { icon: <MapPin className="h-5 w-5" />, text: "Rua das Acácias, 634, Setor Comercial, Sinop - MT", href: "https://maps.google.com/?q=Rua+das+Acácias,+634,+Setor+Comercial,+Sinop+-+MT" },
-            { icon: <Clock className="h-5 w-5" />, text: "Segunda a Sexta: 7:00h às 18:00h", href: null },
+          mainLinks={[
+            { href: "/instituto", label: "O Instituto" },
+            { href: "/corpo-clinico", label: "Corpo Clínico" },
+            { href: "/exames", label: "Exames" },
+            { href: "/catarata", label: "Catarata" },
+            { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+            { href: "/ceratocone", label: "Ceratocone" },
+            { href: "/artigos", label: "Artigos" }
           ]}
+          legalLinks={[]}
+          copyright={{
+            text: "© 2024 Instituto de Olhos Santa Luzia",
+            license: "Rua das Acácias, 634, Setor Comercial, Sinop - MT | (66) 3531-2323"
+          }}
         />
       </Suspense>
 
