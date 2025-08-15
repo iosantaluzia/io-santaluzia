@@ -1,5 +1,4 @@
-
-import Header from "@/components/Header";
+import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button";
 const Catarata = () => {
   const symptoms = [
     "Visão embaçada ou turva",
-    "Dificuldade para enxergar à noite",
+    "Dificuldade para enxergar à noite", 
     "Sensibilidade aumentada à luz",
     "Visão dupla em um olho",
     "Necessidade de mudar óculos frequentemente",
@@ -27,7 +26,7 @@ const Catarata = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <NavigationHeader showLogo={true} />
       <main className="pt-20">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-6xl mx-auto">

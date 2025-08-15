@@ -1,12 +1,12 @@
 
-import Header from "@/components/Header";
+import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 
 const Instituto = () => {
   return (
     <div className="min-h-screen">
-      <Header />
+      <NavigationHeader showLogo={true} />
       <main className="pt-20">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
@@ -27,7 +27,7 @@ const Instituto = () => {
                     e uma abordagem humanizada para preservar e restaurar a visão dos nossos pacientes.
                   </p>
                 </div>
-                <div className="bg-gradient-accent rounded-2xl p-8">
+                <div className="bg-medical-muted rounded-2xl p-8">
                   <h3 className="text-xl font-semibold text-medical-primary mb-4">Nossos Valores</h3>
                   <ul className="space-y-2 text-muted-foreground">
                     <li>• Excelência no atendimento</li>
