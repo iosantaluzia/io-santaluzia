@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Calendar, Prescription, User, LogOut, Download } from 'lucide-react';
+import { FileText, Calendar, User, LogOut, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Document {
@@ -54,8 +54,8 @@ const PatientPortal = () => {
     try {
       setLoadingData(true);
 
-      // Buscar documentos do paciente
-      const { data: documentsData, error: documentsError } = await supabase
+      // Buscar documentos do paciente usando type casting
+      const { data: documentsData, error: documentsError } = await (supabase as any)
         .from('patient_portal_documents')
         .select('*')
         .eq('user_id', user.id)
@@ -65,11 +65,11 @@ const PatientPortal = () => {
       if (documentsError) {
         console.error('Erro ao buscar documentos:', documentsError);
       } else {
-        setDocuments(documentsData || []);
+        setDocuments((documentsData as Document[]) || []);
       }
 
-      // Buscar consultas do paciente
-      const { data: appointmentsData, error: appointmentsError } = await supabase
+      // Buscar consultas do paciente usando type casting
+      const { data: appointmentsData, error: appointmentsError } = await (supabase as any)
         .from('patient_portal_appointments')
         .select('*')
         .eq('user_id', user.id)
@@ -78,7 +78,7 @@ const PatientPortal = () => {
       if (appointmentsError) {
         console.error('Erro ao buscar consultas:', appointmentsError);
       } else {
-        setAppointments(appointmentsData || []);
+        setAppointments((appointmentsData as Appointment[]) || []);
       }
 
     } catch (error) {

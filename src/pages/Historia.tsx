@@ -6,6 +6,40 @@ import Timeline from '@/components/Timeline';
 import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
 
 const Historia = () => {
+  // Dados do timeline para a história do instituto
+  const timelineData = [
+    {
+      year: '2009',
+      title: 'Fundação do Instituto',
+      description: 'O Instituto de Olhos Santa Luzia foi fundado com o compromisso de oferecer cuidados oftalmológicos de excelência.'
+    },
+    {
+      year: '2012',
+      title: 'Primeira Expansão',
+      description: 'Ampliação das instalações e incorporação de novos equipamentos de última geração.'
+    },
+    {
+      year: '2015',
+      title: 'Centro de Cirurgias',
+      description: 'Inauguração do centro cirúrgico especializado em cirurgias oftalmológicas.'
+    },
+    {
+      year: '2018',
+      title: 'Tecnologia de Ponta',
+      description: 'Incorporação de equipamentos de diagnóstico avançado, incluindo OCT e aberrômetro.'
+    },
+    {
+      year: '2020',
+      title: 'Telemedicina',
+      description: 'Implementação de serviços de telemedicina e portal digital para pacientes.'
+    },
+    {
+      year: '2024',
+      title: '15 Anos de Excelência',
+      description: 'Celebrando 15 anos de dedicação à saúde visual no Ceará.'
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -39,7 +73,7 @@ const Historia = () => {
               </p>
             </div>
 
-            <Timeline />
+            <Timeline data={timelineData} />
           </div>
         </div>
       </main>
