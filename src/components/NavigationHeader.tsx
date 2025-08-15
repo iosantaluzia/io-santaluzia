@@ -93,7 +93,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                   O Instituto
                 </Tab>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[60]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[100]">
                 {institutoItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
@@ -120,7 +120,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                   Cirurgias
                 </Tab>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[60]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[100]">
                 {cirurgiasItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
