@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -5,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Calendar, User, LogOut, Download, AlertCircle, RefreshCw } from 'lucide-react';
+import { FileText, Calendar, User, LogOut, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Document {
@@ -35,13 +36,9 @@ const PatientPortal = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('PatientPortal - Auth state:', { user: !!user, appUser: !!appUser, loading });
-    
     if (!loading && (!user || !appUser)) {
-      console.log('PatientPortal - No user/appUser, redirecting to home');
       navigate('/');
       return;
     }
@@ -55,9 +52,7 @@ const PatientPortal = () => {
     if (!user) return;
 
     try {
-      console.log('Fetching patient data for user:', user.id);
       setLoadingData(true);
-      setError(null);
 
       // Buscar documentos do paciente usando type casting
       const { data: documentsData, error: documentsError } = await (supabase as any)
@@ -69,9 +64,7 @@ const PatientPortal = () => {
 
       if (documentsError) {
         console.error('Erro ao buscar documentos:', documentsError);
-        toast.error('Erro ao carregar documentos');
       } else {
-        console.log('Documents loaded:', documentsData?.length || 0);
         setDocuments((documentsData as Document[]) || []);
       }
 
@@ -84,15 +77,12 @@ const PatientPortal = () => {
 
       if (appointmentsError) {
         console.error('Erro ao buscar consultas:', appointmentsError);
-        toast.error('Erro ao carregar consultas');
       } else {
-        console.log('Appointments loaded:', appointmentsData?.length || 0);
         setAppointments((appointmentsData as Appointment[]) || []);
       }
 
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      setError('Erro ao carregar seus dados. Tente novamente.');
       toast.error('Erro ao carregar seus dados');
     } finally {
       setLoadingData(false);
@@ -100,20 +90,12 @@ const PatientPortal = () => {
   };
 
   const handleSignOut = async () => {
-    console.log('Signing out...');
     const { error } = await signOut();
     if (!error) {
       toast.success('Logout realizado com sucesso');
       navigate('/');
     } else {
-      console.error('Sign out error:', error);
       toast.error('Erro ao fazer logout');
-    }
-  };
-
-  const handleRetry = () => {
-    if (user) {
-      fetchPatientData();
     }
   };
 
@@ -154,32 +136,13 @@ const PatientPortal = () => {
   if (loading || loadingData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-medical-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando seus dados...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-medical-primary"></div>
       </div>
     );
   }
 
   if (!user || !appUser) {
     return null;
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Ops! Algo deu errado</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={handleRetry} className="bg-medical-primary hover:bg-medical-primary/90">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Tentar Novamente
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -205,7 +168,7 @@ const PatientPortal = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="flex items-center space-x-2 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+                className="flex items-center space-x-2"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sair</span>

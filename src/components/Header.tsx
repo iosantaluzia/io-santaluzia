@@ -22,18 +22,13 @@ const Header = () => {
     { name: "Ceratocone", href: "/ceratocone" }
   ];
 
-  const handlePortalClick = () => {
-    console.log("Portal do Paciente clicked");
-    setIsPortalModalOpen(true);
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b shadow-soft">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div 
-            className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-3 cursor-pointer"
             onClick={() => navigate("/")}
           >
             <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center">
@@ -55,20 +50,20 @@ const Header = () => {
           <nav className="hidden lg:flex items-center space-x-8">
             <HeaderDropdown title="O Instituto" items={institutoItems} />
             <HeaderDropdown title="Cirurgias" items={cirurgiasItems} />
-            <button
-              onClick={() => navigate("/exames")}
+            <a 
+              href="/exames" 
               className="text-medical-primary hover:text-medical-secondary transition-colors duration-300 font-medium"
             >
               Exames
-            </button>
-            <button
-              onClick={() => navigate("/artigos")}
+            </a>
+            <a 
+              href="/artigos" 
               className="text-medical-primary hover:text-medical-secondary transition-colors duration-300 font-medium"
             >
               Artigos
-            </button>
+            </a>
             <button
-              onClick={handlePortalClick}
+              onClick={() => setIsPortalModalOpen(true)}
               className="text-medical-primary hover:text-medical-secondary transition-colors duration-300 font-medium"
             >
               Portal do Paciente
@@ -77,10 +72,7 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button 
-              variant="default" 
-              className="bg-gradient-primary hover:opacity-90 transition-opacity"
-            >
+            <Button variant="default" className="bg-gradient-primary">
               Agendar Consulta
             </Button>
           </div>
@@ -88,7 +80,7 @@ const Header = () => {
           {/* Mobile menu button */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)} 
-            className="lg:hidden p-2 text-medical-primary hover:text-medical-secondary transition-colors"
+            className="lg:hidden p-2 text-medical-primary"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -96,7 +88,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b shadow-medium animate-fade-in z-40">
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b shadow-medium">
             <nav className="py-4">
               <div className="px-4 py-3">
                 <HeaderDropdown title="O Instituto" items={institutoItems} className="w-full justify-between" />
@@ -104,27 +96,23 @@ const Header = () => {
               <div className="px-4 py-3">
                 <HeaderDropdown title="Cirurgias" items={cirurgiasItems} className="w-full justify-between" />
               </div>
-              <button 
-                onClick={() => {
-                  navigate("/exames");
-                  setIsMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
+              <a 
+                href="/exames" 
+                className="block px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Exames
-              </button>
-              <button 
-                onClick={() => {
-                  navigate("/artigos");
-                  setIsMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
+              </a>
+              <a 
+                href="/artigos" 
+                className="block px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Artigos
-              </button>
+              </a>
               <button
                 onClick={() => {
-                  handlePortalClick();
+                  setIsPortalModalOpen(true);
                   setIsMenuOpen(false);
                 }}
                 className="block w-full text-left px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
