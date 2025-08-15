@@ -9,34 +9,58 @@ const Historia = () => {
   // Dados do timeline para a história do instituto
   const timelineData = [
     {
-      year: '2009',
-      title: 'Fundação do Instituto',
-      description: 'O Instituto de Olhos Santa Luzia foi fundado com o compromisso de oferecer cuidados oftalmológicos de excelência.'
+      title: '2009',
+      content: (
+        <div className="text-muted-foreground">
+          <h3 className="text-lg font-semibold text-medical-primary mb-2">Fundação do Instituto</h3>
+          <p>O Instituto de Olhos Santa Luzia foi fundado com o compromisso de oferecer cuidados oftalmológicos de excelência.</p>
+        </div>
+      )
     },
     {
-      year: '2012',
-      title: 'Primeira Expansão',
-      description: 'Ampliação das instalações e incorporação de novos equipamentos de última geração.'
+      title: '2012',
+      content: (
+        <div className="text-muted-foreground">
+          <h3 className="text-lg font-semibold text-medical-primary mb-2">Primeira Expansão</h3>
+          <p>Ampliação das instalações e incorporação de novos equipamentos de última geração.</p>
+        </div>
+      )
     },
     {
-      year: '2015',
-      title: 'Centro de Cirurgias',
-      description: 'Inauguração do centro cirúrgico especializado em cirurgias oftalmológicas.'
+      title: '2015',
+      content: (
+        <div className="text-muted-foreground">
+          <h3 className="text-lg font-semibold text-medical-primary mb-2">Centro de Cirurgias</h3>
+          <p>Inauguração do centro cirúrgico especializado em cirurgias oftalmológicas.</p>
+        </div>
+      )
     },
     {
-      year: '2018',
-      title: 'Tecnologia de Ponta',
-      description: 'Incorporação de equipamentos de diagnóstico avançado, incluindo OCT e aberrômetro.'
+      title: '2018',
+      content: (
+        <div className="text-muted-foreground">
+          <h3 className="text-lg font-semibold text-medical-primary mb-2">Tecnologia de Ponta</h3>
+          <p>Incorporação de equipamentos de diagnóstico avançado, incluindo OCT e aberrômetro.</p>
+        </div>
+      )
     },
     {
-      year: '2020',
-      title: 'Telemedicina',
-      description: 'Implementação de serviços de telemedicina e portal digital para pacientes.'
+      title: '2020',
+      content: (
+        <div className="text-muted-foreground">
+          <h3 className="text-lg font-semibold text-medical-primary mb-2">Telemedicina</h3>
+          <p>Implementação de serviços de telemedicina e portal digital para pacientes.</p>
+        </div>
+      )
     },
     {
-      year: '2024',
-      title: '15 Anos de Excelência',
-      description: 'Celebrando 15 anos de dedicação à saúde visual no Ceará.'
+      title: '2024',
+      content: (
+        <div className="text-muted-foreground">
+          <h3 className="text-lg font-semibold text-medical-primary mb-2">15 Anos de Excelência</h3>
+          <p>Celebrando 15 anos de dedicação à saúde visual no Ceará.</p>
+        </div>
+      )
     }
   ];
 
