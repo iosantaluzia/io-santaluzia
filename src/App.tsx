@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Instituto from "./pages/Instituto";
+import Historia from "./pages/Historia";
 import CorpoClinico from "./pages/CorpoClinico";
 import Exames from "./pages/Exames";
 import Catarata from "./pages/Catarata";
@@ -14,6 +15,7 @@ import Ceratocone from "./pages/Ceratocone";
 import Artigos from "./pages/Artigos";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
+import PatientPortal from "./pages/PatientPortal";
 
 const queryClient = new QueryClient();
 
@@ -26,12 +28,14 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/instituto" element={<Instituto />} />
+          <Route path="/historia" element={<Historia />} />
           <Route path="/corpo-clinico" element={<CorpoClinico />} />
           <Route path="/exames" element={<Exames />} />
           <Route path="/catarata" element={<Catarata />} />
           <Route path="/cirurgia-refrativa" element={<CirurgiaRefrativa />} />
           <Route path="/ceratocone" element={<Ceratocone />} />
           <Route path="/artigos" element={<Artigos />} />
+          <Route path="/portal-paciente" element={<PatientPortal />} />
           <Route path="/admin-dashboard-santa-luzia" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

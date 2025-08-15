@@ -11,13 +11,13 @@ const FloatingWhatsAppButton = () => {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+      className="fixed bottom-6 right-6 z-50 hover:scale-110 transition-all duration-300 rounded-full shadow-lg"
       aria-label="Contato via WhatsApp"
     >
       <img 
         src="/lovable-uploads/bd1edf3a-7fd7-44ce-8135-96dbec8a78fa.png" 
         alt="WhatsApp" 
-        className="w-8 h-8"
+        className="w-12 h-12 rounded-full"
       />
     </a>
   );
