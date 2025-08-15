@@ -1,7 +1,7 @@
 
 import React, { Suspense } from 'react';
 import { Users, Stethoscope, Eye } from 'lucide-react';
-import { ExpandableCard } from '@/components/ExpandableCard';
+import ExpandableCard from '@/components/ExpandableCard';
 import NavigationHeader from '@/components/NavigationHeader';
 import { Instagram, Facebook, Phone, MapPin, Clock } from 'lucide-react';
 
@@ -11,7 +11,7 @@ const LazyAbout = React.lazy(() => import('@/components/About'));
 const LazyTeam = React.lazy(() => import('@/components/Team'));
 const LazyContact = React.lazy(() => import('@/components/Contact'));
 const LazyFloatingWhatsAppButton = React.lazy(() => import('@/components/FloatingWhatsAppButton'));
-const LazyFooter = React.lazy(() => import('@/components/ui/footer'));
+const LazyFooter = React.lazy(() => import('@/components/ui/footer').then(module => ({ default: module.Footer })));
 
 const Home = () => {
   return (
