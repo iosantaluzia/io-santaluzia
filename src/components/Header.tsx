@@ -12,7 +12,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   const institutoItems = [
-    { name: "História", href: "/historia" },
+    { name: "História", href: "/instituto" },
     { name: "Corpo Clínico", href: "/corpo-clinico" }
   ];
 

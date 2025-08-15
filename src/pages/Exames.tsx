@@ -1,141 +1,142 @@
 
-import React, { useState } from "react";
-import NavigationHeader from "@/components/NavigationHeader";
-import ExamModal from "@/components/ExamModal";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
-import { Footer } from "@/components/ui/footer";
-import { Instagram, Facebook } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eye, Zap, Search, Activity } from "lucide-react";
 
 const Exames = () => {
-  const [selectedExam, setSelectedExam] = useState<any>(null);
-
-  const exames = [
+  const exams = [
     {
-      nome: "Microscopia Especular",
-      imagem: "/lovable-uploads/microscopia.png",
-      descricao: "A microscopia especular de córnea é utilizada na oftalmologia para avaliar as células endoteliais da córnea, que são essenciais para a manutenção da transparência corneana.\n\nAo examinar as células endoteliais, os oftalmologistas podem avaliar a saúde da córnea, prever a resposta a tratamentos e monitorar a progressão de doenças ao longo do tempo.\n\nSuas indicações incluem avaliações pré e pós-operatória de cirurgias como: catarata, transplantes de córnea, indicado também para usuários crônicos de lentes de contato, implante de lentes intraoculares e no acompanhamento de doenças corneanas.\n\nÉ um exame indolor e de rápida execução. O paciente deve estar sem lentes de contato caso faça uso. Para sua realização é necessário apenas que o paciente fixe o olhar no alvo dentro do aparelho. Geralmente não necessita de acompanhantes."
+      name: "Topografia de Córnea",
+      icon: <Eye className="h-8 w-8" />,
+      description: "Exame que mapeia a curvatura da córnea, essencial para diagnóstico de astigmatismo e ceratocone.",
+      image: "/lovable-uploads/topografia.png"
     },
     {
-      nome: "YAG Laser",
-      imagem: "/lovable-uploads/yaglaser.png",
-      descricao: "O YAG laser é uma ferramenta versátil e amplamente utilizada em oftalmologia, utilizado para diversas funções.\n\nApós a cirurgia de catarata, uma fina membrana chamada de cápsula posterior pode se tornar opaca, causando visão turva. Utilizamos o YAG Laser para realizar uma limpeza desta membrana, que envolve a criação de uma abertura na cápsula para restaurar a visão.\n\nEm casos de glaucoma de ângulo estreito ou fechado, onde a drenagem do humor aquoso é prejudicada, uma iridotomia pode ser realizada para criar uma pequena abertura na íris, permitindo que o líquido flua adequadamente.\n\nEle é capaz fornecer tratamentos minimamente invasivos, indolores, com tempos de recuperação mais rápidos."
+      name: "OCT - Tomografia de Coerência Óptica",
+      icon: <Search className="h-8 w-8" />,
+      description: "Tecnologia avançada para visualização detalhada da retina e nervo óptico.",
+      image: "/lovable-uploads/oct.png"
     },
     {
-      nome: "Topografia Corneana",
-      imagem: "/lovable-uploads/topografia.png",
-      descricao: "A topografia corneana é um procedimento oftalmológico utilizado para mapear a superfície da córnea, que é a parte transparente e externa do olho.\n\nA córnea desempenha um papel fundamental na refração da luz que entra no olho, ajudando a focalizar a imagem na retina, este exame auxilia no diagnóstico de doenças como astigmatismo, ceratocone, distrofias corneanas e irregularidades na superfície corneana."
+      name: "Campimetria Visual",
+      icon: <Activity className="h-8 w-8" />,
+      description: "Avaliação do campo visual para diagnóstico de glaucoma e outras patologias.",
+      image: "/lovable-uploads/campimetria.png"
     },
     {
-      nome: "Pentacam",
-      imagem: "/lovable-uploads/pentacam.png",
-      descricao: "O Pentacam é um dispositivo de tomografia de coerência óptica (OCT) utilizado na oftalmologia para avaliar a estrutura e topografia da córnea e segmento anterior do olho.\n\nUtilizado para avaliação pré-operatória de cirurgias refrativas como o LASIK. É importante avaliar a espessura corneana, a topografia corneana e a curvatura da córnea para determinar a adequação do paciente para o procedimento.\n\nAuxilia no diagnóstico de ceratocone e outras ectasias corneanas por fornece mapas tridimensionais detalhados da córnea, ajudando os médicos a monitorar a progressão da doença e planejar intervenções adequadas.\n\nO Pentacam também é útil na avaliação pré-operatória de pacientes que serão submetidos à implantação de lentes intraoculares após a remoção da catarata."
+      name: "Pentacam",
+      icon: <Zap className="h-8 w-8" />,
+      description: "Análise completa do segmento anterior do olho com tecnologia Scheimpflug.",
+      image: "/lovable-uploads/pentacam.png"
     },
     {
-      nome: "Aberrômetro",
-      imagem: "/lovable-uploads/aberrometro.png",
-      descricao: "O aberrômetro, também conhecido como wavefront analyzer, é um instrumento utilizado na oftalmologia para medir as aberrações ópticas do olho. Essas aberrações são imperfeições na forma da córnea e do cristalino que podem afetar a qualidade da visão.\n\nAvaliação pré-operatória de cirurgias refrativas: Antes de realizar cirurgias refrativas como a LASIK (cirurgia refrativa a laser), o aberrômetro é utilizado para medir e quantificar as aberrações ópticas do olho.\n\nAlém de medir as aberrações ópticas, o aberrômetro também pode avaliar a qualidade da visão do paciente em condições específicas, como luz de dia, luz noturna e diferentes níveis de contraste. Isso pode ajudar os oftalmologistas a entender melhor as necessidades visuais do paciente e planejar o tratamento adequado."
+      name: "Microscopia Especular",
+      icon: <Eye className="h-8 w-8" />,
+      description: "Avaliação das células do endotélio da córnea.",
+      image: "/lovable-uploads/microscopia.png"
     },
     {
-      nome: "Campimetria",
-      imagem: "/lovable-uploads/campimetria.png",
-      descricao: "A campimetria, também conhecida como exame de campo visual, é uma ferramenta fundamental na oftalmologia para avaliar a extensão e a sensibilidade da visão periférica e central de um paciente.\n\nEste exame é frequentemente utilizado para diagnosticar e monitorar uma variedade de condições oftalmológicas e neurológicas que afetam o campo visual, principalmente o glaucoma.\n\nA campimetria também é útil na avaliação de distúrbios neurológicos que afetam o campo visual, como lesões no nervo óptico, tumores cerebrais, acidentes vasculares cerebrais (AVCs) e esclerose múltipla. Bem como o monitoramento de doenças retinianas como a retinopatia diabética, degeneração macular e retinose pigmentar."
-    },
-    {
-      nome: "OCT",
-      imagem: "/lovable-uploads/oct.png",
-      descricao: "A Tomografia de Coerência Óptica (OCT) é um exame de imagem não invasivo que utiliza luz para capturar imagens de corte transversal da retina com resolução micrométrica.\n\nEste exame é fundamental para o diagnóstico e acompanhamento de diversas doenças retinianas, incluindo degeneração macular relacionada à idade, edema macular diabético, buracos maculares e outras patologias da mácula.\n\nO OCT também é muito útil no diagnóstico e monitoramento do glaucoma, permitindo avaliar a espessura das fibras nervosas da retina e detectar alterações precoces antes mesmo que o paciente perceba sintomas.\n\nÉ um exame rápido, indolor e não requer dilatação pupilar na maioria dos casos. O paciente apenas precisa fixar o olhar em um ponto de luz enquanto o equipamento realiza as capturas das imagens."
+      name: "Aberrometria",
+      icon: <Search className="h-8 w-8" />,
+      description: "Medição das aberrações ópticas do olho para cirurgias refrativas personalizadas.",
+      image: "/lovable-uploads/aberrometro.png"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <NavigationHeader showLogo={true} />
-      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h1 className="text-3xl md:text-5xl font-sans font-bold text-medical-primary mb-8">
-          Exames Complementares
-        </h1>
-        <p className="text-lg text-medical-secondary mb-12 max-w-3xl">
-          No Instituto de Olhos Santa Luzia contamos com exames complementares necessários para seu diagnóstico, conheça-os abaixo:
-        </p>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exames.map((exame, index) => (
-            <div 
-              key={index} 
-              className="group cursor-pointer bg-white rounded-lg shadow-soft overflow-hidden hover:shadow-medium transition-all duration-300"
-              onClick={() => setSelectedExam(exame)}
-            >
-              <div className="relative h-48 overflow-hidden">
-                <img 
-                  src={exame.imagem}
-                  alt={exame.nome}
-                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-medical-primary/80 to-transparent"></div>
-                <h3 className="absolute bottom-4 left-4 right-4 text-white font-sans text-lg font-semibold">
-                  {exame.nome}
-                </h3>
+    <div className="min-h-screen">
+      <Header />
+      <main className="pt-20">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-8 text-center">
+              Exames Complementares
+            </h1>
+            
+            <p className="text-xl text-muted-foreground leading-relaxed mb-12 text-center max-w-3xl mx-auto">
+              Utilizamos tecnologia de ponta para diagnósticos precisos e 
+              acompanhamento detalhado da saúde dos seus olhos.
+            </p>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {exams.map((exam, index) => (
+                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video overflow-hidden bg-gradient-accent">
+                    <img 
+                      src={exam.image} 
+                      alt={exam.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-3">
+                      <div className="text-medical-primary">
+                        {exam.icon}
+                      </div>
+                      <span className="text-medical-primary">{exam.name}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {exam.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="bg-medical-muted rounded-2xl p-8">
+              <h2 className="text-2xl font-semibold text-medical-primary mb-6 text-center">
+                Por que realizar exames complementares?
+              </h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-lg font-semibold text-medical-primary mb-4">
+                    Diagnóstico Preciso
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed mb-6">
+                    Os exames complementares permitem uma avaliação detalhada das estruturas 
+                    oculares, possibilitando diagnósticos precoces e precisos de diversas 
+                    condições oftalmológicas.
+                  </p>
+                  
+                  <h3 className="text-lg font-semibold text-medical-primary mb-4">
+                    Acompanhamento Especializado
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Para pacientes com condições como glaucoma, diabetes ou degeneração 
+                    macular, os exames regulares são fundamentais para monitorar a 
+                    progressão da doença.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 shadow-soft">
+                    <h4 className="font-semibold text-medical-primary mb-2">Tecnologia Avançada</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Equipamentos de última geração para resultados confiáveis
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-soft">
+                    <h4 className="font-semibold text-medical-primary mb-2">Equipe Especializada</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Profissionais treinados para realizar e interpretar os exames
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-soft">
+                    <h4 className="font-semibold text-medical-primary mb-2">Conforto e Rapidez</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Exames não invasivos realizados com máximo conforto
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-
-      {/* Botão de agendamento */}
-      <div className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-4 flex justify-center">
-          <WhatsAppButton />
-        </div>
-      </div>
-
-      {/* Footer */}
-      <Footer
-        logo={
-          <img 
-            src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
-            alt="Instituto de Olhos Santa Luzia" 
-            className="h-10 w-10 brightness-0 invert"
-          />
-        }
-        brandName="Instituto de Olhos Santa Luzia"
-        socialLinks={[
-          {
-            icon: <Instagram className="h-5 w-5" />,
-            href: "https://www.instagram.com/io.santaluzia/",
-            label: "Instagram",
-          },
-          {
-            icon: <Facebook className="h-5 w-5" />,
-            href: "https://www.facebook.com/institudodeolhossantaluzia",
-            label: "Facebook",
-          },
-        ]}
-        mainLinks={[
-          { href: "/instituto", label: "O Instituto" },
-          { href: "/corpo-clinico", label: "Corpo Clínico" },
-          { href: "/exames", label: "Exames" },
-          { href: "/catarata", label: "Catarata" },
-          { href: "/artigos", label: "Artigos" },
-        ]}
-        legalLinks={[
-          { href: "#", label: "Política de Privacidade" },
-          { href: "#", label: "Termos de Uso" },
-          { href: "#", label: "LGPD" },
-        ]}
-        copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
-          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
-        }}
-      />
-
-      <ExamModal
-        isOpen={!!selectedExam}
-        onClose={() => setSelectedExam(null)}
-        title={selectedExam?.nome || ""}
-        content={selectedExam?.descricao || ""}
-        image={selectedExam?.imagem || ""}
-      />
+      </main>
+      <Footer />
       <FloatingWhatsAppButton />
     </div>
   );

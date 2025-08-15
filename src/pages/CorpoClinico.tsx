@@ -1,124 +1,119 @@
 
-import React from "react";
-import NavigationHeader from "@/components/NavigationHeader";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
-import { Footer } from "@/components/ui/footer";
-import { Instagram, Facebook } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const CorpoClinico = () => {
+  const doctors = [
+    {
+      name: "Dr. Carlos Silva",
+      specialty: "Oftalmologista Geral",
+      crm: "CRM 12345-CE",
+      description: "Especialista em cirurgia de catarata e glaucoma com mais de 15 anos de experiência.",
+      image: "/lovable-uploads/4f2fb169-1556-4f12-9d20-a788c214c4f1.png"
+    },
+    {
+      name: "Dra. Maria Santos",
+      specialty: "Retina e Vítreo",
+      crm: "CRM 67890-CE",
+      description: "Especializada em doenças da retina e cirurgias vitreorretinianas.",
+      image: "/lovable-uploads/6f0e2320-1b39-403a-ab68-8eeffe8dfc36.png"
+    },
+    {
+      name: "Dr. João Oliveira",
+      specialty: "Cirurgia Refrativa",
+      crm: "CRM 11111-CE",
+      description: "Expert em cirurgias refrativas a laser e correção de miopia, hipermetropia e astigmatismo.",
+      image: "/lovable-uploads/87125f62-3c4e-4acc-970b-25f7eb624ae5.png"
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <NavigationHeader showLogo={true} />
-      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h1 className="text-3xl md:text-5xl font-sans font-bold text-medical-primary mb-8">
-          Corpo Clínico
-        </h1>
-        
-        <div className="space-y-16">
-          {/* Dra. Fabíola Roque */}
-          <div className="bg-white rounded-lg shadow-soft overflow-hidden">
-            <div className="flex flex-col lg:flex-row">
-              <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
-                <img 
-                  src="/lovable-uploads/04564b96-e055-469d-8614-41f82a6e22a1.png" 
-                  alt="Dra. Fabíola Roque"
-                  className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
-                />
-              </div>
-              <div className="lg:w-2/3 p-8">
-                <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
-                  Dra. Fabíola Roque
-                </h2>
-                <p className="text-medical-secondary mb-6 text-lg">
-                  Especialista em Catarata, Ceratocone, Lentes de Contato e Cirurgia Refrativa.
-                </p>
-                <div className="space-y-2 text-medical-secondary">
-                  <p>• Formação em Medicina pela FFFCMPA</p>
-                  <p>• Especialização em Oftalmologia pela UFCSPA</p>
-                  <p>• Fellow em Segmento Anterior pela Santa Casa de Misericórdia de Porto Alegre</p>
-                  <p>• Fellow em Córnea pelo Bascom Palmer Eye Institute</p>
-                </div>
-              </div>
+    <div className="min-h-screen">
+      <Header />
+      <main className="pt-20">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-8 text-center">
+              Nosso Corpo Clínico
+            </h1>
+            
+            <p className="text-xl text-muted-foreground leading-relaxed mb-12 text-center max-w-3xl mx-auto">
+              Conheça nossa equipe de oftalmologistas especializados, 
+              comprometidos com a excelência no cuidado da sua visão.
+            </p>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {doctors.map((doctor, index) => (
+                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square overflow-hidden">
+                    <img 
+                      src={doctor.image} 
+                      alt={doctor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold text-medical-primary mb-2">
+                      {doctor.name}
+                    </h3>
+                    <p className="text-medical-secondary font-medium mb-1">
+                      {doctor.specialty}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {doctor.crm}
+                    </p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {doctor.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </div>
-          
-          {/* Dr. Matheus Roque */}
-          <div className="bg-white rounded-lg shadow-soft overflow-hidden">
-            <div className="flex flex-col lg:flex-row">
-              <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
-                <img 
-                  src="/lovable-uploads/1eb4c536-bf5e-4336-9560-481b3a909e6e.png" 
-                  alt="Dr. Matheus Roque"
-                  className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
-                />
-              </div>
-              <div className="lg:w-2/3 p-8">
-                <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
-                  Dr. Matheus Roque
-                </h2>
-                <p className="text-medical-secondary mb-6 text-lg">
-                  Especialista em Oftalmologia geral e Oftalmopediatria
-                </p>
-                <div className="space-y-2 text-medical-secondary">
-                  <p>• Formação em Medicina pela Pontifícia Universidade Católica do Paraná</p>
-                  <p>• Especialização em Oftalmologia pelo Hospital de Clínicas da UFPR</p>
+
+            <div className="mt-16 bg-gradient-accent rounded-2xl p-8">
+              <h2 className="text-2xl font-semibold text-medical-primary mb-6 text-center">
+                Compromisso com a Excelência
+              </h2>
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Nossa equipe médica é formada por oftalmologistas altamente qualificados, 
+                    com formação em renomadas instituições e constante atualização em 
+                    técnicas e tecnologias inovadoras.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Cada profissional traz sua expertise específica, garantindo um 
+                    atendimento completo e personalizado para todas as necessidades 
+                    oftalmológicas.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-medical-primary rounded-full"></div>
+                    <span className="text-medical-primary font-medium">Formação de excelência</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-medical-secondary rounded-full"></div>
+                    <span className="text-medical-primary font-medium">Atualização constante</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-medical-accent rounded-full"></div>
+                    <span className="text-medical-primary font-medium">Experiência comprovada</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-medical-primary rounded-full"></div>
+                    <span className="text-medical-primary font-medium">Atendimento humanizado</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Botão de agendamento */}
-      <div className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-4 flex justify-center">
-          <WhatsAppButton />
-        </div>
-      </div>
-
-      {/* Botão flutuante WhatsApp */}
+      </main>
+      <Footer />
       <FloatingWhatsAppButton />
-
-      {/* Footer */}
-      <Footer
-        logo={
-          <img 
-            src="/lovable-uploads/logoimg.png" 
-            alt="Instituto de Olhos Santa Luzia" 
-            className="h-10 w-10 brightness-0 invert"
-          />
-        }
-        brandName="Instituto de Olhos Santa Luzia"
-        socialLinks={[
-          {
-            icon: <Instagram className="h-5 w-5" />,
-            href: "https://www.instagram.com/io.santaluzia/",
-            label: "Instagram",
-          },
-          {
-            icon: <Facebook className="h-5 w-5" />,
-            href: "https://www.facebook.com/institudodeolhossantaluzia",
-            label: "Facebook",
-          },
-        ]}
-        mainLinks={[
-          { href: "/instituto", label: "O Instituto" },
-          { href: "/corpo-clinico", label: "Corpo Clínico" },
-          { href: "/exames", label: "Exames" },
-          { href: "/catarata", label: "Catarata" },
-          { href: "/artigos", label: "Artigos" },
-        ]}
-        legalLinks={[
-          { href: "#", label: "Política de Privacidade" },
-          { href: "#", label: "Termos de Uso" },
-          { href: "#", label: "LGPD" },
-        ]}
-        copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
-          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
-        }}
-      />
     </div>
   );
 };

@@ -1,130 +1,181 @@
 
-import React from "react";
-import NavigationHeader from "@/components/NavigationHeader";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
-import { Footer } from "@/components/ui/footer";
-import { Instagram, Facebook } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eye, CheckCircle, AlertCircle, Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Catarata = () => {
+  const symptoms = [
+    "Visão embaçada ou turva",
+    "Dificuldade para enxergar à noite",
+    "Sensibilidade aumentada à luz",
+    "Visão dupla em um olho",
+    "Necessidade de mudar óculos frequentemente",
+    "Cores parecem desbotadas"
+  ];
+
+  const benefits = [
+    "Melhora significativa da visão",
+    "Redução da dependência de óculos",
+    "Maior qualidade de vida",
+    "Procedimento seguro e eficaz",
+    "Recuperação rápida",
+    "Tecnologia de ponta"
+  ];
+
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <NavigationHeader showLogo={true} />
-      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
-              Cirurgia de Catarata
-            </h1>
-            <p className="text-lg text-medical-secondary mb-6">
-              A catarata é uma condição natural que ocorre com o envelhecimento, quando o cristalino do olho, que é responsável por focar a visão, começa a se tornar opaco.
-            </p>
-            <p className="text-medical-secondary mb-8">
-              Isso pode causar visão embaçada, dificuldade para enxergar à noite, sensibilidade à luz, e em casos avançados pode levar à cegueira.
-            </p>
-          </div>
-          <div className="relative">
-            <img 
-              src="/lovable-uploads/6f0e2320-1b39-403a-ab68-8eeffe8dfc36.png"
-              alt="Cirurgia de Catarata"
-              className="rounded-lg shadow-medium w-full"
-            />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-medical-accent to-medical-muted p-8 rounded-lg mb-12">
-          <h2 className="text-2xl font-sans text-medical-primary mb-6 text-center">
-            Tratamento Eficaz
-          </h2>
-          <p className="text-medical-secondary text-center max-w-3xl mx-auto">
-            A boa notícia é que, para corrigir a catarata, realizamos uma cirurgia indolor, precisa e segura, onde o cristalino opaco é removido e substituído por uma lente artificial, restaurando a visão de forma eficaz.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-soft text-center">
-            <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-white">1</span>
+    <div className="min-h-screen">
+      <Header />
+      <main className="pt-20">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+                Cirurgia de Catarata
+              </h1>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                Recupere sua visão com segurança e tecnologia avançada. 
+                A cirurgia de catarata é um dos procedimentos mais seguros e eficazes da medicina.
+              </p>
             </div>
-            <h3 className="text-xl font-sans text-medical-primary mb-4">Avaliação</h3>
-            <p className="text-sm text-medical-secondary">
-              Exames detalhados para determinar o melhor momento para a cirurgia
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-soft text-center">
-            <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-white">2</span>
+
+            <div className="grid lg:grid-cols-2 gap-12 mb-16">
+              <div>
+                <h2 className="text-3xl font-semibold text-medical-primary mb-6">
+                  O que é Catarata?
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  A catarata é uma opacificação do cristalino (lente natural do olho) que 
+                  torna a visão embaçada, como se você estivesse olhando através de uma 
+                  janela embaçada ou fosca.
+                </p>
+                <p className="text-muted-foreground leading-relaxed mb-8">
+                  É uma condição comum relacionada ao envelhecimento, mas pode afetar 
+                  pessoas de qualquer idade. A única forma eficaz de tratamento é a cirurgia.
+                </p>
+
+                <Card className="bg-gradient-accent">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <AlertCircle className="h-6 w-6 text-medical-primary" />
+                      <span>Sintomas da Catarata</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {symptoms.map((symptom, index) => (
+                        <li key={index} className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-medical-primary rounded-full"></div>
+                          <span className="text-muted-foreground">{symptom}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-8">
+                <div className="bg-medical-primary rounded-2xl p-8 text-white">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <Eye className="h-10 w-10" />
+                    <h3 className="text-2xl font-semibold">Tecnologia Avançada</h3>
+                  </div>
+                  <p className="leading-relaxed mb-6">
+                    Utilizamos a técnica de facoemulsificação com ultrassom, 
+                    que permite incisões menores, recuperação mais rápida e 
+                    resultados superiores.
+                  </p>
+                  <ul className="space-y-3">
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="h-5 w-5" />
+                      <span>Lentes intraoculares premium</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="h-5 w-5" />
+                      <span>Cirurgia ambulatorial</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="h-5 w-5" />
+                      <span>Anestesia tópica (colírio)</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Lightbulb className="h-6 w-6 text-medical-secondary" />
+                      <span>Benefícios da Cirurgia</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3">
+                      {benefits.map((benefit, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <CheckCircle className="h-4 w-4 text-medical-secondary" />
+                          <span className="text-sm text-muted-foreground">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-            <h3 className="text-xl font-sans text-medical-primary mb-4">Cirurgia</h3>
-            <p className="text-sm text-medical-secondary">
-              Procedimento indolor, preciso e seguro com lentes intraoculares de qualidade
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-soft text-center">
-            <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-white">3</span>
+
+            <div className="bg-medical-muted rounded-2xl p-8 mb-12">
+              <h2 className="text-2xl font-semibold text-medical-primary mb-6 text-center">
+                Como é o Procedimento?
+              </h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">1</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Preparação</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Aplicação de colírio anestésico e dilatação da pupila
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">2</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Cirurgia</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Remoção da catarata e implante da lente intraocular
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-medical-primary">3</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Recuperação</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Acompanhamento pós-operatório e melhora gradual da visão
+                  </p>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-sans text-medical-primary mb-4">Recuperação</h3>
-            <p className="text-sm text-medical-secondary">
-              Acompanhamento pós-operatório para garantir a melhor recuperação
-            </p>
+
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-medical-primary mb-4">
+                Pronto para recuperar sua visão?
+              </h2>
+              <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Agende uma consulta para avaliação e descubra como a cirurgia de catarata 
+                pode melhorar sua qualidade de vida.
+              </p>
+              <Button size="lg" className="bg-gradient-primary">
+                Agendar Consulta
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Botão de agendamento */}
-      <div className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-4 flex justify-center">
-          <WhatsAppButton />
-        </div>
-      </div>
-
-      {/* Botão flutuante WhatsApp */}
+      </main>
+      <Footer />
       <FloatingWhatsAppButton />
-
-      {/* Footer */}
-      <Footer
-        logo={
-          <img 
-            src="/lovable-uploads/logoimg.png" 
-            alt="Instituto de Olhos Santa Luzia" 
-            className="h-10 w-10 brightness-0 invert"
-          />
-        }
-        brandName="Instituto de Olhos Santa Luzia"
-        socialLinks={[
-          {
-            icon: <Instagram className="h-5 w-5" />,
-            href: "https://www.instagram.com/io.santaluzia/",
-            label: "Instagram",
-          },
-          {
-            icon: <Facebook className="h-5 w-5" />,
-            href: "https://www.facebook.com/institudodeolhossantaluzia",
-            label: "Facebook",
-          },
-        ]}
-        mainLinks={[
-          { href: "/instituto", label: "O Instituto" },
-          { href: "/corpo-clinico", label: "Corpo Clínico" },
-          { href: "/exames", label: "Exames" },
-          { href: "/catarata", label: "Catarata" },
-          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
-          { href: "/ceratocone", label: "Ceratocone" },
-          { href: "/artigos", label: "Artigos" },
-        ]}
-        legalLinks={[
-          { href: "#", label: "Política de Privacidade" },
-          { href: "#", label: "Termos de Uso" },
-          { href: "#", label: "LGPD" },
-        ]}
-        copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
-          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
-        }}
-      />
     </div>
   );
 };

@@ -53,20 +53,20 @@ const Footer = () => {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
-            <div className="flex items-center justify-center mb-6">
+            <div className="flex items-center justify-center lg:justify-start mb-6">
               <img 
                 src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
                 alt="Instituto de Olhos Santa Luzia" 
                 className="h-16 w-auto brightness-0 invert"
               />
             </div>
-            <p className="text-white/80 mb-6 leading-relaxed text-center">
+            <p className="text-white/80 mb-6 leading-relaxed text-center lg:text-left">
               Mais de 15 anos cuidando da saúde dos seus olhos com excelência, 
               tecnologia de ponta e atendimento humanizado.
             </p>
             
             {/* Social Links */}
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center lg:justify-start space-x-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}

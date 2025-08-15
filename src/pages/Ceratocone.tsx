@@ -1,167 +1,205 @@
 
-import React from "react";
-import NavigationHeader from "@/components/NavigationHeader";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import { Footer } from "@/components/ui/footer";
-import { Instagram, Facebook } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, Eye, Shield, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Ceratocone = () => {
+  const symptoms = [
+    "Visão distorcida e embaçada",
+    "Aumento frequente do grau dos óculos",
+    "Sensibilidade à luz",
+    "Visão dupla ou múltipla",
+    "Dificuldade para dirigir à noite",
+    "Coceira nos olhos"
+  ];
+
+  const treatments = [
+    {
+      name: "Crosslinking",
+      description: "Fortalecimento da córnea com riboflavina e luz UV",
+      icon: <Shield className="h-6 w-6" />
+    },
+    {
+      name: "Anel Intraestromal",
+      description: "Implante de anéis para regularizar a córnea",
+      icon: <Eye className="h-6 w-6" />
+    },
+    {
+      name: "Lentes de Contato Especiais",
+      description: "Lentes rígidas ou esclerais para correção visual",
+      icon: <Activity className="h-6 w-6" />
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <NavigationHeader showLogo={true} />
-      <div className="max-w-4xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
-              Tratamento do Ceratocone
-            </h1>
-            <p className="text-lg text-medical-secondary mb-6">
-              O ceratocone é uma condição ocular que causa o afinamento e a deformação da córnea, levando à visão distorcida e, em alguns casos, à perda significativa da visão.
-            </p>
-            <p className="text-medical-secondary mb-6">
-              Com o tempo, a córnea assume um formato de cone, o que afeta a forma como a luz é focalizada na retina.
-            </p>
-          </div>
-          <div className="relative">
-            <img 
-              src="/lovable-uploads/cf83b478-63b6-4cc7-a3c1-a4b1eb5029fb.png"
-              alt="Lente de contato para ceratocone"
-              className="rounded-lg shadow-medium w-full"
-            />
-          </div>
-        </div>
+    <div className="min-h-screen">
+      <Header />
+      <main className="pt-20">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+                Tratamento de Ceratocone
+              </h1>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                Diagnóstico precoce e tratamento especializado para preservar sua visão. 
+                Tecnologias avançadas para controlar a progressão do ceratocone.
+              </p>
+            </div>
 
-        <div className="bg-white p-8 rounded-lg shadow-soft mb-12">
-          <h2 className="text-2xl font-sans text-medical-primary mb-6">
-            Complicações e Sintomas
-          </h2>
-          <p className="text-medical-secondary mb-6">
-            As complicações mais comuns do ceratocone incluem miopia e astigmatismo, além de dificuldades com o uso de lentes de contato convencionais.
-          </p>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold text-medical-primary mb-4">
-                Sinais e Sintomas:
-              </h3>
-              <ul className="list-disc list-inside text-medical-secondary space-y-2">
-                <li>Visão distorcida e embaçada</li>
-                <li>Mudanças frequentes no grau dos óculos</li>
-                <li>Sensibilidade à luz</li>
-                <li>Halos ao redor das luzes</li>
-                <li>Diplopia monocular (visão dupla em um olho)</li>
-              </ul>
-            </div>
-            <div className="flex items-center justify-center">
-              <img 
-                src="/lovable-uploads/ca6a3fb8-8270-45cf-97e5-a67feca68a3e.png"
-                alt="Vista detalhada do ceratocone"
-                className="rounded-lg shadow-soft"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-medical-accent to-medical-muted p-8 rounded-lg mb-12">
-          <h3 className="text-2xl font-sans text-medical-primary mb-6 text-center">
-            Opções de Tratamento
-          </h3>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <h4 className="font-semibold text-medical-primary mb-2">Crosslinking Corneano</h4>
-                <p className="text-sm text-medical-primary">
-                  Procedimento que fortalece as fibras de colágeno da córnea, estabilizando a progressão da doença.
-                </p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-medical-primary mb-2">Lentes de Contato Especiais</h4>
-                <p className="text-sm text-medical-primary">
-                  Lentes rígidas ou semi-rígidas especialmente desenhadas para ceratocone.
-                </p>
+            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-8 mb-12">
+              <div className="flex items-start space-x-4">
+                <AlertTriangle className="h-8 w-8 text-orange-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h2 className="text-xl font-semibold text-orange-800 mb-3">
+                    O que é Ceratocone?
+                  </h2>
+                  <p className="text-orange-700 leading-relaxed mb-4">
+                    O ceratocone é uma condição progressiva em que a córnea (parte transparente 
+                    da frente do olho) gradualmente se torna mais fina e assume um formato cônico, 
+                    causando distorção visual.
+                  </p>
+                  <p className="text-orange-700 leading-relaxed">
+                    É importante o diagnóstico precoce para evitar a progressão e preservar a visão.
+                  </p>
+                </div>
               </div>
             </div>
-            
-            <div className="space-y-6">
+
+            <div className="grid lg:grid-cols-2 gap-12 mb-16">
               <div>
-                <h4 className="font-semibold text-medical-primary mb-2">Anel Intraestromal</h4>
-                <p className="text-sm text-medical-primary">
-                  Implante de segmentos de anel para regularizar a curvatura corneana.
+                <h2 className="text-3xl font-semibold text-medical-primary mb-6">
+                  Sintomas do Ceratocone
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-8">
+                  O ceratocone geralmente se desenvolve durante a adolescência ou início 
+                  da idade adulta. Os sintomas podem aparecer gradualmente e incluem:
                 </p>
+
+                <Card className="bg-gradient-accent">
+                  <CardContent className="p-6">
+                    <ul className="space-y-3">
+                      {symptoms.map((symptom, index) => (
+                        <li key={index} className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-medical-primary rounded-full flex-shrink-0"></div>
+                          <span className="text-muted-foreground">{symptom}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-blue-800 mb-2">
+                    ⚠️ Diagnóstico Precoce é Fundamental
+                  </h3>
+                  <p className="text-blue-700 text-sm leading-relaxed">
+                    Se você apresenta algum destes sintomas, especialmente se tem 
+                    histórico familiar de ceratocone, procure avaliação oftalmológica 
+                    especializada o quanto antes.
+                  </p>
+                </div>
               </div>
-              
-              <div>
-                <h4 className="font-semibold text-medical-primary mb-2">Transplante de Córnea</h4>
-                <p className="text-sm text-medical-primary">
-                  Em casos avançados, pode ser necessário o transplante parcial ou total da córnea.
-                </p>
+
+              <div className="space-y-8">
+                <h2 className="text-3xl font-semibold text-medical-primary mb-6">
+                  Opções de Tratamento
+                </h2>
+                
+                {treatments.map((treatment, index) => (
+                  <Card key={index} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-3">
+                        <div className="text-medical-primary">
+                          {treatment.icon}
+                        </div>
+                        <span>{treatment.name}</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {treatment.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                <div className="bg-medical-primary rounded-2xl p-6 text-white">
+                  <h3 className="font-semibold mb-3">💡 Tratamento Personalizado</h3>
+                  <p className="text-sm leading-relaxed">
+                    Cada caso de ceratocone é único. Nossa equipe avalia 
+                    cuidadosamente cada paciente para determinar o melhor 
+                    plano de tratamento, que pode combinar diferentes 
+                    abordagens para resultados otimais.
+                  </p>
+                </div>
               </div>
+            </div>
+
+            <div className="bg-medical-muted rounded-2xl p-8 mb-12">
+              <h2 className="text-2xl font-semibold text-medical-primary mb-6 text-center">
+                Etapas do Diagnóstico
+              </h2>
+              <div className="grid md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">1</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Consulta</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Avaliação dos sintomas e histórico familiar
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">2</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Topografia</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Mapeamento detalhado da curvatura da córnea
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-medical-primary">3</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Pentacam</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Análise da espessura e formato da córnea
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">4</span>
+                  </div>
+                  <h3 className="font-semibold text-medical-primary mb-2">Plano</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Definição da estratégia de tratamento
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-medical-primary mb-4">
+                Suspeita de Ceratocone?
+              </h2>
+              <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Não espere os sintomas piorarem. Agende uma consulta especializada 
+                para diagnóstico precoce e tratamento adequado.
+              </p>
+              <Button size="lg" className="bg-gradient-primary">
+                Agendar Consulta Especializada
+              </Button>
             </div>
           </div>
         </div>
-
-        <div className="bg-white p-8 rounded-lg shadow-soft text-center">
-          <h3 className="text-2xl font-sans text-medical-primary mb-4">
-            Acompanhamento é Fundamental
-          </h3>
-          <p className="text-medical-primary max-w-4xl mx-auto mb-6">
-            O tratamento varia conforme a gravidade da doença. Em estágios iniciais, o uso de lentes de contato especiais pode corrigir a visão, e pode ser necessário a realização de crosslinking para estabilização do ceratocone.
-          </p>
-          <p className="text-medical-primary max-w-4xl mx-auto">
-            É fundamental o acompanhamento regular com um oftalmologista para monitorar a progressão da doença e determinar o tratamento adequado.
-          </p>
-        </div>
-      </div>
-
-      {/* Botão de agendamento */}
-      <div className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-4 flex justify-center">
-          <WhatsAppButton />
-        </div>
-      </div>
-
-      {/* Footer */}
-      <Footer
-        logo={
-          <img 
-            src="/lovable-uploads/logoimg.png" 
-            alt="Instituto de Olhos Santa Luzia" 
-            className="h-10 w-10 brightness-0 invert"
-          />
-        }
-        brandName="Instituto de Olhos Santa Luzia"
-        socialLinks={[
-          {
-            icon: <Instagram className="h-5 w-5" />,
-            href: "https://www.instagram.com/io.santaluzia/",
-            label: "Instagram",
-          },
-          {
-            icon: <Facebook className="h-5 w-5" />,
-            href: "https://www.facebook.com/institudodeolhossantaluzia",
-            label: "Facebook",
-          },
-        ]}
-        mainLinks={[
-          { href: "/instituto", label: "O Instituto" },
-          { href: "/corpo-clinico", label: "Corpo Clínico" },
-          { href: "/exames", label: "Exames" },
-          { href: "/catarata", label: "Catarata" },
-          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
-          { href: "/ceratocone", label: "Ceratocone" },
-          { href: "/artigos", label: "Artigos" },
-        ]}
-        legalLinks={[
-          { href: "#", label: "Política de Privacidade" },
-          { href: "#", label: "Termos de Uso" },
-          { href: "#", label: "LGPD" },
-        ]}
-        copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
-          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000",
-        }}
-      />
+      </main>
+      <Footer />
+      <FloatingWhatsAppButton />
     </div>
   );
 };
