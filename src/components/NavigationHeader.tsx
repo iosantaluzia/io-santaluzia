@@ -4,7 +4,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Users, Stethoscope, Eye, Zap, Circle, FileText, ChevronDown } from "lucide-react";
+import { Home, Users, Stethoscope, Eye, FileText, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +68,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               onClick={() => navigate("/")}
             >
               <img 
-                src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
+                src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
                 alt="Instituto de Olhos Santa Luzia" 
                 className="h-7 w-7 object-contain animate-spin-slow"
               />
@@ -93,7 +93,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                   O Instituto
                 </Tab>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-medium rounded-lg p-2 min-w-[200px] z-[60]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[60]">
                 {institutoItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
@@ -120,7 +120,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                   Cirurgias
                 </Tab>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-medium rounded-lg p-2 min-w-[200px] z-[60]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[60]">
                 {cirurgiasItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}

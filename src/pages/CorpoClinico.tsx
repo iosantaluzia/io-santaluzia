@@ -1,5 +1,6 @@
+
 import NavigationHeader from "@/components/NavigationHeader";
-import Footer from "@/components/Footer";
+import { Footer } from "@/components/ui/footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 
 const CorpoClinico = () => {
@@ -7,138 +8,30 @@ const CorpoClinico = () => {
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
       <main className="pt-20">
-        <div className="container mx-auto px-4 py-16">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-8 text-center">
-            Nosso Corpo Clínico
-          </h1>
-          <p className="text-xl text-muted-foreground leading-relaxed mb-8 text-center">
-            Conheça os profissionais que cuidam da sua visão com excelência e dedicação.
-          </p>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Médico 1 */}
-            <div className="bg-white rounded-2xl shadow-medium overflow-hidden">
-              <img
-                src="https://via.placeholder.com/400x300"
-                alt="Dr(a). Nome do Médico"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-medical-primary mb-2">
-                  Dr(a). Nome do Médico
-                </h3>
-                <p className="text-muted-foreground mb-3">
-                  Especialidade: Oftalmologia Geral
-                </p>
-                <p className="text-sm text-gray-600">
-                  CRM: 12345-CE
-                </p>
-              </div>
-            </div>
-
-            {/* Médico 2 */}
-            <div className="bg-white rounded-2xl shadow-medium overflow-hidden">
-              <img
-                src="https://via.placeholder.com/400x300"
-                alt="Dr(a). Nome do Médico"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-medical-primary mb-2">
-                  Dr(a). Nome do Médico
-                </h3>
-                <p className="text-muted-foreground mb-3">
-                  Especialidade: Retina e Vítreo
-                </p>
-                <p className="text-sm text-gray-600">
-                  CRM: 67890-CE
-                </p>
-              </div>
-            </div>
-
-            {/* Médico 3 */}
-            <div className="bg-white rounded-2xl shadow-medium overflow-hidden">
-              <img
-                src="https://via.placeholder.com/400x300"
-                alt="Dr(a). Nome do Médico"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-medical-primary mb-2">
-                  Dr(a). Nome do Médico
-                </h3>
-                <p className="text-muted-foreground mb-3">
-                  Especialidade: Cirurgia Refrativa
-                </p>
-                <p className="text-sm text-gray-600">
-                  CRM: 11223-CE
-                </p>
-              </div>
-            </div>
-
-            {/* Médico 4 */}
-            <div className="bg-white rounded-2xl shadow-medium overflow-hidden">
-              <img
-                src="https://via.placeholder.com/400x300"
-                alt="Dr(a). Nome do Médico"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-medical-primary mb-2">
-                  Dr(a). Nome do Médico
-                </h3>
-                <p className="text-muted-foreground mb-3">
-                  Especialidade: Glaucoma
-                </p>
-                <p className="text-sm text-gray-600">
-                  CRM: 44556-CE
-                </p>
-              </div>
-            </div>
-
-            {/* Médico 5 */}
-            <div className="bg-white rounded-2xl shadow-medium overflow-hidden">
-              <img
-                src="https://via.placeholder.com/400x300"
-                alt="Dr(a). Nome do Médico"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-medical-primary mb-2">
-                  Dr(a). Nome do Médico
-                </h3>
-                <p className="text-muted-foreground mb-3">
-                  Especialidade: Plástica Ocular
-                </p>
-                <p className="text-sm text-gray-600">
-                  CRM: 77889-CE
-                </p>
-              </div>
-            </div>
-
-            {/* Médico 6 */}
-            <div className="bg-white rounded-2xl shadow-medium overflow-hidden">
-              <img
-                src="https://via.placeholder.com/400x300"
-                alt="Dr(a). Nome do Médico"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-medical-primary mb-2">
-                  Dr(a). Nome do Médico
-                </h3>
-                <p className="text-muted-foreground mb-3">
-                  Especialidade: Oftalmopediatria
-                </p>
-                <p className="text-sm text-gray-600">
-                  CRM: 99001-CE
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </main>
-      <Footer />
+      <Footer
+        logo={<img src="/lovable-uploads/logogrande-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-10 w-10 brightness-0 invert" />}
+        brandName=""
+        socialLinks={[
+          { icon: <span>📷</span>, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
+          { icon: <span>📘</span>, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
+        ]}
+        mainLinks={[
+          { href: "/instituto", label: "O Instituto" },
+          { href: "/corpo-clinico", label: "Corpo Clínico" },
+          { href: "/exames", label: "Exames" },
+          { href: "/catarata", label: "Catarata" },
+          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+          { href: "/ceratocone", label: "Ceratocone" },
+          { href: "/artigos", label: "Artigos" }
+        ]}
+        legalLinks={[]}
+        copyright={{
+          text: "© 2024 Instituto de Olhos Santa Luzia",
+          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
+        }}
+      />
       <FloatingWhatsAppButton />
     </div>
   );
