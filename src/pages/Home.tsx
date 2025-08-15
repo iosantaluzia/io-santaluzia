@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Stethoscope, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Stethoscope, Eye, ChevronLeft, ChevronRight, Instagram, Facebook } from "lucide-react";
 import NavigationHeader from "@/components/NavigationHeader";
 import SymptomChecker from "@/components/SymptomChecker";
 import ExpandableCard from "@/components/ExpandableCard";
@@ -92,28 +92,30 @@ const Home = () => {
             <p className="text-lg text-medical-secondary mb-8 max-w-2xl mx-auto">
               Nossa IA especializada ajuda você a entender seus sintomas oculares de forma rápida e confiável
             </p>
-            <SymptomChecker onContinue={handleContinueToSite} />
+            <SymptomChecker />
           </motion.div>
         </div>
       </section>
 
-      {/* Site Section */}
+      {/* Site Section - Duas Colunas */}
       <section id="site" className="py-20 bg-gradient-hero scroll-mt-20">
-        <div className="max-w-4xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
-              Bem vindo ao Instituto de Olhos Santa Luzia
-            </h2>
-            <p className="text-lg text-medical-secondary mb-8">
-              Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
-            </p>
-          </div>
-          <div className="relative">
-            <img
-              src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
-              alt="Cuidados oftalmológicos especializados"
-              className="rounded-lg shadow-medium w-full"
-            />
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
+                Bem vindo ao Instituto de Olhos Santa Luzia
+              </h2>
+              <p className="text-lg text-medical-secondary mb-8">
+                Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
+              </p>
+            </div>
+            <div className="relative">
+              <img
+                src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
+                alt="Cuidados oftalmológicos especializados"
+                className="rounded-lg shadow-medium w-full"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -125,9 +127,9 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Services Section */}
+      {/* Services Section - Duas Colunas */}
       <div className="py-20 bg-background">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
@@ -220,11 +222,11 @@ const Home = () => {
       </div>
 
       <Footer
-        logo={<img src="/lovable-uploads/logogrande-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-10 w-10 brightness-0 invert" />}
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto brightness-0 invert" />}
         brandName=""
         socialLinks={[
-          { icon: <span>📷</span>, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
-          { icon: <span>📘</span>, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
+          { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
+          { icon: <Facebook className="h-5 w-5" />, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
         ]}
         mainLinks={[
           { href: "/instituto", label: "O Instituto" },

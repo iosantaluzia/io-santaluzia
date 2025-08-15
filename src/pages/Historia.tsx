@@ -1,9 +1,10 @@
 
 import React from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import NavigationHeader from '@/components/NavigationHeader';
+import { Footer } from '@/components/ui/footer';
 import Timeline from '@/components/Timeline';
 import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
+import { Instagram, Facebook } from 'lucide-react';
 
 const Historia = () => {
   // Dados do timeline para a história do instituto
@@ -66,7 +67,7 @@ const Historia = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <NavigationHeader showLogo={true} />
       <FloatingWhatsAppButton />
       
       <main className="pt-32">
@@ -102,7 +103,28 @@ const Historia = () => {
         </div>
       </main>
       
-      <Footer />
+      <Footer
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto brightness-0 invert" />}
+        brandName=""
+        socialLinks={[
+          { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
+          { icon: <Facebook className="h-5 w-5" />, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
+        ]}
+        mainLinks={[
+          { href: "/instituto", label: "O Instituto" },
+          { href: "/corpo-clinico", label: "Corpo Clínico" },
+          { href: "/exames", label: "Exames" },
+          { href: "/catarata", label: "Catarata" },
+          { href: "/cirurgia-refrativa", label: "Cirurgia Refrativa" },
+          { href: "/ceratocone", label: "Ceratocone" },
+          { href: "/artigos", label: "Artigos" }
+        ]}
+        legalLinks={[]}
+        copyright={{
+          text: "© 2024 Instituto de Olhos Santa Luzia",
+          license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
+        }}
+      />
     </div>
   );
 };
