@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 interface FooterProps {
   logo: React.ReactNode;
@@ -23,8 +24,8 @@ interface FooterProps {
 export function Footer({
   logo,
   brandName,
-  socialLinks,
-  mainLinks,
+  socialLinks = [],
+  mainLinks = [],
   legalLinks,
   copyright
 }: FooterProps) {
