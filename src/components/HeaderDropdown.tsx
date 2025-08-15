@@ -20,7 +20,7 @@ interface HeaderDropdownProps {
   className?: string;
 }
 
-const HeaderDropdown = ({ title, items = [], className = "" }: HeaderDropdownProps) => {
+const HeaderDropdown = ({ title, items, className = "" }: HeaderDropdownProps) => {
   const navigate = useNavigate();
 
   return (

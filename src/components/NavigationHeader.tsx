@@ -93,7 +93,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                   O Instituto
                 </Tab>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[200]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[100]">
                 {institutoItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
@@ -120,7 +120,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                   Cirurgias
                 </Tab>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[200]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[100]">
                 {cirurgiasItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
@@ -188,26 +188,27 @@ const Tab = ({
   icon: any;
   isDropdown?: boolean;
 }) => {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLLIElement>(null);
   
-  const handleMouseEnter = () => {
-    if (!ref.current) return;
-    const { width } = ref.current.getBoundingClientRect();
-    setPosition({
-      width,
-      opacity: 1,
-      left: ref.current.offsetLeft,
-    });
-  };
-
-  const commonClassName = `relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full ${
-    isActive 
-      ? "bg-medical-primary text-white font-semibold" 
-      : "text-medical-primary hover:text-white hover:bg-medical-primary"
-  } ${isDropdown ? 'flex items-center space-x-1' : ''}`;
-
-  const content = (
-    <>
+  return (
+    <li
+      ref={ref}
+      onMouseEnter={() => {
+        if (!ref.current) return;
+        const { width } = ref.current.getBoundingClientRect();
+        setPosition({
+          width,
+          opacity: 1,
+          left: ref.current.offsetLeft,
+        });
+      }}
+      onClick={!isDropdown ? onClick : undefined}
+      className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full ${
+        isActive 
+          ? "bg-medical-primary text-white font-semibold" 
+          : "text-medical-primary hover:text-white hover:bg-medical-primary"
+      } ${isDropdown ? 'flex items-center space-x-1' : ''}`}
+    >
       {isMobile ? (
         isActive ? (
           <span className="text-xs whitespace-nowrap flex items-center space-x-1">
@@ -223,30 +224,6 @@ const Tab = ({
           {isDropdown && <ChevronDown className="w-3 h-3" />}
         </span>
       )}
-    </>
-  );
-
-  if (isDropdown) {
-    return (
-      <button
-        ref={ref as React.RefObject<HTMLButtonElement>}
-        onMouseEnter={handleMouseEnter}
-        className={commonClassName}
-        type="button"
-      >
-        {content}
-      </button>
-    );
-  }
-
-  return (
-    <li
-      ref={ref as React.RefObject<HTMLLIElement>}
-      onMouseEnter={handleMouseEnter}
-      onClick={onClick}
-      className={commonClassName}
-    >
-      {content}
     </li>
   );
 };
