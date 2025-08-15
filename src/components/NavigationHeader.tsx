@@ -68,7 +68,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               onClick={() => navigate("/")}
             >
               <img 
-                src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
+                src="/lovable-uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
                 alt="Instituto de Olhos Santa Luzia" 
                 className="h-7 w-7 object-contain animate-spin-slow"
               />
@@ -202,7 +202,7 @@ const Tab = ({
           left: ref.current.offsetLeft,
         });
       }}
-      onClick={onClick}
+      onClick={!isDropdown ? onClick : undefined}
       className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full ${
         isActive 
           ? "bg-medical-primary text-white font-semibold" 
