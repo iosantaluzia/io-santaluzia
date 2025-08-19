@@ -40,7 +40,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
   }, []);
 
   const institutoItems = [
-    { name: "História", href: "/instituto" },
+    { name: "História", href: "/historia" },
     { name: "Corpo Clínico", href: "/corpo-clinico" }
   ];
 
@@ -83,12 +83,12 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className={`relative z-10 cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full flex items-center space-x-1 ${
-                  location.pathname === '/instituto' || location.pathname === '/corpo-clinico'
+                  location.pathname === '/historia' || location.pathname === '/corpo-clinico'
                     ? "bg-medical-primary text-white font-semibold" 
                     : "text-medical-primary hover:text-white hover:bg-medical-primary"
                 }`}>
                   {isMobile ? (
-                    location.pathname === '/instituto' || location.pathname === '/corpo-clinico' ? (
+                    location.pathname === '/historia' || location.pathname === '/corpo-clinico' ? (
                       <>
                         <span className="text-xs whitespace-nowrap">O Instituto</span>
                         <ChevronDown className="w-3 h-3" />

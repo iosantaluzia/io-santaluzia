@@ -4,7 +4,6 @@ import { Footer } from '@/components/ui/footer';
 import Timeline from '@/components/Timeline';
 import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
 import { Instagram, Facebook } from 'lucide-react';
-import BackgroundRemovedImage from '@/components/BackgroundRemovedImage';
 
 const Historia = () => {
   // Timeline real do Instituto de Olhos Santa Luzia
@@ -42,8 +41,8 @@ const Historia = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <BackgroundRemovedImage
-              src="https://i.ytimg.com/vi/G6-7RxvIBJM/maxresdefault.jpg"
+            <img
+              src="/lovable-uploads/mel-90-zeiss-laser.png"
               alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
               className="rounded-lg shadow-medium w-full max-w-md h-auto object-cover"
             />
