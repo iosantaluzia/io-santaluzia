@@ -1,10 +1,10 @@
-
 import React from 'react';
 import NavigationHeader from '@/components/NavigationHeader';
 import { Footer } from '@/components/ui/footer';
 import Timeline from '@/components/Timeline';
 import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
 import { Instagram, Facebook } from 'lucide-react';
+import BackgroundRemovedImage from '@/components/BackgroundRemovedImage';
 
 const Historia = () => {
   // Timeline real do Instituto de Olhos Santa Luzia
@@ -27,31 +27,26 @@ const Historia = () => {
             Esta tecnologia revolucionária permite tratamentos mais precisos e personalizados, 
             estabelecendo um novo padrão de excelência em correção visual na região.
           </p>
-          <div className="flex flex-col md:flex-row gap-6 items-center mb-6">
-            <div className="flex-1">
-              <div className="mb-4">
-                <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
-                  🔬 Primeiro MEL 90 Zeiss da região
-                </div>
-                <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
-                  ⚡ Tecnologia Presbyond® avançada
-                </div>
-                <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
-                  👁️ Cirurgia refrativa de última geração
-                </div>
-                <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base">
-                  📈 Novo padrão de excelência regional
-                </div>
-              </div>
+          <div className="mb-4">
+            <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
+              🔬 Primeiro MEL 90 Zeiss da região
             </div>
-            <div className="flex-shrink-0">
-              <img 
-                src="https://i.ytimg.com/vi/G6-7RxvIBJM/maxresdefault.jpg"
-                alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
-                className="rounded-lg shadow-medium w-full max-w-xs h-auto object-cover"
-                style={{ backgroundColor: 'transparent' }}
-              />
+            <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
+              ⚡ Tecnologia Presbyond® avançada
             </div>
+            <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
+              👁️ Cirurgia refrativa de última geração
+            </div>
+            <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-4">
+              📈 Novo padrão de excelência regional
+            </div>
+          </div>
+          <div className="flex justify-center">
+            <BackgroundRemovedImage
+              src="https://i.ytimg.com/vi/G6-7RxvIBJM/maxresdefault.jpg"
+              alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
+              className="rounded-lg shadow-medium w-full max-w-md h-auto object-cover"
+            />
           </div>
         </div>
       )
