@@ -5,32 +5,11 @@ import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 import { Instagram, Facebook } from 'lucide-react';
 
 const CorpoClinico = () => {
-  const doctors = [
-    {
-      name: "Dr. Matheus Rocha",
-      specialty: "Oftalmologista Geral",
-      description: "Especialista em cirurgias de catarata e glaucoma, com mais de 10 anos de experiência.",
-      image: "/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
-    },
-    {
-      name: "Dra. Fabíola Santos",
-      specialty: "Cirurgia Refrativa",
-      description: "Especialista em cirurgias refrativas e correção de miopia, hipermetropia e astigmatismo.",
-      image: "/lovable-uploads/87125f62-3c4e-4acc-970b-25f7eb624ae5.png"
-    },
-    {
-      name: "Dr. Carlos Mendes",
-      specialty: "Retina e Vítreo",
-      description: "Especialista em doenças da retina e procedimentos de vitrectomia.",
-      image: "/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
-    }
-  ];
-
   return (
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
       <main className="pt-32 pb-16">
-        <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
               Corpo Clínico
@@ -41,32 +20,58 @@ const CorpoClinico = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {doctors.map((doctor, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-soft overflow-hidden hover:shadow-medium transition-all duration-300"
-              >
-                <div className="h-64 overflow-hidden">
+          <div className="space-y-16">
+            {/* Dra. Fabíola Roque */}
+            <div className="bg-white rounded-lg shadow-soft overflow-hidden">
+              <div className="flex flex-col lg:flex-row">
+                <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
-                    src={doctor.image}
-                    alt={doctor.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    src="/lovable-uploads/04564b96-e055-469d-8614-41f82a6e22a1.png"
+                    alt="Dra. Fabíola Roque"
+                    className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-sans font-bold text-medical-primary mb-2">
-                    {doctor.name}
-                  </h3>
-                  <h4 className="text-medical-accent font-medium mb-3">
-                    {doctor.specialty}
-                  </h4>
-                  <p className="text-medical-secondary text-sm">
-                    {doctor.description}
+                <div className="lg:w-2/3 p-8">
+                  <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
+                    Dra. Fabíola Roque
+                  </h2>
+                  <p className="text-medical-secondary mb-6 text-lg">
+                    Especialista em Catarata, Ceratocone, Lentes de Contato e Cirurgia Refrativa.
                   </p>
+                  <div className="space-y-2 text-medical-secondary">
+                    <p>• Formação em Medicina pela FFFCMPA</p>
+                    <p>• Especialização em Oftalmologia pela UFCSPA</p>
+                    <p>• Fellow em Segmento Anterior pela Santa Casa de Misericórdia de Porto Alegre</p>
+                    <p>• Fellow em Córnea pelo Bascom Palmer Eye Institute</p>
+                  </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Dr. Matheus Roque */}
+            <div className="bg-white rounded-lg shadow-soft overflow-hidden">
+              <div className="flex flex-col lg:flex-row">
+                <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
+                  <img
+                    src="/lovable-uploads/1eb4c536-bf5e-4336-9560-481b3a909e6e.png"
+                    alt="Dr. Matheus Roque"
+                    className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
+                  />
+                </div>
+                <div className="lg:w-2/3 p-8">
+                  <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
+                    Dr. Matheus Roque
+                  </h2>
+                  <p className="text-medical-secondary mb-6 text-lg">
+                    Especialista em Oftalmologia geral e Oftalmopediatria
+                  </p>
+                  <div className="space-y-2 text-medical-secondary">
+                    <p>• Formação em Medicina pela Pontifícia Universidade Católica do Paraná</p>
+                    <p>• Especialização em Oftalmologia pelo Hospital de Clínicas da UFPR</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-soft p-8 mt-12 max-w-4xl mx-auto">
