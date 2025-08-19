@@ -116,22 +116,7 @@ const Historia = () => {
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Conheça a trajetória do Instituto de Olhos Santa Luzia e como nos tornamos 
-              referência em cuidados oftalmológicos no Ceará.
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-soft p-8 mb-12">
-            <h2 className="text-2xl font-semibold text-medical-primary mb-4">
-              10 Anos de Excelência
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Fundado com o compromisso de oferecer cuidados oftalmológicos de excelência, 
-              o Instituto de Olhos Santa Luzia tem se dedicado ao longo de uma década 
-              a proporcionar saúde visual com tecnologia de ponta e atendimento humanizado.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Nossa missão sempre foi clara: cuidar da visão de nossos pacientes com a mais 
-              alta qualidade técnica, combinada com o carinho e atenção que cada pessoa merece.
+              referência em cuidados oftalmológicos em Sinop/MT.
             </p>
           </div>
 
