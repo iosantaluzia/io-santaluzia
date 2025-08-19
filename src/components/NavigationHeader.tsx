@@ -82,18 +82,29 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             {/* Instituto Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Tab 
-                  setPosition={setPosition}
-                  isActive={location.pathname === '/instituto' || location.pathname === '/corpo-clinico'}
-                  onClick={() => {}}
-                  isMobile={isMobile}
-                  icon={Home}
-                  isDropdown={true}
-                >
-                  O Instituto
-                </Tab>
+                <button className={`relative z-10 cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full flex items-center space-x-1 ${
+                  location.pathname === '/instituto' || location.pathname === '/corpo-clinico'
+                    ? "bg-medical-primary text-white font-semibold" 
+                    : "text-medical-primary hover:text-white hover:bg-medical-primary"
+                }`}>
+                  {isMobile ? (
+                    location.pathname === '/instituto' || location.pathname === '/corpo-clinico' ? (
+                      <>
+                        <span className="text-xs whitespace-nowrap">O Instituto</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </>
+                    ) : (
+                      <Home className="w-4 h-4" />
+                    )
+                  ) : (
+                    <>
+                      <span className="whitespace-nowrap">O Instituto</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </>
+                  )}
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[100]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[200]">
                 {institutoItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
@@ -109,18 +120,29 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             {/* Cirurgias Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Tab 
-                  setPosition={setPosition}
-                  isActive={location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone'}
-                  onClick={() => {}}
-                  isMobile={isMobile}
-                  icon={Eye}
-                  isDropdown={true}
-                >
-                  Cirurgias
-                </Tab>
+                <button className={`relative z-10 cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full flex items-center space-x-1 ${
+                  location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone'
+                    ? "bg-medical-primary text-white font-semibold" 
+                    : "text-medical-primary hover:text-white hover:bg-medical-primary"
+                }`}>
+                  {isMobile ? (
+                    location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone' ? (
+                      <>
+                        <span className="text-xs whitespace-nowrap">Cirurgias</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </>
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )
+                  ) : (
+                    <>
+                      <span className="whitespace-nowrap">Cirurgias</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </>
+                  )}
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[100]">
+              <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 min-w-[200px] z-[200]">
                 {cirurgiasItems.map((item) => (
                   <DropdownMenuItem
                     key={item.name}
@@ -178,7 +200,6 @@ const Tab = ({
   onClick,
   isMobile,
   icon: Icon,
-  isDropdown = false,
 }: {
   children: React.ReactNode;
   setPosition: any;
@@ -186,7 +207,6 @@ const Tab = ({
   onClick: () => void;
   isMobile: boolean;
   icon: any;
-  isDropdown?: boolean;
 }) => {
   const ref = useRef<HTMLLIElement>(null);
   
@@ -202,26 +222,24 @@ const Tab = ({
           left: ref.current.offsetLeft,
         });
       }}
-      onClick={!isDropdown ? onClick : undefined}
+      onClick={onClick}
       className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full ${
         isActive 
           ? "bg-medical-primary text-white font-semibold" 
           : "text-medical-primary hover:text-white hover:bg-medical-primary"
-      } ${isDropdown ? 'flex items-center space-x-1' : ''}`}
+      }`}
     >
       {isMobile ? (
         isActive ? (
-          <span className="text-xs whitespace-nowrap flex items-center space-x-1">
+          <span className="text-xs whitespace-nowrap">
             {children}
-            {isDropdown && <ChevronDown className="w-3 h-3" />}
           </span>
         ) : (
           <Icon className="w-4 h-4" />
         )
       ) : (
-        <span className="whitespace-nowrap flex items-center space-x-1">
+        <span className="whitespace-nowrap">
           {children}
-          {isDropdown && <ChevronDown className="w-3 h-3" />}
         </span>
       )}
     </li>

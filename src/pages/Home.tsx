@@ -77,7 +77,7 @@ const Home = () => {
         </div>
       </motion.div>
 
-      {/* IA Section */}
+      {/* IA Section - Manter largura original para SymptomChecker */}
       <section id="ia" className="py-16 bg-gradient-to-br from-medical-muted/10 to-medical-accent/5">
         <div className="max-w-4xl mx-auto px-4">
           <motion.div
@@ -97,9 +97,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Site Section - Duas Colunas */}
+      {/* Site Section - Ajustada para max-w-4xl */}
       <section id="site" className="py-20 bg-gradient-hero scroll-mt-20">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
@@ -127,9 +127,9 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Services Section - Duas Colunas */}
+      {/* Services Section - Ajustada para max-w-4xl */}
       <div className="py-20 bg-background">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-medical-primary mb-6">
@@ -164,7 +164,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Articles Section */}
+      {/* Articles Section - Ajustada para max-w-4xl */}
       <div className="py-20 bg-medical-muted/30">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex justify-between items-center mb-8">

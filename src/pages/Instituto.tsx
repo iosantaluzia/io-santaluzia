@@ -8,8 +8,8 @@ const Instituto = () => {
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
       <main className="pt-20">
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <div>
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-8 text-center">
               O Instituto de Olhos Santa Luzia
             </h1>
