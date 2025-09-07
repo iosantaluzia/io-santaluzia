@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
+import Index from "./pages/Index";
 import Instituto from "./pages/Instituto";
 import Historia from "./pages/Historia";
 import CorpoClinico from "./pages/CorpoClinico";
@@ -16,6 +16,7 @@ import Artigos from "./pages/Artigos";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import PatientPortal from "./pages/PatientPortal";
+import OftalmologistaSinop from "./pages/OftalmologistaSinop";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +27,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Index />} />
           <Route path="/instituto" element={<Instituto />} />
           <Route path="/historia" element={<Historia />} />
           <Route path="/corpo-clinico" element={<CorpoClinico />} />
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/artigos" element={<Artigos />} />
           <Route path="/portal-paciente" element={<PatientPortal />} />
           <Route path="/admin-dashboard-santa-luzia" element={<AdminDashboard />} />
+          <Route path="/oftalmologista-sinop" element={<OftalmologistaSinop />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
