@@ -189,21 +189,67 @@ const Home = () => {
               {/* Content */}
               <div className="relative z-20 flex items-end pt-28">
                 <div className="w-full">
+                  {/* Mobile Mock Frame with Overlay Text */}
+                  <div className="md:hidden w-full px-4 mb-8">
+                    <div className="relative">
+                      {/* Mobile Mock Frame */}
+                      <div className="relative mx-auto max-w-sm">
+                        <img 
+                          src="/lovable-uploads/mockmobile2.png"
+                          alt="Mobile Mock"
+                          className="w-full h-auto object-contain"
+                        />
+                        
+                        {/* Overlay Text "Bem vindo ao" */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <h2 className="text-lg font-medium text-gray-600 text-center">
+                            Bem vindo ao
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="space-y-4">
-                      <h2 className="text-lg md:text-xl font-medium text-gray-600 mb-2">Bem vindo ao</h2>
+                      {/* Desktop Welcome Text */}
+                      <h2 className="hidden md:block text-lg md:text-xl font-medium text-gray-600 mb-2">Bem vindo ao</h2>
                       <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-medical-primary mb-6">
                         INSTITUTO DE OLHOS SANTA LUZIA
             </h1>
         </div>
       </div>
 
-                  <div className="max-w-2xl ml-0 px-4 self-start">
+                  {/* Desktop Content */}
+                  <div className="hidden md:block max-w-2xl ml-0 px-4 self-start">
                     <div className="space-y-4">
                       <p className="text-lg text-medical-secondary mb-8 text-left">
                         Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
                       </p>
                       <div className="flex flex-col sm:flex-row gap-4">
+                        <button 
+                          onClick={() => window.open('https://wa.me/5566997215000?text=Olá! Gostaria de agendar uma consulta no Instituto de Olhos Santa Luzia.', '_blank')}
+                          className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
+                        >
+                          AGENDE UMA CONSULTA
+                        </button>
+                        <button 
+                          onClick={handleContinueToSite}
+                          className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
+                        >
+                          CONHEÇA NOSSOS SERVIÇOS
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile Content - Below Title */}
+                  <div className="md:hidden w-full px-4 mt-6">
+                    <div className="space-y-4">
+                      <p className="text-lg text-medical-secondary mb-8 text-left">
+                        Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
+                      </p>
+                      <div className="flex flex-col gap-4">
                         <button 
                           onClick={() => window.open('https://wa.me/5566997215000?text=Olá! Gostaria de agendar uma consulta no Instituto de Olhos Santa Luzia.', '_blank')}
                           className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
@@ -234,8 +280,8 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-6">
               O que <span className="text-medical-primary">oferecemos</span>
               </h2>
-          </div>
-          
+            </div>
+            
           <div className="flex justify-center">
             <InteractiveCards />
           </div>
@@ -324,7 +370,7 @@ const Home = () => {
         ]}
         legalLinks={[]}
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "© Instituto de Olhos Santa Luzia",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }}
       />
