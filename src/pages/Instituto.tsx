@@ -8,7 +8,7 @@ const Instituto = () => {
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
       <main className="pt-20">
-        <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 py-16">
           <div>
             <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8 text-center">
               O Instituto
@@ -77,7 +77,7 @@ const Instituto = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/logogrande-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-10 w-10 brightness-0 invert" />}
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <span>📷</span>, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -94,7 +94,7 @@ const Instituto = () => {
         ]}
         legalLinks={[]}
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }}
       />

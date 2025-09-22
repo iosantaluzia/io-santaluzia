@@ -1,40 +1,14 @@
 
+import React, { useState } from "react";
 import NavigationHeader from "@/components/NavigationHeader";
 import { Footer } from "@/components/ui/footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
+import ArticleModal from "@/components/ArticleModal";
 import { Instagram, Facebook } from 'lucide-react';
+import { articles } from '@/data/articles';
 
 const Artigos = () => {
-  const articles = [
-    {
-      title: "Cirurgia Refrativa – Liberdade e Segurança",
-      excerpt: "Descubra como a cirurgia refrativa pode transformar sua vida, oferecendo liberdade dos óculos e lentes de contato com total segurança.",
-      date: "26 de fevereiro de 2025",
-      image: "/lovable-uploads/87125f62-3c4e-4acc-970b-25f7eb624ae5.png",
-      readTime: "5 min"
-    },
-    {
-      title: "Catarata: Diagnóstico e Tratamento",
-      excerpt: "Tudo o que você precisa saber sobre a catarata, desde os primeiros sintomas até os tratamentos mais modernos disponíveis.",
-      date: "20 de fevereiro de 2025",
-      image: "/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png",
-      readTime: "7 min"
-    },
-    {
-      title: "Ceratocone: Tratamentos Avançados",
-      excerpt: "Conheça os tratamentos mais modernos para ceratocone, incluindo crosslinking e implante de anéis intraestromais.",
-      date: "15 de fevereiro de 2025",
-      image: "/lovable-uploads/87125f62-3c4e-4acc-970b-25f7eb624ae5.png",
-      readTime: "6 min"
-    },
-    {
-      title: "Importância dos Exames Preventivos",
-      excerpt: "Saiba por que realizar exames oftalmológicos regulares é essencial para manter a saúde dos seus olhos.",
-      date: "10 de fevereiro de 2025",
-      image: "/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png",
-      readTime: "4 min"
-    }
-  ];
+  const [selectedArticle, setSelectedArticle] = useState<any>(null);
 
   return (
     <div className="min-h-screen">
@@ -51,55 +25,42 @@ const Artigos = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {articles.map((article, index) => (
               <article
                 key={index}
                 className="bg-white rounded-lg shadow-soft overflow-hidden hover:shadow-medium transition-all duration-300 cursor-pointer"
+                onClick={() => setSelectedArticle(article)}
               >
-                <div className="h-48 overflow-hidden">
+                <div className="h-40 overflow-hidden">
                   <img
-                    src={article.image}
-                    alt={article.title}
+                    src={article.imagem}
+                    alt={article.titulo}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between text-sm text-medical-secondary mb-3">
-                    <span>{article.date}</span>
-                    <span>{article.readTime} de leitura</span>
+                <div className="p-4">
+                  <div className="flex items-center justify-between text-xs text-medical-secondary mb-2">
+                    <span>{article.data}</span>
+                    <span>5 min</span>
                   </div>
-                  <h3 className="text-xl font-sans font-bold text-medical-primary mb-3 line-clamp-2">
-                    {article.title}
+                  <h3 className="text-lg font-sans font-bold text-medical-primary mb-2 line-clamp-2">
+                    {article.titulo}
                   </h3>
-                  <p className="text-medical-secondary text-sm mb-4 line-clamp-3">
-                    {article.excerpt}
+                  <p className="text-medical-secondary text-sm mb-3 line-clamp-2">
+                    {article.subtitulo}
                   </p>
-                  <button className="text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm">
+                  <button className="text-medical-primary hover:text-medical-secondary transition-colors font-medium text-xs">
                     LEIA MAIS »
                   </button>
                 </div>
               </article>
             ))}
           </div>
-
-          <div className="bg-white rounded-2xl shadow-soft p-8 mt-12 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-medical-primary mb-4">
-              Fique Sempre Informado
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Nossa equipe de especialistas está sempre produzindo conteúdo de qualidade 
-              para manter você informado sobre os avanços na oftalmologia.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Acompanhe nossos artigos e descubra como cuidar melhor da sua saúde visual 
-              com informações precisas e atualizadas.
-            </p>
-          </div>
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto brightness-0 invert" />}
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -116,11 +77,22 @@ const Artigos = () => {
         ]}
         legalLinks={[]}
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }}
       />
       <FloatingWhatsAppButton />
+      
+      {/* Article Modal */}
+      {selectedArticle && (
+        <ArticleModal
+          isOpen={!!selectedArticle}
+          onClose={() => setSelectedArticle(null)}
+          title={selectedArticle.titulo}
+          content={selectedArticle.conteudo}
+          date={selectedArticle.data}
+        />
+      )}
     </div>
   );
 };

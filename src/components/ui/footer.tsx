@@ -28,9 +28,9 @@ export function Footer({
   legalLinks,
   copyright
 }: FooterProps) {
-  return <footer className="pb-6 pt-16 lg:pb-8 lg:pt-24 bg-medical-primary text-white">
+  return <footer className="pb-6 pt-8 lg:pb-8 lg:pt-12 bg-medical-primary text-white">
       <div className="px-4 lg:px-8 max-w-7xl mx-auto">
-        <div className="md:flex md:items-start md:justify-between">
+        <div className="md:flex md:items-center md:justify-between">
           <a href="/" className="flex items-center gap-x-2" aria-label={brandName}>
             {logo}
             <span className="font-bold text-xl text-white">{brandName}</span>
@@ -58,9 +58,9 @@ export function Footer({
           <div className="mt-6 lg:mt-0 lg:col-[4/11]">
             
           </div>
-          <div className="mt-6 text-sm leading-6 text-white/80 whitespace-nowrap lg:mt-0 lg:row-[1/3] lg:col-[1/4]">
-            <div>{copyright.text}</div>
-            {copyright.license && <div>{copyright.license}</div>}
+          <div className="mt-6 text-sm leading-6 text-white/80 lg:mt-0 lg:row-[1/3] lg:col-[1/4] lg:text-right">
+            {copyright.text && <div>{copyright.text}</div>}
+            {copyright.license && <div className="whitespace-nowrap">{copyright.license}</div>}
           </div>
         </div>
       </div>

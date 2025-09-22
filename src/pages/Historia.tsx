@@ -150,7 +150,7 @@ const Historia = () => {
       <FloatingWhatsAppButton />
       
       <main className="pt-32">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="container mx-auto px-4">
           <Timeline data={timelineData} />
         </div>
       </main>
@@ -160,7 +160,7 @@ const Historia = () => {
           <img 
             src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
             alt="Instituto de Olhos Santa Luzia" 
-            className="h-12 w-auto brightness-0 invert" 
+            className="h-28 w-auto brightness-0 invert mx-auto" 
           />
         } 
         brandName="" 
@@ -208,7 +208,7 @@ const Historia = () => {
         ]} 
         legalLinks={[]} 
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }} 
       />

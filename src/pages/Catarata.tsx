@@ -36,7 +36,7 @@ const Catarata = () => {
           {/* Hero Section */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+              <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
                 Cirurgia de Catarata
               </h1>
               <p className="text-lg text-medical-secondary mb-8">
@@ -56,7 +56,7 @@ const Catarata = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
+                src="/lovable-uploads/6f0e2320-1b39-403a-ab68-8eeffe8dfc36.png"
                 alt="Cirurgia de Catarata"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -165,7 +165,7 @@ const Catarata = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto brightness-0 invert" />}
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -182,7 +182,7 @@ const Catarata = () => {
         ]}
         legalLinks={[]}
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }}
       />

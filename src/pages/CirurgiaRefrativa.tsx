@@ -50,11 +50,11 @@ const CirurgiaRefrativa = () => {
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
       <main className="pt-32 pb-16">
-        <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           {/* Hero Section */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+              <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
                 Cirurgia Refrativa
               </h1>
               <p className="text-lg text-medical-secondary mb-8">
@@ -74,7 +74,7 @@ const CirurgiaRefrativa = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/87125f62-3c4e-4acc-970b-25f7eb624ae5.png"
+                src="/lovable-uploads/9ae22b05-d770-4e0d-b143-fbc9278106e6.png"
                 alt="Cirurgia Refrativa"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -219,7 +219,7 @@ const CirurgiaRefrativa = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto brightness-0 invert" />}
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -236,7 +236,7 @@ const CirurgiaRefrativa = () => {
         ]}
         legalLinks={[]}
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }}
       />

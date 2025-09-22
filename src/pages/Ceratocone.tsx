@@ -50,11 +50,11 @@ const Ceratocone = () => {
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
       <main className="pt-32 pb-16">
-        <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           {/* Hero Section */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+              <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
                 Ceratocone
               </h1>
               <p className="text-lg text-medical-secondary mb-8">
@@ -73,7 +73,7 @@ const Ceratocone = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/87125f62-3c4e-4acc-970b-25f7eb624ae5.png"
+                src="/lovable-uploads/ca6a3fb8-8270-45cf-97e5-a67feca68a3e.png"
                 alt="Tratamento de Ceratocone"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -167,10 +167,203 @@ const Ceratocone = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
+                src="/lovable-uploads/ceratocone.jpg"
                 alt="Crosslinking de Córnea"
                 className="rounded-lg shadow-medium w-full"
               />
+            </div>
+          </div>
+
+          {/* Anel Intraestromal Section */}
+          <div className="mb-16">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-serif font-bold text-medical-primary mb-4">
+                Anel Intraestromal
+              </h2>
+              <p className="text-lg text-medical-secondary max-w-3xl mx-auto">
+                Os anéis intraestromais são pequenos segmentos semicirculares de material biocompatível 
+                implantados na córnea para regularizar sua curvatura e melhorar a visão em casos de 
+                ceratocone moderado a avançado.
+              </p>
+            </div>
+            
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+              <div className="relative">
+                <img
+                  src="/lovable-uploads/anelintraestromal.png"
+                  alt="Anel Intraestromal"
+                  className="rounded-lg shadow-medium w-full"
+                />
+              </div>
+              <div className="bg-medical-muted/20 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-medical-primary mb-3">
+                  Como Funciona?
+                </h3>
+                <p className="text-medical-secondary mb-4">
+                  Os anéis são inseridos em túneis criados na espessura da córnea, aplicando pressão 
+                  que achatam a área central e regularizam a curvatura corneana.
+                </p>
+                <ul className="text-medical-secondary space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Procedimento ambulatorial com anestesia local
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Recuperação rápida e pouco dolorosa
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Pode ser combinado com crosslinking
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Reversível se necessário
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-medical-accent/10 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-medical-primary mb-3">
+                  Indicações
+                </h3>
+                <ul className="text-medical-secondary space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Ceratocone moderado a avançado
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Intolerância a lentes de contato
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Pacientes que não podem usar óculos
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Alternativa ao transplante de córnea
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-white border border-medical-muted/30 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-medical-primary mb-3">
+                  Vantagens
+                </h3>
+                <ul className="text-medical-secondary space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Melhora significativa da visão
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Redução da dependência de óculos
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Estabilização do ceratocone
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Procedimento seguro e eficaz
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Transplante de Córnea Section */}
+          <div className="mb-16">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-serif font-bold text-medical-primary mb-4">
+                Transplante de Córnea
+              </h2>
+              <p className="text-lg text-medical-secondary max-w-3xl mx-auto">
+                O transplante de córnea é indicado para casos avançados de ceratocone onde outros tratamentos 
+                não são mais eficazes. Utilizamos técnicas modernas para garantir os melhores resultados.
+              </p>
+            </div>
+            
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+              <div className="relative">
+                <img
+                  src="/lovable-uploads/txcornea.jpg"
+                  alt="Transplante de Córnea"
+                  className="rounded-lg shadow-medium w-full"
+                />
+              </div>
+              <div className="bg-medical-muted/20 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-medical-primary mb-3">
+                  Quando é Indicado?
+                </h3>
+                <ul className="text-medical-secondary space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Ceratocone em estágio avançado
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Falha dos tratamentos conservadores
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Córnea muito fina ou com cicatrizes
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Perda significativa da visão
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-medical-accent/10 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-medical-primary mb-3">
+                  Tipos de Transplante
+                </h3>
+                <ul className="text-medical-secondary space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Transplante penetrante (PK)
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Transplante lamelar anterior (DALK)
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Transplante endotelial (DMEK)
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-white border border-medical-muted/30 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-medical-primary mb-3">
+                  Recuperação
+                </h3>
+                <ul className="text-medical-secondary space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Visão gradual em 3-6 meses
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Cuidados pós-operatórios rigorosos
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Acompanhamento especializado
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-medical-primary mr-2">•</span>
+                    Taxa de sucesso alta
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -209,7 +402,7 @@ const Ceratocone = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-12 w-auto brightness-0 invert" />}
+        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -226,7 +419,7 @@ const Ceratocone = () => {
         ]}
         legalLinks={[]}
         copyright={{
-          text: "© 2024 Instituto de Olhos Santa Luzia",
+          text: "",
           license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
         }}
       />

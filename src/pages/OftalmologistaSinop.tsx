@@ -70,7 +70,7 @@ const OftalmologistaSinop = () => {
         <section className="relative bg-gradient-to-r from-medical-primary to-medical-secondary text-white py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
                 Oftalmologista Especialista em Sinop/MT
               </h1>
               <p className="text-xl md:text-2xl mb-8 opacity-90">
@@ -235,7 +235,7 @@ const OftalmologistaSinop = () => {
         </section>
 
         <Footer
-          logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-20 w-auto brightness-0 invert" />}
+          logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
           brandName=""
           socialLinks={[
             { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -252,7 +252,7 @@ const OftalmologistaSinop = () => {
           ]}
           legalLinks={[]}
           copyright={{
-            text: "© 2024 Instituto de Olhos Santa Luzia",
+            text: "",
             license: "Avenida dos Tarumãs, 930 - Sinop/MT - CEP: 78550-001 | +55 66 99721-5000"
           }}
         />
