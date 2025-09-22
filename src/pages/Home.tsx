@@ -146,30 +146,16 @@ const Home = () => {
                 />
               </div>
               
-              {/* Mock Background - Recreated */}
-              <div className="absolute inset-0 flex items-start justify-center pt-8 z-1">
-                <div className="w-full max-w-4xl mx-auto px-4">
-                  <div className="relative bg-white rounded-t-3xl shadow-lg overflow-hidden">
-                    {/* Mock content area */}
-                    <div className="p-8 md:p-12">
-                      <div className="space-y-4">
-                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                        <div className="h-8 bg-gray-300 rounded w-2/3"></div>
-                        <div className="h-3 bg-gray-200 rounded w-full"></div>
-                        <div className="h-3 bg-gray-200 rounded w-4/5"></div>
-                        <div className="h-3 bg-gray-200 rounded w-3/5"></div>
-                      </div>
-                      <div className="mt-8 flex gap-4">
-                        <div className="h-12 bg-medical-primary rounded-lg w-48"></div>
-                        <div className="h-12 bg-medical-accent rounded-lg w-48"></div>
-                      </div>
-                    </div>
-                    {/* Decorative notch */}
-                    <div className="absolute top-0 right-0 w-32 h-full bg-white" 
-                         style={{clipPath: 'polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)'}}>
-                    </div>
-                  </div>
-                </div>
+              {/* Mock Background - bgmockhome.png */}
+              <div className="absolute inset-0 flex items-start justify-center pt-8 z-10">
+                <img 
+                  src="/lovable-uploads/bgmockhome.png"
+                  alt="Mock Background"
+                  className="w-full object-contain"
+                  style={{
+                    filter: 'hue-rotate(0deg) saturate(1) brightness(1) contrast(1) sepia(0) invert(0) grayscale(0)'
+                  }}
+                />
               </div>
 
               {/* Content */}
