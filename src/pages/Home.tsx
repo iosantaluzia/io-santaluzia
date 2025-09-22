@@ -138,7 +138,7 @@ const Home = () => {
                 <img 
                   src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
                   alt="Background"
-                  className="max-w-4xl object-contain rounded-t-3xl"
+                  className="max-w-5xl object-contain rounded-t-3xl"
                   style={{ 
                     filter: `contrast(1.05) brightness(0.98) saturate(1.05) blur(${Math.max(0, 3 - scrollY * 0.01)}px)`,
                     imageRendering: 'crisp-edges'
@@ -151,7 +151,7 @@ const Home = () => {
                 <img 
                   src="/lovable-uploads/bghomemock.png"
                   alt="Mock Background"
-                  className="max-w-4xl object-contain"
+                  className="max-w-5xl object-contain"
                   style={{
                     filter: 'hue-rotate(0deg) saturate(1) brightness(1) contrast(1) sepia(0) invert(0) grayscale(0)'
                   }}
