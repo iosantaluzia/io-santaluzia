@@ -42,7 +42,7 @@ const Artigos = () => {
       <main className="pt-32 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
               Artigos
             </h1>
             <p className="text-lg text-medical-secondary max-w-3xl mx-auto">

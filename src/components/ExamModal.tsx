@@ -1,6 +1,6 @@
-
-import React from "react";
-import { X } from "lucide-react";
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 interface ExamModalProps {
   isOpen: boolean;
@@ -10,43 +10,73 @@ interface ExamModalProps {
   image: string;
 }
 
-const ExamModal = ({ isOpen, onClose, title, content, image }: ExamModalProps) => {
-  if (!isOpen) return null;
-
+const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, title, content, image }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-medical-muted p-4 flex justify-between items-center">
-          <h2 className="text-2xl font-sans text-gray-800">{title}</h2>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-medical-muted rounded-full transition-colors"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X className="w-6 h-6 text-medical-primary" />
-          </button>
-        </div>
-        <div className="p-6">
-          <div className="grid md:grid-cols-3 gap-6 mb-6">
-            <div className="md:col-span-1">
-              <img 
-                src={image}
-                alt={title}
-                className="w-full h-auto object-contain rounded-lg bg-gray-50 p-4"
-              />
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-medical-primary">{title}</h2>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-6 w-6 text-gray-500" />
+              </button>
             </div>
-            <div className="md:col-span-2">
-              <div className="prose prose-medical max-w-none">
-                {content.split('\n').map((paragraph, index) => (
-                  <p key={index} className="text-gray-700 mb-4 leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Image */}
+                <div className="lg:w-1/3">
+                  <img
+                    src={image}
+                    alt={title}
+                    className="w-full h-64 object-contain rounded-lg bg-gray-50 p-4"
+                  />
+                </div>
+
+                {/* Text Content */}
+                <div className="lg:w-2/3">
+                  <div className="prose prose-gray max-w-none">
+                    {content.split('\n').map((paragraph, index) => (
+                      <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
+            {/* Footer */}
+            <div className="flex justify-end p-6 border-t border-gray-200">
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-medical-primary text-white rounded-lg hover:bg-medical-primary/90 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

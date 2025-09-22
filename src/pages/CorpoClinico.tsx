@@ -11,7 +11,7 @@ const CorpoClinico = () => {
       <main className="pt-32 pb-16">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-6">
+            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
               Corpo Clínico
             </h1>
             <p className="text-lg text-medical-secondary max-w-3xl mx-auto">
@@ -26,7 +26,7 @@ const CorpoClinico = () => {
               <div className="flex flex-col lg:flex-row">
                 <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
-                    src="/lovable-uploads/04564b96-e055-469d-8614-41f82a6e22a1.png"
+                    src="/lovable-uploads/fabiola.png"
                     alt="Dra. Fabíola Roque"
                     className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
                   />
@@ -53,7 +53,7 @@ const CorpoClinico = () => {
               <div className="flex flex-col lg:flex-row">
                 <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
-                    src="/lovable-uploads/1eb4c536-bf5e-4336-9560-481b3a909e6e.png"
+                    src="/lovable-uploads/matheus.png"
                     alt="Dr. Matheus Roque"
                     className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
                   />

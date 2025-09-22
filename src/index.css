@@ -111,4 +111,24 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Animação de respiração para o botão WhatsApp */
+  @keyframes breathe {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+  }
+
+  /* Esconder scrollbars mas manter funcionalidade */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
 }

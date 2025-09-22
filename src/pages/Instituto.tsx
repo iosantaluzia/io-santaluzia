@@ -10,8 +10,8 @@ const Instituto = () => {
       <main className="pt-20">
         <div className="max-w-4xl mx-auto px-4 py-16">
           <div>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-medical-primary mb-8 text-center">
-              O Instituto de Olhos Santa Luzia
+            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8 text-center">
+              O Instituto
             </h1>
             
             <div className="prose prose-lg max-w-none">
