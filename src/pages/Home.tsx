@@ -146,10 +146,10 @@ const Home = () => {
                 />
               </div>
               
-              {/* Mock Background - bgmockhome.png */}
+              {/* Mock Background - bghomemock.png */}
               <div className="absolute inset-0 flex items-start justify-center pt-8 z-10">
                 <img 
-                  src="/lovable-uploads/bgmockhome.png"
+                  src="/lovable-uploads/bghomemock.png"
                   alt="Mock Background"
                   className="w-full object-contain"
                   style={{
