@@ -14,7 +14,7 @@ interface CardData {
 }
 
 const InteractiveCards = () => {
-  const [activeCard, setActiveCard] = useState<string | null>(null);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const cardsData: CardData[] = [
     {
@@ -42,7 +42,7 @@ const InteractiveCards = () => {
       title: "Cirurgias Especializadas",
       description: "Realizamos cirurgias de Catarata, Ceratocone, Cirurgia Refrativa, de Lesões oculares e adaptação de lentes de contato. Utilizamos as mais modernas técnicas cirúrgicas e equipamentos de alta precisão para garantir os melhores resultados.",
       icon: <Eye className="h-6 w-6" />,
-      image: "/lovable-uploads/refrativacc2.jpg",
+      image: "/lovable-uploads/ZEISS-MEL-90-photo.jpeg",
       color: "text-medical-primary",
       bgColor: "bg-medical-muted/30",
       iconBg: "bg-medical-primary/10"
@@ -50,78 +50,83 @@ const InteractiveCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {cardsData.map((card) => (
-        <motion.div
-          key={card.id}
-          className="relative group cursor-pointer"
-          onMouseEnter={() => setActiveCard(card.id)}
-          onMouseLeave={() => setActiveCard(null)}
-          whileHover={{ y: -10 }}
-          transition={{ duration: 0.3 }}
-        >
-          {/* Card Background */}
-          <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-medical-primary/5 to-medical-accent/5">
-            {/* Background Image */}
-            <div className="absolute inset-0">
-              <img
-                src={card.image}
-                alt={card.title}
-                className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
-              />
-            </div>
-            
-            {/* Overlay */}
-            <div className={`absolute inset-0 ${card.bgColor} group-hover:bg-medical-primary/20 transition-colors duration-300`}></div>
-            
-            {/* Content */}
-            <div className="relative z-10 p-6 h-full flex flex-col justify-between">
-              {/* Icon */}
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${card.iconBg} ${card.color} mb-4`} style={{ filter: 'drop-shadow(2px 2px 0 white) drop-shadow(-2px -2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px 2px 0 white)' }}>
-                {card.icon}
+    <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4">
+      {cardsData.map((card) => {
+        const isExpanded = expandedCard === card.id;
+        const cardWidth = isExpanded ? 600 : 280;
+        
+        return (
+          <motion.div
+            key={card.id}
+            className="relative group cursor-pointer flex-shrink-0"
+            style={{ width: cardWidth }}
+            onClick={() => setExpandedCard(isExpanded ? null : card.id)}
+            whileHover={{ y: -5 }}
+            animate={{ width: cardWidth }}
+            transition={{ 
+              duration: 0.4,
+              ease: "easeInOut"
+            }}
+          >
+            {/* Card Background */}
+            <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-medical-primary/5 to-medical-accent/5">
+              {/* Background Image */}
+              <div className="absolute inset-0">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                />
               </div>
               
-              {/* Title */}
-              <h3 className={`text-xl font-bold ${card.color} mb-2`} style={{ textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white' }}>
-                {card.title}
-              </h3>
-            </div>
-          </div>
-
-          {/* Expanded Content */}
-          <AnimatePresence>
-            {activeCard === card.id && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="absolute top-0 left-0 right-0 z-20"
-              >
-                <motion.div
-                  className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${card.iconBg} ${card.color} flex-shrink-0`} style={{ filter: 'drop-shadow(2px 2px 0 white) drop-shadow(-2px -2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px 2px 0 white)' }}>
-                      {card.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className={`text-2xl font-bold ${card.color} mb-3`} style={{ textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white' }}>
-                        {card.title}
-                      </h3>
-                      <p className="text-gray-700 leading-relaxed text-sm">
-                        {card.description}
-                      </p>
-                    </div>
+              {/* Overlay */}
+              <div className={`absolute inset-0 ${card.bgColor} group-hover:bg-medical-primary/20 transition-colors duration-300`}></div>
+              
+              {/* Content */}
+              <div className="relative z-10 p-6 h-full flex flex-col">
+                {/* Header with Icon and Title */}
+                <div className="flex items-center gap-4 mb-4">
+                  {/* Icon */}
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center ${card.iconBg} ${card.color} flex-shrink-0`} style={{ filter: 'drop-shadow(2px 2px 0 white) drop-shadow(-2px -2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px 2px 0 white)' }}>
+                    {card.icon}
                   </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      ))}
+                  
+                  {/* Title */}
+                  <h3 className={`text-xl font-bold ${card.color} flex-1`} style={{ textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white' }}>
+                    {card.title}
+                  </h3>
+                </div>
+                
+                {/* Description - Only visible when expanded */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0, y: -20 }}
+                      animate={{ opacity: 1, height: 'auto', y: 0 }}
+                      exit={{ opacity: 0, height: 0, y: -20 }}
+                      transition={{ 
+                        duration: 0.4,
+                        ease: "easeInOut"
+                      }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                          {card.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
 };
 
 export default InteractiveCards;
+
+
