@@ -151,7 +151,7 @@ const Home = () => {
                 <img 
                   src="/lovable-uploads/bghomemock.png"
                   alt="Mock Background"
-                  className="w-full object-contain"
+                  className="max-w-4xl object-contain"
                   style={{
                     filter: 'hue-rotate(0deg) saturate(1) brightness(1) contrast(1) sepia(0) invert(0) grayscale(0)'
                   }}
