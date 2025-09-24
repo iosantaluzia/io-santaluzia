@@ -1,204 +1,257 @@
 import { useState, useEffect, useCallback } from 'react';
 
-interface PrivateMessage {
+interface ChatMessage {
   id: string;
   from: string;
   to: string;
   message: string;
-  timestamp: Date;
+  timestamp: number;
   read: boolean;
+  type: 'group' | 'private';
 }
 
 interface OnlineUser {
   username: string;
-  lastSeen: Date;
+  lastSeen: number;
   isOnline: boolean;
 }
 
-interface ChatSystemState {
-  onlineUsers: OnlineUser[];
-  privateMessages: PrivateMessage[];
-  activeChat: string | null;
-}
+const STORAGE_KEYS = {
+  MESSAGES: 'team-chat-messages',
+  ONLINE_USERS: 'team-online-users',
+  USER_ACTIVITY: 'team-user-activity'
+};
 
-const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+const ONLINE_THRESHOLD = 2 * 60 * 1000; // 2 minutes
 const MESSAGE_RETENTION_DAYS = 3;
+const ALL_USERS = ['matheus', 'fabiola', 'thauanne', 'beatriz'];
 
 export function useChatSystem(currentUser: string) {
-  const [state, setState] = useState<ChatSystemState>({
-    onlineUsers: [],
-    privateMessages: [],
-    activeChat: null
-  });
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [newMessageCount, setNewMessageCount] = useState(0);
 
-  // Load data from localStorage on mount
+  // BroadcastChannel for real-time communication
   useEffect(() => {
-    const savedOnlineUsers = localStorage.getItem('chat-online-users');
-    const savedMessages = localStorage.getItem('chat-private-messages');
+    if (!currentUser) return;
 
-    if (savedOnlineUsers) {
-      try {
-        const users = JSON.parse(savedOnlineUsers).map((user: any) => ({
-          ...user,
-          lastSeen: new Date(user.lastSeen)
-        }));
-        setState(prev => ({ ...prev, onlineUsers: users }));
-      } catch (error) {
-        console.error('Error loading online users:', error);
+    const channel = new BroadcastChannel('team-chat');
+    
+    const handleMessage = (event: MessageEvent) => {
+      const { type, data } = event.data;
+      
+      switch (type) {
+        case 'NEW_MESSAGE':
+          setMessages(prev => {
+            const exists = prev.some(msg => msg.id === data.id);
+            if (!exists) {
+              // Check if this is a new message for the current user
+              if (data.to === currentUser || data.type === 'group') {
+                setNewMessageCount(prev => prev + 1);
+              }
+              return [...prev, data];
+            }
+            return prev;
+          });
+          break;
+          
+        case 'USER_ACTIVITY':
+          updateUserActivity(data.username, data.timestamp);
+          break;
+          
+        case 'SYNC_REQUEST':
+          // Send current state to requesting tab
+          channel.postMessage({
+            type: 'SYNC_RESPONSE',
+            data: {
+              messages,
+              onlineUsers,
+              timestamp: Date.now()
+            }
+          });
+          break;
+          
+        case 'SYNC_RESPONSE':
+          if (data.timestamp > Date.now() - 1000) { // Only accept recent syncs
+            setMessages(data.messages || []);
+            setOnlineUsers(data.onlineUsers || []);
+          }
+          break;
+          
+        case 'CLEAR_NOTIFICATIONS':
+          if (data.user === currentUser) {
+            setNewMessageCount(0);
+          }
+          break;
       }
-    }
+    };
 
-    if (savedMessages) {
-      try {
-        const messages = JSON.parse(savedMessages).map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }));
-        setState(prev => ({ ...prev, privateMessages: messages }));
-      } catch (error) {
-        console.error('Error loading private messages:', error);
+    channel.addEventListener('message', handleMessage);
+    
+    // Request sync from other tabs
+    channel.postMessage({ type: 'SYNC_REQUEST' });
+    
+    setIsConnected(true);
+
+    return () => {
+      channel.removeEventListener('message', handleMessage);
+      channel.close();
+      setIsConnected(false);
+    };
+  }, [currentUser, messages, onlineUsers]);
+
+  // Load initial data
+  useEffect(() => {
+    loadMessages();
+    loadOnlineUsers();
+    updateUserActivity();
+  }, []);
+
+  const loadMessages = useCallback(() => {
+    try {
+      const savedMessages = localStorage.getItem(STORAGE_KEYS.MESSAGES);
+      if (savedMessages) {
+        const parsedMessages = JSON.parse(savedMessages);
+        // Filter messages older than 3 days
+        const threeDaysAgo = Date.now() - (MESSAGE_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+        const filteredMessages = parsedMessages.filter((msg: ChatMessage) => msg.timestamp > threeDaysAgo);
+        
+        setMessages(filteredMessages);
+        
+        // Clean up old messages
+        if (filteredMessages.length !== parsedMessages.length) {
+          localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(filteredMessages));
+        }
       }
+    } catch (error) {
+      console.error('Error loading messages:', error);
     }
   }, []);
 
-  // Update current user's online status
-  const updateOnlineStatus = useCallback(() => {
-    const now = new Date();
-    setState(prev => {
-      const updatedUsers = [...prev.onlineUsers];
-      const currentUserIndex = updatedUsers.findIndex(u => u.username === currentUser);
-      
-      if (currentUserIndex >= 0) {
-        updatedUsers[currentUserIndex] = {
-          ...updatedUsers[currentUserIndex],
-          lastSeen: now,
-          isOnline: true
-        };
+  const loadOnlineUsers = useCallback(() => {
+    try {
+      const savedUsers = localStorage.getItem(STORAGE_KEYS.ONLINE_USERS);
+      if (savedUsers) {
+        const parsedUsers = JSON.parse(savedUsers);
+        setOnlineUsers(parsedUsers);
       } else {
-        updatedUsers.push({
-          username: currentUser,
-          lastSeen: now,
-          isOnline: true
-        });
+        // Initialize with all users offline
+        const initialUsers = ALL_USERS.map(username => ({
+          username,
+          lastSeen: Date.now() - ONLINE_THRESHOLD - 1000,
+          isOnline: false
+        }));
+        setOnlineUsers(initialUsers);
       }
+    } catch (error) {
+      console.error('Error loading online users:', error);
+    }
+  }, []);
 
-      // Update online status for all users
-      const allUsers = ['matheus', 'fabiola', 'thauanne', 'beatriz'];
-      allUsers.forEach(username => {
-        if (username !== currentUser) {
-          const userIndex = updatedUsers.findIndex(u => u.username === username);
-          if (userIndex >= 0) {
-            const timeDiff = now.getTime() - updatedUsers[userIndex].lastSeen.getTime();
-            updatedUsers[userIndex].isOnline = timeDiff < ONLINE_THRESHOLD;
-          } else {
-            // Add other users as offline initially
-            updatedUsers.push({
-              username,
-              lastSeen: new Date(now.getTime() - ONLINE_THRESHOLD - 1000),
-              isOnline: false
-            });
-          }
+  const updateUserActivity = useCallback((username?: string, timestamp?: number) => {
+    const user = username || currentUser;
+    const time = timestamp || Date.now();
+    
+    if (!user) return;
+
+    setOnlineUsers(prev => {
+      const updated = prev.map(u => 
+        u.username === user 
+          ? { ...u, lastSeen: time, isOnline: true }
+          : { ...u, isOnline: (Date.now() - u.lastSeen) < ONLINE_THRESHOLD }
+      );
+      
+      // Ensure all users are in the list
+      ALL_USERS.forEach(username => {
+        if (!updated.find(u => u.username === username)) {
+          updated.push({
+            username,
+            lastSeen: Date.now() - ONLINE_THRESHOLD - 1000,
+            isOnline: false
+          });
         }
       });
-
-      return { ...prev, onlineUsers: updatedUsers };
+      
+      localStorage.setItem(STORAGE_KEYS.ONLINE_USERS, JSON.stringify(updated));
+      return updated;
     });
   }, [currentUser]);
 
-  // Update online status every minute
+  // Update activity every 30 seconds
   useEffect(() => {
-    updateOnlineStatus();
-    const interval = setInterval(updateOnlineStatus, 60000); // Every minute
+    if (!currentUser) return;
+
+    updateUserActivity();
+    const interval = setInterval(() => updateUserActivity(), 30000);
+    
     return () => clearInterval(interval);
-  }, [updateOnlineStatus]);
+  }, [currentUser, updateUserActivity]);
 
-  // Save online users to localStorage
+  // Save messages to localStorage
   useEffect(() => {
-    if (state.onlineUsers.length > 0) {
-      localStorage.setItem('chat-online-users', JSON.stringify(state.onlineUsers));
+    if (messages.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
     }
-  }, [state.onlineUsers]);
+  }, [messages]);
 
-  // Clean old messages (older than 3 days)
-  const cleanOldMessages = useCallback(() => {
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - MESSAGE_RETENTION_DAYS);
+  const sendMessage = useCallback((to: string, message: string, type: 'group' | 'private' = 'group') => {
+    if (!currentUser || !message.trim()) return null;
 
-    setState(prev => {
-      const filteredMessages = prev.privateMessages.filter(
-        msg => msg.timestamp > threeDaysAgo
-      );
-      return { ...prev, privateMessages: filteredMessages };
-    });
-  }, []);
-
-  // Clean old messages on mount and every hour
-  useEffect(() => {
-    cleanOldMessages();
-    const interval = setInterval(cleanOldMessages, 60 * 60 * 1000); // Every hour
-    return () => clearInterval(interval);
-  }, [cleanOldMessages]);
-
-  // Save private messages to localStorage
-  useEffect(() => {
-    if (state.privateMessages.length > 0) {
-      localStorage.setItem('chat-private-messages', JSON.stringify(state.privateMessages));
-    }
-  }, [state.privateMessages]);
-
-  // Send private message
-  const sendPrivateMessage = useCallback((to: string, message: string) => {
-    const newMessage: PrivateMessage = {
-      id: Date.now().toString(),
+    const newMessage: ChatMessage = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       from: currentUser,
       to,
-      message,
-      timestamp: new Date(),
-      read: false
+      message: message.trim(),
+      timestamp: Date.now(),
+      read: false,
+      type
     };
 
-    setState(prev => ({
-      ...prev,
-      privateMessages: [...prev.privateMessages, newMessage]
-    }));
+    setMessages(prev => [...prev, newMessage]);
+    
+    // Broadcast to other tabs
+    const channel = new BroadcastChannel('team-chat');
+    channel.postMessage({
+      type: 'NEW_MESSAGE',
+      data: newMessage
+    });
+    channel.close();
 
     return newMessage;
   }, [currentUser]);
 
-  // Get messages between two users
   const getMessagesBetween = useCallback((user1: string, user2: string) => {
-    return state.privateMessages.filter(msg => 
+    return messages.filter(msg => 
       (msg.from === user1 && msg.to === user2) ||
       (msg.from === user2 && msg.to === user1)
-    ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-  }, [state.privateMessages]);
+    ).sort((a, b) => a.timestamp - b.timestamp);
+  }, [messages]);
 
-  // Mark messages as read
   const markMessagesAsRead = useCallback((from: string) => {
-    setState(prev => ({
-      ...prev,
-      privateMessages: prev.privateMessages.map(msg => 
-        msg.from === from && msg.to === currentUser ? { ...msg, read: true } : msg
+    setMessages(prev =>
+      prev.map(msg =>
+        msg.from === from && msg.to === currentUser && !msg.read
+          ? { ...msg, read: true }
+          : msg
       )
-    }));
+    );
   }, [currentUser]);
 
-  // Get unread count for a user
   const getUnreadCount = useCallback((from: string) => {
-    return state.privateMessages.filter(msg => 
-      msg.from === from && msg.to === currentUser && !msg.read
+    return messages.filter(
+      msg => msg.from === from && msg.to === currentUser && !msg.read
     ).length;
-  }, [state.privateMessages, currentUser]);
+  }, [currentUser, messages]);
 
-  // Get all conversations
   const getConversations = useCallback(() => {
     const conversations = new Map<string, {
       user: string;
-      lastMessage: PrivateMessage | null;
+      lastMessage: ChatMessage | null;
       unreadCount: number;
     }>();
 
-    state.privateMessages.forEach(msg => {
+    messages.forEach(msg => {
       const otherUser = msg.from === currentUser ? msg.to : msg.from;
       
       if (!conversations.has(otherUser)) {
@@ -224,20 +277,32 @@ export function useChatSystem(currentUser: string) {
       if (!a.lastMessage && !b.lastMessage) return 0;
       if (!a.lastMessage) return 1;
       if (!b.lastMessage) return -1;
-      return b.lastMessage.timestamp.getTime() - a.lastMessage.timestamp.getTime();
+      return b.lastMessage.timestamp - a.lastMessage.timestamp;
     });
-  }, [state.privateMessages, currentUser]);
+  }, [messages, currentUser]);
+
+  const clearNotifications = useCallback(() => {
+    setNewMessageCount(0);
+    // Broadcast to other tabs
+    const channel = new BroadcastChannel('team-chat');
+    channel.postMessage({
+      type: 'CLEAR_NOTIFICATIONS',
+      data: { user: currentUser }
+    });
+    channel.close();
+  }, [currentUser]);
 
   return {
-    onlineUsers: state.onlineUsers,
-    privateMessages: state.privateMessages,
-    activeChat: state.activeChat,
-    setActiveChat: (user: string | null) => setState(prev => ({ ...prev, activeChat: user })),
-    sendPrivateMessage,
+    onlineUsers,
+    messages,
+    isConnected,
+    newMessageCount,
+    sendMessage,
     getMessagesBetween,
     markMessagesAsRead,
     getUnreadCount,
     getConversations,
-    updateOnlineStatus
+    updateUserActivity,
+    clearNotifications
   };
 }

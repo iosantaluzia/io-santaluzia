@@ -28,7 +28,7 @@ const PrivateChat = ({ currentUser, targetUser, onClose }: PrivateChatProps) => 
   
   const {
     getMessagesBetween,
-    sendPrivateMessage,
+    sendMessage,
     markMessagesAsRead
   } = useChatSystem(currentUser);
 
@@ -52,7 +52,7 @@ const PrivateChat = ({ currentUser, targetUser, onClose }: PrivateChatProps) => 
     setIsLoading(true);
     
     try {
-      const message = sendPrivateMessage(targetUser, newMessage.trim());
+      const message = sendMessage(targetUser, newMessage.trim(), 'private');
       setNewMessage('');
       
       toast.success(`Mensagem enviada para ${targetUser}!`);

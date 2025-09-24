@@ -24,12 +24,12 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showUsers, setShowUsers] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'chat'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'chat'>('chat'); // Start with chat
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPrivateChat, setShowPrivateChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
   
-  // Use chat system for private messages and online status
+  // Use chat system for real-time communication
   const chatSystem = useChatSystem(appUser?.username || '');
 
   // Scroll to bottom when new messages arrive
@@ -37,28 +37,29 @@ const Admin = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Load messages from localStorage on component mount
+  // Load messages from chat system
   useEffect(() => {
-    const savedMessages = localStorage.getItem('admin-chat-messages');
-    if (savedMessages) {
-      try {
-        const parsedMessages = JSON.parse(savedMessages).map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
+    if (chatSystem.messages.length > 0) {
+      const formattedMessages = chatSystem.messages
+        .filter(msg => msg.type === 'group') // Only show group messages in main chat
+        .map(msg => ({
+          id: msg.id,
+          username: msg.from,
+          message: msg.message,
+          timestamp: new Date(msg.timestamp),
+          isOwn: msg.from === appUser?.username
         }));
-        setMessages(parsedMessages);
-      } catch (error) {
-        console.error('Error loading messages:', error);
-      }
+      
+      setMessages(formattedMessages);
     }
-  }, []);
+  }, [chatSystem.messages, appUser?.username]);
 
-  // Save messages to localStorage whenever messages change
+  // Clear notifications when user opens chat
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('admin-chat-messages', JSON.stringify(messages));
+    if (activeTab === 'chat') {
+      chatSystem.clearNotifications();
     }
-  }, [messages]);
+  }, [activeTab, chatSystem]);
 
   // Handle private chat opening
   const handleOpenPrivateChat = (username: string) => {
@@ -76,24 +77,13 @@ const Admin = () => {
     setIsLoading(true);
     
     try {
-      const message: Message = {
-        id: Date.now().toString(),
-        username: appUser.username,
-        message: newMessage.trim(),
-        timestamp: new Date(),
-        isOwn: true
-      };
-
-      setMessages(prev => [...prev, message]);
-      setNewMessage('');
+      // Use the new chat system
+      const sentMessage = chatSystem.sendMessage('group', newMessage.trim(), 'group');
       
-      // Show notification
-      toast.success(`Mensagem enviada como ${appUser.username}!`);
-      
-      // Simulate typing indicator for other users
-      setTimeout(() => {
-        toast.info('Outros membros da equipe podem ver sua mensagem');
-      }, 1000);
+      if (sentMessage) {
+        setNewMessage('');
+        toast.success(`Mensagem enviada como ${appUser.username}!`);
+      }
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -115,7 +105,7 @@ const Admin = () => {
 
   const clearChat = () => {
     setMessages([]);
-    localStorage.removeItem('admin-chat-messages');
+    localStorage.removeItem('team-chat-messages');
     toast.success('Chat limpo!');
   };
 
@@ -157,7 +147,7 @@ const Admin = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-medical-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando painel administrativo...</p>
+          <p className="mt-4 text-gray-600">Carregando chat da equipe...</p>
         </div>
       </div>
     );
@@ -178,14 +168,15 @@ const Admin = () => {
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
             <div className="w-10 h-10 bg-medical-primary rounded-full flex items-center justify-center">
-              <LayoutDashboard className="w-5 h-5 text-white" />
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-medical-primary">
-                Painel Administrativo
+                Chat da Equipe
               </h1>
               <p className="text-sm text-gray-600">
                 Logado como: <span className="font-semibold capitalize">{appUser?.username}</span>
+                {chatSystem.isConnected && <span className="text-green-600 ml-2">● Online</span>}
               </p>
             </div>
           </div>
@@ -203,9 +194,22 @@ const Admin = () => {
               variant={activeTab === 'chat' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setActiveTab('chat')}
+              className="relative"
             >
               <MessageCircle className="w-4 h-4 mr-1" />
               Chat
+              {chatSystem.newMessageCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {chatSystem.newMessageCount}
+                </span>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearChat}
+            >
+              Limpar Chat
             </Button>
             <Button
               variant="outline"
