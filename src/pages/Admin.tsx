@@ -3,9 +3,9 @@ import { MessageCircle, Send, LogOut, Users, Eye, EyeOff, LayoutDashboard, Menu,
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/hooks/useAuth';
+import { useLocalAuth } from '@/hooks/useLocalAuth';
 import { toast } from 'sonner';
-import { LoginForm } from '@/components/LoginForm';
+import { LocalLoginForm } from '@/components/LocalLoginForm';
 
 interface Message {
   id: string;
@@ -16,7 +16,7 @@ interface Message {
 }
 
 const Admin = () => {
-  const { isAuthenticated, appUser, signOut } = useAuth();
+  const { isAuthenticated, appUser, signOut } = useLocalAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +24,7 @@ const Admin = () => {
   const [showUsers, setShowUsers] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'chat'>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -53,6 +54,27 @@ const Admin = () => {
     }
   }, [messages]);
 
+  // Simulate online users (in a real app, this would come from a server)
+  useEffect(() => {
+    if (isAuthenticated && appUser) {
+      // Add current user to online list
+      setOnlineUsers(prev => {
+        if (!prev.includes(appUser.username)) {
+          return [...prev, appUser.username];
+        }
+        return prev;
+      });
+
+      // Simulate other users being online
+      const allUsers = ['matheus', 'fabiola', 'thauanne', 'beatriz'];
+      const otherUsers = allUsers.filter(user => user !== appUser.username);
+      
+      // Randomly show some users as online
+      const randomOnlineUsers = otherUsers.filter(() => Math.random() > 0.5);
+      setOnlineUsers(prev => [...new Set([...prev, ...randomOnlineUsers])]);
+    }
+  }, [isAuthenticated, appUser]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -72,8 +94,13 @@ const Admin = () => {
       setMessages(prev => [...prev, message]);
       setNewMessage('');
       
-      // Simulate other users seeing the message
-      toast.success('Mensagem enviada!');
+      // Show notification
+      toast.success(`Mensagem enviada como ${appUser.username}!`);
+      
+      // Simulate typing indicator for other users
+      setTimeout(() => {
+        toast.info('Outros membros da equipe podem ver sua mensagem');
+      }, 1000);
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -125,13 +152,7 @@ const Admin = () => {
   }, {} as Record<string, Message[]>);
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-medical-primary to-medical-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <LoginForm />
-        </div>
-      </div>
-    );
+    return <LocalLoginForm />;
   }
 
   return (
@@ -431,7 +452,7 @@ const Admin = () => {
                         >
                           <div
                             className={`w-3 h-3 rounded-full ${
-                              user === appUser?.username
+                              onlineUsers.includes(user)
                                 ? 'bg-green-500'
                                 : 'bg-gray-300'
                             }`}
@@ -445,6 +466,9 @@ const Admin = () => {
                           </span>
                           {user === appUser?.username && (
                             <span className="text-xs text-medical-primary">(você)</span>
+                          )}
+                          {onlineUsers.includes(user) && user !== appUser?.username && (
+                            <span className="text-xs text-green-600">(online)</span>
                           )}
                         </div>
                       ))}

@@ -1,0 +1,20 @@
+[33mcommit 7ea5525069ad383d72acc99f903439694fcef5ef[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: iosantaluzia <oftalmologiaroque@gmail.com>
+Date:   Wed Sep 24 08:41:31 2025 -0400
+
+    feat: Add admin panel with chat system
+    
+    - Add new /admin route with dashboard and chat functionality
+    - Add new users: thauanne and beatriz to authentication system
+    - Create comprehensive admin panel with:
+      - Dashboard tab with statistics and quick actions
+      - Chat tab with real-time messaging between team members
+      - User management and online status indicators
+    - Update LoginForm to include new users
+    - Integrate with existing authentication system
+    - Add responsive design for mobile and desktop
+
+src/App.tsx
+src/components/LoginForm.tsx
+src/hooks/useAuth.tsx
+src/pages/Admin.tsx
