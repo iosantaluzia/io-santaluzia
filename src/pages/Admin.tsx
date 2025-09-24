@@ -155,6 +155,21 @@ const Admin = () => {
     return <LocalLoginForm />;
   }
 
+  // Debug log
+  console.log('Admin component rendered:', { isAuthenticated, appUser });
+
+  // Show loading state if user is authenticated but appUser is not loaded yet
+  if (isAuthenticated && !appUser) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-medical-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando painel administrativo...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

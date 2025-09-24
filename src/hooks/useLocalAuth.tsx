@@ -77,6 +77,7 @@ export function useLocalAuth() {
         error: null
       });
 
+      console.log('Login successful:', userData);
       return { data: { user: userData }, error: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';

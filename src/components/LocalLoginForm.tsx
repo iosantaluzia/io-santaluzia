@@ -28,6 +28,10 @@ export function LocalLoginForm() {
         toast.error('Erro no login: ' + error.message);
       } else {
         toast.success('Login realizado com sucesso!');
+        // Force page reload to ensure state update
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (error) {
       console.error('Login error:', error);
