@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, LogOut, Users, Eye, EyeOff, LayoutDashboard, Menu, X } from 'lucide-react';
+import { MessageCircle, Send, LogOut, Users, Eye, EyeOff, LayoutDashboard, Menu, X, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalAuth } from '@/hooks/useLocalAuth';
+import { useChatSystem } from '@/hooks/useChatSystem';
 import { toast } from 'sonner';
 import { LocalLoginForm } from '@/components/LocalLoginForm';
+import PrivateChat from '@/components/PrivateChat';
 
 interface Message {
   id: string;
@@ -24,7 +26,11 @@ const Admin = () => {
   const [showUsers, setShowUsers] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'chat'>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [showPrivateChat, setShowPrivateChat] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string>('');
+  
+  // Use chat system for private messages and online status
+  const chatSystem = useChatSystem(appUser?.username || '');
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -54,26 +60,13 @@ const Admin = () => {
     }
   }, [messages]);
 
-  // Simulate online users (in a real app, this would come from a server)
-  useEffect(() => {
-    if (isAuthenticated && appUser) {
-      // Add current user to online list
-      setOnlineUsers(prev => {
-        if (!prev.includes(appUser.username)) {
-          return [...prev, appUser.username];
-        }
-        return prev;
-      });
-
-      // Simulate other users being online
-      const allUsers = ['matheus', 'fabiola', 'thauanne', 'beatriz'];
-      const otherUsers = allUsers.filter(user => user !== appUser.username);
-      
-      // Randomly show some users as online
-      const randomOnlineUsers = otherUsers.filter(() => Math.random() > 0.5);
-      setOnlineUsers(prev => [...new Set([...prev, ...randomOnlineUsers])]);
+  // Handle private chat opening
+  const handleOpenPrivateChat = (username: string) => {
+    if (username !== appUser?.username) {
+      setSelectedUser(username);
+      setShowPrivateChat(true);
     }
-  }, [isAuthenticated, appUser]);
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -456,34 +449,48 @@ const Admin = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {['matheus', 'fabiola', 'thauanne', 'beatriz'].map((user) => (
+                      {chatSystem.onlineUsers.map((user) => (
                         <div
-                          key={user}
-                          className={`flex items-center space-x-2 p-2 rounded-lg ${
-                            user === appUser?.username
+                          key={user.username}
+                          className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                            user.username === appUser?.username
                               ? 'bg-medical-primary/10 border border-medical-primary/20'
-                              : 'bg-gray-50'
+                              : 'bg-gray-50 hover:bg-gray-100'
                           }`}
+                          onClick={() => handleOpenPrivateChat(user.username)}
                         >
-                          <div
-                            className={`w-3 h-3 rounded-full ${
-                              onlineUsers.includes(user)
-                                ? 'bg-green-500'
-                                : 'bg-gray-300'
-                            }`}
-                          />
-                          <span className={`text-sm capitalize ${
-                            user === appUser?.username
-                              ? 'font-semibold text-medical-primary'
-                              : 'text-gray-600'
-                          }`}>
-                            {user}
-                          </span>
-                          {user === appUser?.username && (
-                            <span className="text-xs text-medical-primary">(você)</span>
-                          )}
-                          {onlineUsers.includes(user) && user !== appUser?.username && (
-                            <span className="text-xs text-green-600">(online)</span>
+                          <div className="flex items-center space-x-2">
+                            <div
+                              className={`w-3 h-3 rounded-full ${
+                                user.isOnline
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
+                              }`}
+                            />
+                            <span className={`text-sm capitalize ${
+                              user.username === appUser?.username
+                                ? 'font-semibold text-medical-primary'
+                                : 'text-gray-600'
+                            }`}>
+                              {user.username}
+                            </span>
+                            {user.username === appUser?.username && (
+                              <span className="text-xs text-medical-primary">(você)</span>
+                            )}
+                            {user.isOnline && user.username !== appUser?.username && (
+                              <span className="text-xs text-green-600">(online)</span>
+                            )}
+                          </div>
+                          
+                          {user.username !== appUser?.username && (
+                            <div className="flex items-center space-x-1">
+                              {chatSystem.getUnreadCount(user.username) > 0 && (
+                                <div className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                  {chatSystem.getUnreadCount(user.username)}
+                                </div>
+                              )}
+                              <MessageSquare className="w-4 h-4 text-gray-400" />
+                            </div>
                           )}
                         </div>
                       ))}
@@ -495,6 +502,18 @@ const Admin = () => {
           </div>
         )}
       </div>
+
+      {/* Private Chat Modal */}
+      {showPrivateChat && appUser && (
+        <PrivateChat
+          currentUser={appUser.username}
+          targetUser={selectedUser}
+          onClose={() => {
+            setShowPrivateChat(false);
+            setSelectedUser('');
+          }}
+        />
+      )}
     </div>
   );
 };
