@@ -15,6 +15,7 @@ import Ceratocone from "./pages/Ceratocone";
 import Artigos from "./pages/Artigos";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
+import Admin from "./pages/Admin";
 import PatientPortal from "./pages/PatientPortal";
 import OftalmologistaSinop from "./pages/OftalmologistaSinop";
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/ceratocone" element={<Ceratocone />} />
           <Route path="/artigos" element={<Artigos />} />
           <Route path="/portal-paciente" element={<PatientPortal />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/admin-dashboard-santa-luzia" element={<AdminDashboard />} />
           <Route path="/oftalmologista-sinop" element={<OftalmologistaSinop />} />
           <Route path="*" element={<NotFound />} />

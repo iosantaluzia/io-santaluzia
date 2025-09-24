@@ -67,7 +67,7 @@ export function LoginForm() {
               disabled={isLoading}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Usuários disponíveis: matheus, fabiola, iosantaluzia, financeiro
+              Usuários disponíveis: matheus, fabiola, thauanne, beatriz, iosantaluzia, financeiro
             </p>
           </div>
           
