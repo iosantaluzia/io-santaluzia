@@ -1,3 +1,4 @@
+// Componente de Agendamentos - Última atualização: 2025-10-20
 import React, { useState } from 'react';
 import { ChevronRight, Columns, PanelLeft, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
