@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -86,6 +86,9 @@ const PatientPortalModal = ({
           <DialogTitle className="text-center text-xl font-semibold text-medical-primary">
             {isLogin ? 'Acesso ao Portal do Paciente' : 'Cadastro de Paciente'}
           </DialogTitle>
+          <DialogDescription className="text-center">
+            {isLogin ? 'Entre com suas credenciais para acessar seus dados' : 'Preencha o formulário para criar sua conta'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
@@ -104,13 +107,13 @@ const PatientPortalModal = ({
             <Label htmlFor="email">
               {isLogin ? 'Email ou Username' : 'Email'}
             </Label>
-            <Input id="email" name="email" type={isLogin ? 'text' : 'email'} value={formData.email} onChange={handleInputChange} required placeholder={isLogin ? 'Digite seu email ou username' : 'seu@email.com'} />
+            <Input id="email" name="email" type={isLogin ? 'text' : 'email'} value={formData.email} onChange={handleInputChange} required placeholder={isLogin ? 'Digite seu email ou username' : 'seu@email.com'} autoComplete={isLogin ? 'username' : 'email'} />
           </div>
 
           <div>
             <Label htmlFor="password">Senha</Label>
             <div className="relative">
-              <Input id="password" name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange} required />
+              <Input id="password" name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange} required autoComplete="current-password" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -119,7 +122,7 @@ const PatientPortalModal = ({
 
           {!isLogin && <div>
               <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-              <Input id="confirmPassword" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} required={!isLogin} />
+              <Input id="confirmPassword" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} required={!isLogin} autoComplete="new-password" />
             </div>}
 
           <Button type="submit" className="w-full bg-medical-primary hover:bg-medical-primary/90" disabled={loading}>

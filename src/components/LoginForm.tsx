@@ -65,6 +65,7 @@ export function LoginForm() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Digite seu usuário"
               disabled={isLoading}
+              autoComplete="username"
             />
             <p className="text-xs text-gray-500 mt-1">
               Usuários disponíveis: matheus, fabiola, thauanne, beatriz, iosantaluzia, financeiro
@@ -82,6 +83,7 @@ export function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Digite sua senha"
               disabled={isLoading}
+              autoComplete="current-password"
             />
           </div>
           

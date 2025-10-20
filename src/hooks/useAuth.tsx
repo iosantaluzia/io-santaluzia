@@ -37,8 +37,6 @@ export function useAuth() {
     // Set up auth state listener - NUNCA usar async aqui para evitar deadlock
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
         if (!mounted) return;
 
         // Apenas atualizações síncronas de estado aqui
@@ -73,8 +71,6 @@ export function useAuth() {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email);
-      
       if (!mounted) return;
 
       setAuthState(prev => ({
@@ -103,11 +99,8 @@ export function useAuth() {
   }, []);
 
   const fetchAppUserSafely = async (authUserId: string) => {
-    console.log('fetchAppUserSafely called for:', authUserId);
-
     // Verificar cache primeiro
     if (appUserCache.current[authUserId] !== undefined) {
-      console.log('Using cached app user data');
       setAuthState(prev => ({
         ...prev,
         appUser: appUserCache.current[authUserId],
@@ -119,11 +112,10 @@ export function useAuth() {
 
     // Verificar se já está buscando para este usuário
     if (fetchingAppUser.current[authUserId]) {
-      console.log('Already fetching app user, waiting...');
       try {
         await fetchingAppUser.current[authUserId];
       } catch (error) {
-        console.log('Fetch in progress failed:', error);
+        // Ignorar erro de fetch em progresso
       }
       return;
     }
@@ -139,9 +131,6 @@ export function useAuth() {
   };
 
   const fetchAppUser = async (authUserId: string) => {
-    const startTime = Date.now();
-    console.log('Fetching app user for auth_user_id:', authUserId, 'at', new Date().toISOString());
-    
     try {
       // Timeout reduzido para 3 segundos
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -156,9 +145,6 @@ export function useAuth() {
 
       const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
-      const elapsedTime = Date.now() - startTime;
-      console.log('App user query completed in', elapsedTime, 'ms');
-
       if (error) {
         console.error('Error fetching app user:', error);
         appUserCache.current[authUserId] = null;
@@ -171,10 +157,7 @@ export function useAuth() {
         return;
       }
 
-      console.log('App user data:', data);
-
       if (!data) {
-        console.log('No app user found for this auth user');
         appUserCache.current[authUserId] = null;
         setAuthState(prev => ({
           ...prev,
@@ -194,8 +177,7 @@ export function useAuth() {
         error: null
       }));
     } catch (error) {
-      const elapsedTime = Date.now() - startTime;
-      console.error('Error in fetchAppUser after', elapsedTime, 'ms:', error);
+      console.error('Error in fetchAppUser:', error);
       
       appUserCache.current[authUserId] = null;
       
@@ -219,8 +201,6 @@ export function useAuth() {
 
   const signInWithUsername = async (username: string, password: string) => {
     try {
-      console.log('Attempting login with username:', username);
-      
       // Mapear username para email - INCLUINDO o usuário financeiro
       const emailMap: Record<string, string> = {
         'matheus': 'matheus@iosantaluzia.com',
@@ -236,8 +216,6 @@ export function useAuth() {
         return { data: null, error: { message: 'Usuário não encontrado' } };
       }
 
-      console.log('Login attempt with email:', email);
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -249,8 +227,6 @@ export function useAuth() {
       }
 
       if (data.user) {
-        console.log('Login successful for user:', data.user.email);
-        
         // Update last login - usar setTimeout para não bloquear
         setTimeout(async () => {
           try {
@@ -272,8 +248,6 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    console.log('Signing out...');
-    
     // Limpar cache antes do logout
     appUserCache.current = {};
     fetchingAppUser.current = {};
@@ -292,7 +266,6 @@ export function useAuth() {
   };
 
   const retry = () => {
-    console.log('Retrying auth...');
     if (authState.user) {
       // Limpar cache para forçar nova busca
       delete appUserCache.current[authState.user.id];
