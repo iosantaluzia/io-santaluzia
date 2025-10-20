@@ -7,7 +7,11 @@ import { AppointmentForm } from './AppointmentForm';
 import { PatientDetailsModal } from './PatientDetailsModal';
 import { toast } from 'sonner';
 
-export function AgendamentosSection() {
+interface AgendamentosSectionProps {
+  onSectionChange?: (section: string) => void;
+}
+
+export function AgendamentosSection({ onSectionChange }: AgendamentosSectionProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('double');
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
@@ -109,8 +113,10 @@ export function AgendamentosSection() {
 
   const handleOpenConsultation = () => {
     setShowPatientDetails(false);
-    toast.success('Abrindo dados da consulta...');
-    // Aqui você pode navegar para a seção de consultas ou abrir outro modal
+    if (onSectionChange) {
+      onSectionChange('consultas');
+      toast.success(`Abrindo consulta de ${selectedPatient?.name}`);
+    }
   };
 
   const formatDate = (date: Date) => {

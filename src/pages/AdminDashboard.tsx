@@ -163,7 +163,7 @@ const AdminDashboard = () => {
         case 'overview':
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
         case 'agendamentos':
-          return <LazyComponents.AgendamentosSection />;
+          return <LazyComponents.AgendamentosSection onSectionChange={setActiveSection} />;
         case 'pacientes':
           return <LazyComponents.PacientesSection />;
         case 'consultas':

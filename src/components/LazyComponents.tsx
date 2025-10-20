@@ -34,9 +34,9 @@ const ErrorFallback = ({ error, retry }: { error: Error; retry?: () => void }) =
 );
 
 export const LazyComponents = {
-  AgendamentosSection: () => (
+  AgendamentosSection: ({ onSectionChange }: { onSectionChange?: (section: string) => void }) => (
     <Suspense fallback={<LoadingSpinner />}>
-      <AgendamentosSectionLazy />
+      <AgendamentosSectionLazy onSectionChange={onSectionChange} />
     </Suspense>
   ),
   
