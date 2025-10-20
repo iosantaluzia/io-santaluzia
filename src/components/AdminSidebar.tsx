@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -23,16 +23,17 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from '@/hooks/useAuth';
 
-const sidebarItems = [
-  { title: "Visão Geral", url: "#overview", icon: LayoutDashboard },
-  { title: "Agendamentos", url: "#agendamentos", icon: Calendar },
-  { title: "Pacientes", url: "#pacientes", icon: Users },
-  { title: "Consultas", url: "#consultas", icon: Stethoscope },
-  { title: "Exames", url: "#exames", icon: FileText },
-  { title: "Estoque", url: "#estoque", icon: Boxes },
-  { title: "Financeiro", url: "#financeiro", icon: HandCoins },
-  { title: "Email", url: "#email", icon: Mail },
+const allSidebarItems = [
+  { title: "Visão Geral", url: "#overview", icon: LayoutDashboard, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Agendamentos", url: "#agendamentos", icon: Calendar, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Pacientes", url: "#pacientes", icon: Users, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Consultas", url: "#consultas", icon: Stethoscope, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Exames", url: "#exames", icon: FileText, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Email", url: "#email", icon: Mail, roles: ['admin'], allowedUsers: ['financeiro'] }, // Só para financeiro
 ];
 
 interface AdminSidebarProps {
@@ -43,6 +44,21 @@ interface AdminSidebarProps {
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const { appUser } = useAuth();
+  
+  // Filtrar itens do sidebar baseado no role e username do usuário
+  const sidebarItems = useMemo(() => {
+    if (!appUser) return [];
+    
+    return allSidebarItems.filter(item => {
+      // Se o item tem allowedUsers, verificar se o username está na lista
+      if (item.allowedUsers) {
+        return item.allowedUsers.includes(appUser.username);
+      }
+      // Caso contrário, verificar por role
+      return item.roles.includes(appUser.role);
+    });
+  }, [appUser]);
 
   const handleSectionClick = (url: string) => {
     const section = url.replace('#', '');

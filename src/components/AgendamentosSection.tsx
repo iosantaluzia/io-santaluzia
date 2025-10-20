@@ -3,26 +3,114 @@ import { ChevronRight, Columns, PanelLeft, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AppointmentForm } from './AppointmentForm';
+import { PatientDetailsModal } from './PatientDetailsModal';
+import { toast } from 'sonner';
 
 export function AgendamentosSection() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('double');
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [showPatientDetails, setShowPatientDetails] = useState(false);
 
   const timeSlotsMatheus = [
-    { time: '09:00', patient: 'Ana Silva', status: 'Confirmado' },
-    { time: '10:00', patient: 'Bruno Costa', status: 'Confirmado' },
-    { time: '11:30', patient: 'Carla Dias', status: 'Pendente' },
-    { time: '14:00', patient: 'Daniel Rocha', status: 'Confirmado' },
-    { time: '15:00', patient: 'Elisa Ferreira', status: 'Cancelado' },
+    { 
+      time: '09:00', 
+      name: 'Ana Silva', 
+      status: 'Confirmado',
+      cpf: '123.456.789-00',
+      phone: '(66) 99999-1234',
+      email: 'ana.silva@email.com',
+      address: 'Rua das Flores, 123 - Centro',
+      birthDate: '15/05/1985',
+      observations: 'Paciente com histórico de miopia'
+    },
+    { 
+      time: '10:00', 
+      name: 'Bruno Costa', 
+      status: 'Confirmado',
+      cpf: '234.567.890-11',
+      phone: '(66) 99888-5678',
+      email: 'bruno.costa@email.com',
+      address: 'Av. Principal, 456 - Jardim',
+      birthDate: '20/08/1990',
+      observations: 'Retorno pós-cirurgia de catarata'
+    },
+    { 
+      time: '11:30', 
+      name: 'Carla Dias', 
+      status: 'Pendente',
+      cpf: '345.678.901-22',
+      phone: '(66) 99777-9012',
+      email: 'carla.dias@email.com',
+      birthDate: '10/03/1978'
+    },
+    { 
+      time: '14:00', 
+      name: 'Daniel Rocha', 
+      status: 'Confirmado',
+      cpf: '456.789.012-33',
+      phone: '(66) 99666-3456',
+      birthDate: '25/11/1992'
+    },
+    { 
+      time: '15:00', 
+      name: 'Elisa Ferreira', 
+      status: 'Cancelado',
+      cpf: '567.890.123-44',
+      phone: '(66) 99555-7890',
+      birthDate: '08/07/1988'
+    },
   ];
 
   const timeSlotsFabiola = [
-    { time: '09:30', patient: 'Fernanda Gomes', status: 'Confirmado' },
-    { time: '10:30', patient: 'Gustavo Lima', status: 'Pendente' },
-    { time: '13:00', patient: 'Helena Souza', status: 'Confirmado' },
-    { time: '14:30', patient: 'Igor Pereira', status: 'Confirmado' },
+    { 
+      time: '09:30', 
+      name: 'Fernanda Gomes', 
+      status: 'Confirmado',
+      cpf: '678.901.234-55',
+      phone: '(66) 99444-2345',
+      email: 'fernanda.gomes@email.com',
+      birthDate: '12/09/1982'
+    },
+    { 
+      time: '10:30', 
+      name: 'Gustavo Lima', 
+      status: 'Pendente',
+      cpf: '789.012.345-66',
+      phone: '(66) 99333-6789',
+      birthDate: '30/01/1995'
+    },
+    { 
+      time: '13:00', 
+      name: 'Helena Souza', 
+      status: 'Confirmado',
+      cpf: '890.123.456-77',
+      phone: '(66) 99222-0123',
+      email: 'helena.souza@email.com',
+      birthDate: '18/06/1987',
+      observations: 'Primeira consulta - avaliação geral'
+    },
+    { 
+      time: '14:30', 
+      name: 'Igor Pereira', 
+      status: 'Confirmado',
+      cpf: '901.234.567-88',
+      phone: '(66) 99111-4567',
+      birthDate: '05/12/1993'
+    },
   ];
+
+  const handlePatientClick = (patient: any) => {
+    setSelectedPatient(patient);
+    setShowPatientDetails(true);
+  };
+
+  const handleOpenConsultation = () => {
+    setShowPatientDetails(false);
+    toast.success('Abrindo dados da consulta...');
+    // Aqui você pode navegar para a seção de consultas ou abrir outro modal
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -139,10 +227,14 @@ export function AgendamentosSection() {
             <ScrollArea className="h-[350px]">
               {timeSlotsMatheus.length > 0 ? (
                 timeSlotsMatheus.map((slot, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100">
+                  <div 
+                    key={idx} 
+                    onClick={() => handlePatientClick(slot)}
+                    className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
                     <div>
                       <p className="font-medium text-gray-800">{slot.time}</p>
-                      <p className="text-sm text-gray-600">{slot.patient}</p>
+                      <p className="text-sm text-gray-600 hover:text-medical-primary transition-colors">{slot.name}</p>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold
                       ${slot.status === 'Confirmado' ? 'bg-green-100 text-green-800' :
@@ -165,10 +257,14 @@ export function AgendamentosSection() {
               <ScrollArea className="h-[350px]">
                 {timeSlotsFabiola.length > 0 ? (
                   timeSlotsFabiola.map((slot, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100">
+                    <div 
+                      key={idx} 
+                      onClick={() => handlePatientClick(slot)}
+                      className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
                       <div>
                         <p className="font-medium text-gray-800">{slot.time}</p>
-                        <p className="text-sm text-gray-600">{slot.patient}</p>
+                        <p className="text-sm text-gray-600 hover:text-medical-primary transition-colors">{slot.name}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold
                         ${slot.status === 'Confirmado' ? 'bg-green-100 text-green-800' :
@@ -192,6 +288,18 @@ export function AgendamentosSection() {
         onClose={() => setShowAppointmentForm(false)}
         selectedDate={selectedDate}
       />
+
+      {selectedPatient && (
+        <PatientDetailsModal
+          isOpen={showPatientDetails}
+          onClose={() => {
+            setShowPatientDetails(false);
+            setSelectedPatient(null);
+          }}
+          patient={selectedPatient}
+          onOpenConsultation={handleOpenConsultation}
+        />
+      )}
     </div>
   );
 }
