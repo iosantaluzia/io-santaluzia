@@ -9,9 +9,10 @@ import { toast } from 'sonner';
 
 interface AgendamentosSectionProps {
   onSectionChange?: (section: string) => void;
+  onOpenPatientConsultation?: (patientName: string) => void;
 }
 
-export function AgendamentosSection({ onSectionChange }: AgendamentosSectionProps) {
+export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation }: AgendamentosSectionProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('double');
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
@@ -113,9 +114,9 @@ export function AgendamentosSection({ onSectionChange }: AgendamentosSectionProp
 
   const handleOpenConsultation = () => {
     setShowPatientDetails(false);
-    if (onSectionChange) {
-      onSectionChange('consultas');
-      toast.success(`Abrindo consulta de ${selectedPatient?.name}`);
+    if (onOpenPatientConsultation && selectedPatient) {
+      onOpenPatientConsultation(selectedPatient.name);
+      toast.success(`Abrindo prontuário de ${selectedPatient.name}`);
     }
   };
 

@@ -34,9 +34,18 @@ const ErrorFallback = ({ error, retry }: { error: Error; retry?: () => void }) =
 );
 
 export const LazyComponents = {
-  AgendamentosSection: ({ onSectionChange }: { onSectionChange?: (section: string) => void }) => (
+  AgendamentosSection: ({ 
+    onSectionChange, 
+    onOpenPatientConsultation 
+  }: { 
+    onSectionChange?: (section: string) => void;
+    onOpenPatientConsultation?: (patientName: string) => void;
+  }) => (
     <Suspense fallback={<LoadingSpinner />}>
-      <AgendamentosSectionLazy onSectionChange={onSectionChange} />
+      <AgendamentosSectionLazy 
+        onSectionChange={onSectionChange}
+        onOpenPatientConsultation={onOpenPatientConsultation}
+      />
     </Suspense>
   ),
   
@@ -46,9 +55,9 @@ export const LazyComponents = {
     </Suspense>
   ),
   
-  ConsultasSection: () => (
+  ConsultasSection: ({ initialPatientName }: { initialPatientName?: string }) => (
     <Suspense fallback={<LoadingSpinner />}>
-      <ConsultasSectionLazy />
+      <ConsultasSectionLazy initialPatientName={initialPatientName} />
     </Suspense>
   ),
   

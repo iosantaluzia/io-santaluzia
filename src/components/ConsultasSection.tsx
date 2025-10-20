@@ -20,7 +20,11 @@ interface Patient {
   condition?: string;
 }
 
-export function ConsultasSection() {
+interface ConsultasSectionProps {
+  initialPatientName?: string;
+}
+
+export function ConsultasSection({ initialPatientName }: ConsultasSectionProps = {}) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +35,19 @@ export function ConsultasSection() {
   useEffect(() => {
     fetchPatients();
   }, []);
+
+  // Auto-selecionar paciente se initialPatientName foi fornecido
+  useEffect(() => {
+    if (initialPatientName && patients.length > 0 && !selectedPatient) {
+      const patient = patients.find(p => 
+        p.name.toLowerCase().includes(initialPatientName.toLowerCase())
+      );
+      if (patient) {
+        console.log('Auto-selecionando paciente:', patient.name);
+        setSelectedPatient(patient);
+      }
+    }
+  }, [initialPatientName, patients, selectedPatient]);
 
   const fetchPatients = async () => {
     try {

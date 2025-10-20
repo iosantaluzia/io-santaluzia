@@ -28,6 +28,7 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
+  const [selectedPatientName, setSelectedPatientName] = useState<string>('');
 
   // Show timeout message after 6 seconds of loading
   useEffect(() => {
@@ -163,11 +164,17 @@ const AdminDashboard = () => {
         case 'overview':
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
         case 'agendamentos':
-          return <LazyComponents.AgendamentosSection onSectionChange={setActiveSection} />;
+          return <LazyComponents.AgendamentosSection 
+            onSectionChange={setActiveSection}
+            onOpenPatientConsultation={(patientName) => {
+              setSelectedPatientName(patientName);
+              setActiveSection('consultas');
+            }}
+          />;
         case 'pacientes':
           return <LazyComponents.PacientesSection />;
         case 'consultas':
-          return <LazyComponents.ConsultasSection />;
+          return <LazyComponents.ConsultasSection initialPatientName={selectedPatientName} />;
         case 'exames':
           return <LazyComponents.ExamesSection />;
         case 'estoque':
