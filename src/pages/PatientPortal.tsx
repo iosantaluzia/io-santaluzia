@@ -153,7 +153,7 @@ const PatientPortal = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <img 
-                src="/lovable-uploads/logoiosantaluzia-removebg-preview.png" 
+                src="/uploads/logoiosantaluzia-removebg-preview.png" 
                 alt="Instituto de Olhos Santa Luzia" 
                 className="h-10 w-10 object-contain" 
               />

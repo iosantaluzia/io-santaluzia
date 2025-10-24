@@ -42,7 +42,7 @@ const Historia = () => {
           </div>
           <div className="flex justify-center">
             <img
-              src="/lovable-uploads/Gemini_Generated_Image_mhsbckmhsbckmhsb.png"
+              src="/uploads/Gemini_Generated_Image_mhsbckmhsbckmhsb.png"
               alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
               className="rounded-lg shadow-medium w-full max-w-md h-auto object-cover"
             />
@@ -158,7 +158,7 @@ const Historia = () => {
       <Footer 
         logo={
           <img 
-            src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
+            src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
             alt="Instituto de Olhos Santa Luzia" 
             className="h-28 w-auto brightness-0 invert mx-auto" 
           />

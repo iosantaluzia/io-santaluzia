@@ -2,9 +2,13 @@
 import NavigationHeader from "@/components/NavigationHeader";
 import { Footer } from "@/components/ui/footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
-import { Instagram, Facebook, Eye, Zap, Heart, Star } from 'lucide-react';
+import PDFModal from "@/components/PDFModal";
+import { Instagram, Facebook, Eye, Zap, Heart, Star, FileText, Download } from 'lucide-react';
+import { useState } from 'react';
 
 const CirurgiaRefrativa = () => {
+  const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
+
   const benefits = [
     {
       icon: <Eye className="h-8 w-8" />,
@@ -74,7 +78,7 @@ const CirurgiaRefrativa = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/9ae22b05-d770-4e0d-b143-fbc9278106e6.png"
+                src="/uploads/9ae22b05-d770-4e0d-b143-fbc9278106e6.png"
                 alt="Cirurgia Refrativa"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -184,6 +188,50 @@ const CirurgiaRefrativa = () => {
             </div>
           </div>
 
+          {/* Cuidados Pós-Operatórios */}
+          <div className="bg-gradient-to-r from-medical-primary/5 to-medical-accent/5 rounded-2xl p-8 mb-8">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-serif font-bold text-medical-primary mb-4">
+                Cuidados Pós-Operatórios
+              </h2>
+              <p className="text-lg text-medical-secondary mb-6">
+                Orientações importantes para uma recuperação segura e eficaz após a cirurgia refrativa
+              </p>
+              <button
+                onClick={() => setIsPDFModalOpen(true)}
+                className="inline-flex items-center gap-3 bg-medical-primary text-white px-8 py-4 rounded-lg hover:bg-medical-secondary transition-colors font-semibold text-lg shadow-medium hover:shadow-lg"
+              >
+                <FileText className="h-6 w-6" />
+                Ver Orientações Completas
+                <Download className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-soft">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                  Primeiras Horas
+                </h3>
+                <ul className="text-medical-secondary space-y-2 text-sm">
+                  <li>• Use os colírios conforme prescrito</li>
+                  <li>• Evite esfregar os olhos</li>
+                  <li>• Descanse com os olhos fechados</li>
+                  <li>• Use óculos escuros ao sair</li>
+                </ul>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-soft">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                  Primeira Semana
+                </h3>
+                <ul className="text-medical-secondary space-y-2 text-sm">
+                  <li>• Evite atividades físicas intensas</li>
+                  <li>• Não use maquiagem nos olhos</li>
+                  <li>• Evite piscinas e saunas</li>
+                  <li>• Retorne às consultas marcadas</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {/* FAQ Section */}
           <div className="bg-white rounded-2xl shadow-soft p-8">
             <h2 className="text-3xl font-serif font-bold text-medical-primary mb-8 text-center">
@@ -219,7 +267,7 @@ const CirurgiaRefrativa = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
+        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -241,6 +289,15 @@ const CirurgiaRefrativa = () => {
         }}
       />
       <FloatingWhatsAppButton />
+      
+      {/* PDF Modal */}
+      <PDFModal
+        isOpen={isPDFModalOpen}
+        onClose={() => setIsPDFModalOpen(false)}
+        title="Cuidados Pós-Operatórios - Cirurgia Refrativa"
+        pdfUrl="/CUIDADOS REFRATIVA.pdf"
+        fileName="CUIDADOS REFRATIVA.pdf"
+      />
     </div>
   );
 };

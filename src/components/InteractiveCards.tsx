@@ -15,6 +15,7 @@ interface CardData {
 
 const InteractiveCards = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [activeCard, setActiveCard] = useState<string>("profissionais"); // Primeiro card ativo por padrão
 
   const cardsData: CardData[] = [
     {
@@ -22,7 +23,7 @@ const InteractiveCards = () => {
       title: "Profissionais Qualificados",
       description: "Estamos prontos para cuidar da sua visão, oferecendo serviços especializados em áreas como refração, catarata, cirurgia refrativa, lentes de contato, ceratocone e oftalmopediatria. Nossa equipe é composta por médicos especialistas com vasta experiência e formação continuada.",
       icon: <Users className="h-6 w-6" />,
-      image: "/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png",
+      image: "/uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png",
       color: "text-medical-primary",
       bgColor: "bg-medical-muted/30",
       iconBg: "bg-medical-primary/10"
@@ -32,7 +33,7 @@ const InteractiveCards = () => {
       title: "Ampla Gama de Exames",
       description: "Disponibilizamos exames de ponta, para garantir um diagnóstico preciso e um tratamento adequado para cada paciente. Contamos com equipamentos de última geração como OCT, topografia corneana, microscopia especular e muitos outros.",
       icon: <Stethoscope className="h-6 w-6" />,
-      image: "/lovable-uploads/oct.png",
+      image: "/uploads/oct.png",
       color: "text-medical-primary",
       bgColor: "bg-medical-muted/30",
       iconBg: "bg-medical-primary/10"
@@ -42,7 +43,7 @@ const InteractiveCards = () => {
       title: "Cirurgias Especializadas",
       description: "Realizamos cirurgias de Catarata, Ceratocone, Cirurgia Refrativa, de Lesões oculares e adaptação de lentes de contato. Utilizamos as mais modernas técnicas cirúrgicas e equipamentos de alta precisão para garantir os melhores resultados.",
       icon: <Eye className="h-6 w-6" />,
-      image: "/lovable-uploads/ZEISS-MEL-90-photo.jpeg",
+      image: "/uploads/ZEISS-MEL-90-photo.jpeg",
       color: "text-medical-primary",
       bgColor: "bg-medical-muted/30",
       iconBg: "bg-medical-primary/10"
@@ -60,8 +61,17 @@ const InteractiveCards = () => {
             key={card.id}
             className="relative group cursor-pointer flex-shrink-0"
             style={{ width: cardWidth }}
-            onClick={() => setExpandedCard(isExpanded ? null : card.id)}
-            whileHover={{ y: -5 }}
+            onClick={() => {
+              setActiveCard(card.id);
+              setExpandedCard(isExpanded ? null : card.id);
+            }}
+            onMouseEnter={() => {
+              setActiveCard(card.id);
+              setExpandedCard(card.id);
+            }}
+            onMouseLeave={() => {
+              setExpandedCard(null);
+            }}
             animate={{ width: cardWidth }}
             transition={{ 
               duration: 0.4,
@@ -75,12 +85,20 @@ const InteractiveCards = () => {
                 <img
                   src={card.image}
                   alt={card.title}
-                  className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    activeCard === card.id 
+                      ? 'opacity-100' 
+                      : 'opacity-20 group-hover:opacity-30'
+                  }`}
                 />
               </div>
               
               {/* Overlay */}
-              <div className={`absolute inset-0 ${card.bgColor} group-hover:bg-medical-primary/20 transition-colors duration-300`}></div>
+              <div className={`absolute inset-0 transition-colors duration-300 ${
+                activeCard === card.id 
+                  ? 'bg-medical-primary/10' 
+                  : `${card.bgColor} group-hover:bg-medical-primary/20`
+              }`}></div>
               
               {/* Content */}
               <div className="relative z-10 p-6 h-full flex flex-col">

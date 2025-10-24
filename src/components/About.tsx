@@ -92,7 +92,7 @@ const About = () => {
               <div className="bg-background rounded-2xl p-8 text-center">
                 <div className="w-24 h-24 bg-medical-primary rounded-full mx-auto mb-6 flex items-center justify-center">
                   <img 
-                    src="/lovable-uploads/a89a1d61-75ee-4ff2-8233-42d51ff14f18.png" 
+                    src="/uploads/a89a1d61-75ee-4ff2-8233-42d51ff14f18.png" 
                     alt="Santa Luzia" 
                     className="w-16 h-16 object-contain"
                   />

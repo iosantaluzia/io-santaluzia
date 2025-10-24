@@ -2,9 +2,13 @@
 import NavigationHeader from "@/components/NavigationHeader";
 import { Footer } from "@/components/ui/footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
-import { Instagram, Facebook, Eye, CheckCircle, Clock, Shield } from 'lucide-react';
+import PDFModal from "@/components/PDFModal";
+import { Instagram, Facebook, Eye, CheckCircle, Clock, Shield, FileText, Download } from 'lucide-react';
+import { useState } from 'react';
 
 const Catarata = () => {
+  const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
+
   const benefits = [
     {
       icon: <Eye className="h-8 w-8" />,
@@ -56,7 +60,7 @@ const Catarata = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/6f0e2320-1b39-403a-ab68-8eeffe8dfc36.png"
+                src="/uploads/6f0e2320-1b39-403a-ab68-8eeffe8dfc36.png"
                 alt="Cirurgia de Catarata"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -130,6 +134,50 @@ const Catarata = () => {
             </div>
           </div>
 
+          {/* Cuidados Pós-Operatórios */}
+          <div className="bg-gradient-to-r from-medical-primary/5 to-medical-accent/5 rounded-2xl p-8 mb-8">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-serif font-bold text-medical-primary mb-4">
+                Cuidados Pós-Operatórios
+              </h2>
+              <p className="text-lg text-medical-secondary mb-6">
+                Orientações importantes para uma recuperação segura e eficaz após a cirurgia de catarata
+              </p>
+              <button
+                onClick={() => setIsPDFModalOpen(true)}
+                className="inline-flex items-center gap-3 bg-medical-primary text-white px-8 py-4 rounded-lg hover:bg-medical-secondary transition-colors font-semibold text-lg shadow-medium hover:shadow-lg"
+              >
+                <FileText className="h-6 w-6" />
+                Ver Orientações Completas
+                <Download className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-soft">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                  Primeiros Dias
+                </h3>
+                <ul className="text-medical-secondary space-y-2 text-sm">
+                  <li>• Use os colírios conforme prescrito</li>
+                  <li>• Evite esfregar os olhos</li>
+                  <li>• Use óculos de proteção</li>
+                  <li>• Evite atividades físicas intensas</li>
+                </ul>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-soft">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                  Primeira Semana
+                </h3>
+                <ul className="text-medical-secondary space-y-2 text-sm">
+                  <li>• Mantenha a higiene ocular</li>
+                  <li>• Evite piscinas e saunas</li>
+                  <li>• Retorne às consultas marcadas</li>
+                  <li>• Relate qualquer desconforto</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {/* FAQ Section */}
           <div className="bg-medical-muted/10 rounded-2xl p-8">
             <h2 className="text-3xl font-serif font-bold text-medical-primary mb-8 text-center">
@@ -165,7 +213,7 @@ const Catarata = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
+        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
@@ -187,6 +235,15 @@ const Catarata = () => {
         }}
       />
       <FloatingWhatsAppButton />
+      
+      {/* PDF Modal */}
+      <PDFModal
+        isOpen={isPDFModalOpen}
+        onClose={() => setIsPDFModalOpen(false)}
+        title="Cuidados Pós-Operatórios - Cirurgia de Catarata"
+        pdfUrl="/CUIDADOS OPERATÓRIOS CATARATA.pdf"
+        fileName="CUIDADOS OPERATÓRIOS CATARATA.pdf"
+      />
     </div>
   );
 };

@@ -53,7 +53,23 @@ git push -u origin main --force-with-lease
 3. O Vercel deve fazer deploy automático
 4. Site atualizado em: https://io-santaluzia.vercel.app
 
+## 📧 Configuração de Email (Locaweb)
+
+### Variáveis de Ambiente no Supabase:
+```bash
+EMAIL_USER=financeiro@iosantaluzia.com.br
+EMAIL_PASSWORD=sua_senha_aqui
+```
+
+### Servidores Corretos:
+- **SMTP**: `smtp.locaweb.com.br:587` (TLS)
+- **IMAP**: `imap.locaweb.com.br:993` (SSL)
+
+### Teste de Conectividade:
+Acesse: `https://seu-projeto.supabase.co/functions/v1/email-test`
+
 ## 🆘 Se ainda não funcionar:
 - Verifique se o Git está instalado: `git --version`
 - Verifique se está no diretório correto: `pwd` ou `cd`
 - Tente com token de acesso pessoal do GitHub
+- Para problemas de email, consulte: `CONFIGURACAO_EMAIL_LOCAWEB.md`

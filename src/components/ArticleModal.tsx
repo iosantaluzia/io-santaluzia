@@ -9,9 +9,10 @@ interface ArticleModalProps {
   title: string;
   content: string;
   date: string;
+  image?: string;
 }
 
-const ArticleModal = ({ isOpen, onClose, title, content, date }: ArticleModalProps) => {
+const ArticleModal = ({ isOpen, onClose, title, content, date, image }: ArticleModalProps) => {
   const handleShare = async () => {
     const modalContent = document.getElementById('article-modal-content');
     if (!modalContent) return;
@@ -64,38 +65,54 @@ const ArticleModal = ({ isOpen, onClose, title, content, date }: ArticleModalPro
         </div>
         
         <div id="article-modal-content" className="p-8 bg-white">
-          {/* Logo para compartilhamento */}
-          <div className="flex justify-center mb-6">
-            <img 
-              src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
-              alt="Instituto de Olhos Santa Luzia"
-              className="h-16 w-auto"
-            />
+          {/* Layout com imagem de capa no canto superior esquerdo */}
+          <div className="relative">
+            {/* Imagem de capa no canto superior esquerdo */}
+            {image && (
+              <div className="float-left mr-6 mb-4 w-full sm:w-80">
+                <img 
+                  src={image}
+                  alt={title}
+                  className="w-full h-48 sm:h-64 object-cover rounded-lg shadow-md"
+                />
+              </div>
+            )}
+            
+            {/* Conteúdo do artigo que flui ao redor da imagem */}
+            <div className="prose prose-lg max-w-none">
+              {content.split('\n').map((paragraph, index) => (
+                <p key={index} className="text-gray-700 mb-4 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+            
+            {/* Clearfix para evitar problemas de layout */}
+            <div className="clear-both"></div>
           </div>
           
-          <div className="text-sm text-gray-500 mb-4 text-center">
-            {date}
-          </div>
-          
-          <h1 className="text-3xl font-sans font-bold text-medical-primary mb-6 text-center">
-            {title}
-          </h1>
-          
-          <div className="prose prose-lg max-w-none">
-            {content.split('\n').map((paragraph, index) => (
-              <p key={index} className="text-gray-700 mb-4 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          
-          <div className="mt-8 pt-6 border-t border-medical-muted text-center">
-            <p className="text-medical-primary font-medium">
-              Instituto de Olhos Santa Luzia
-            </p>
-            <p className="text-gray-500 text-sm">
-              Cuidados oftalmológicos especializados com excelência
-            </p>
+          <div className="mt-8 pt-6 border-t border-medical-muted">
+            <div className="flex justify-between items-center">
+              <div className="text-center flex-1">
+                <p className="text-medical-primary font-medium">
+                  Instituto de Olhos Santa Luzia
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Cuidados oftalmológicos especializados com excelência
+                </p>
+                <p className="text-gray-400 text-xs mt-2">
+                  Publicado em {date}
+                </p>
+              </div>
+              {/* Logo no canto inferior direito */}
+              <div className="flex-shrink-0 ml-6">
+                <img 
+                  src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png"
+                  alt="Instituto de Olhos Santa Luzia"
+                  className="h-16 w-auto"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

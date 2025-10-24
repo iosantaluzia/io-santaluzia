@@ -116,9 +116,9 @@ const SymptomChecker = () => {
   };
 
   const scrollToSite = () => {
-    const siteSection = document.getElementById('site');
-    if (siteSection) {
-      siteSection.scrollIntoView({
+    const heroSection = document.getElementById('hero');
+    if (heroSection) {
+      heroSection.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
@@ -127,48 +127,110 @@ const SymptomChecker = () => {
 
   return (
     <div className="max-w-2xl mx-auto text-center">
-      <p className="text-lg text-medical-secondary mb-6">
-        Digite seus sintomas oculares e receba uma análise inicial. Para diagnóstico preciso, agende uma consulta.
-      </p>
-
-      <div className="bg-white rounded-lg border border-medical-muted p-4 mb-6">
-        <div className="flex gap-3">
-          <textarea
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              if (response?.type === 'error') {
-                setResponse(null);
-                setShowScheduleButton(false);
-              }
-            }}
-            placeholder="Descreva seus sintomas oculares (ex: 'visão embaçada e sensibilidade à luz', 'olho seco e coceira', 'dor de cabeça e vista cansada')"
-            className="flex-1 min-h-[60px] resize-none border-none outline-none bg-transparent text-medical-primary placeholder:text-medical-secondary/60"
-            rows={2}
-            disabled={isLoading}
-          />
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading || !input.trim()}
-              className="bg-medical-primary text-white p-2 rounded-full hover:bg-medical-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Analisar sintomas"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-            {input && (
-              <button
-                onClick={clearInput}
-                disabled={isLoading}
-                className="text-medical-secondary hover:text-medical-primary p-2 rounded-full hover:bg-medical-muted/30 transition-colors disabled:opacity-50"
-                title="Limpar campo"
-              >
-                ×
-              </button>
-            )}
+      {!response ? (
+        <>
+          <div className="max-w-3xl mx-auto space-y-4 mb-8">
+            <p className="text-lg text-medical-secondary leading-relaxed">
+              Nossa IA especializada ajuda você a entender seus sintomas oculares de forma rápida e confiável
+            </p>
+            <p className="text-base text-gray-600 leading-relaxed">
+              Digite seus sintomas oculares e receba uma análise inicial. Para diagnóstico preciso, agende uma consulta.
+            </p>
           </div>
+          <div className="bg-white rounded-lg border border-medical-muted p-4 mb-6">
+            <div className="flex gap-3">
+              <textarea
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  if (response?.type === 'error') {
+                    setResponse(null);
+                    setShowScheduleButton(false);
+                  }
+                }}
+                placeholder="Descreva seus sintomas oculares (ex: 'visão embaçada e sensibilidade à luz', 'dor de cabeça e vista cansada', 'manchas na visão', 'dificuldade para enxergar de perto')"
+                className="flex-1 min-h-[60px] resize-none border-none outline-none bg-transparent text-medical-primary placeholder:text-medical-secondary/60"
+                rows={2}
+                disabled={isLoading}
+              />
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading || !input.trim()}
+                  className="bg-medical-primary text-white p-2 rounded-full hover:bg-medical-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Analisar sintomas"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+                {input && (
+                  <button
+                    onClick={clearInput}
+                    disabled={isLoading}
+                    className="text-medical-secondary hover:text-medical-primary p-2 rounded-full hover:bg-medical-muted/30 transition-colors disabled:opacity-50"
+                    title="Limpar campo"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div 
+          ref={resultRef}
+          className={`p-4 rounded-lg border mb-6 ${
+            response.type === 'success' 
+              ? 'bg-medical-muted/20 border-medical-muted' 
+              : 'bg-red-50 border-red-200'
+          }`}
+        >
+          {response.type === 'success' ? (
+            <div className="flex flex-col lg:flex-row gap-4 items-start">
+              <div className="flex-1 text-left">
+                <p className="font-semibold mb-2 text-medical-primary">Resultado da Análise:</p>
+                <p className="text-medical-secondary leading-relaxed text-sm">
+                  {response.message}
+                </p>
+                <p className="text-xs text-medical-secondary/70 mt-3 italic">
+                  ⚠️ Esta análise é apenas informativa. Consulte nosso corpo clínico para diagnóstico preciso.
+                </p>
+              </div>
+              
+              <div className="flex-shrink-0 lg:ml-4 flex flex-col gap-2">
+                <button 
+                  onClick={handleSchedule}
+                  className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-3 rounded-lg hover:bg-medical-secondary transition-colors text-sm font-medium shadow-soft"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Agendar Consulta
+                </button>
+                <button 
+                  onClick={clearInput}
+                  className="inline-flex items-center gap-2 text-medical-secondary hover:text-medical-primary px-4 py-2 rounded-lg hover:bg-medical-muted/30 transition-colors text-sm"
+                >
+                  Nova Análise
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <p className="font-semibold text-red-700">Erro na Análise</p>
+              </div>
+              <p className="text-red-600 mb-3 text-sm">{response.message}</p>
+              <button 
+                onClick={handleRetry}
+                className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-2 rounded-lg hover:bg-medical-secondary transition-colors text-sm"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Tentar Novamente
+              </button>
+            </>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Botão Continuar no site - sempre visível */}
       <div className="mb-8">
@@ -193,68 +255,6 @@ const SymptomChecker = () => {
         </div>
       )}
 
-      {response && (
-        <div 
-          ref={resultRef}
-          className={`mt-6 p-4 rounded-lg border ${
-            response.type === 'success' 
-              ? 'bg-medical-muted/20 border-medical-muted' 
-              : 'bg-red-50 border-red-200'
-          }`}
-        >
-          {response.type === 'success' ? (
-            <div className="flex flex-col lg:flex-row gap-4 items-start">
-              <div className="flex-1 text-left">
-                <p className="font-semibold mb-2 text-medical-primary">Resultado da Análise:</p>
-                <p className="text-medical-secondary leading-relaxed text-sm">
-                  {response.message}
-                </p>
-                <p className="text-xs text-medical-secondary/70 mt-3 italic">
-                  ⚠️ Esta análise é apenas informativa. Consulte nosso corpo clínico para diagnóstico preciso.
-                </p>
-              </div>
-              
-              <div className="flex-shrink-0 lg:ml-4">
-                <button 
-                  onClick={handleSchedule}
-                  className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-3 rounded-lg hover:bg-medical-secondary transition-colors text-sm font-medium shadow-soft"
-                >
-                  <Calendar className="h-4 w-4" />
-                  Agendar Consulta
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                <p className="font-semibold text-red-700">Erro na Análise</p>
-              </div>
-              <p className="text-red-600 mb-3 text-sm">{response.message}</p>
-              <button 
-                onClick={handleRetry}
-                className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-2 rounded-lg hover:bg-medical-secondary transition-colors text-sm"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Tentar Novamente
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Botão adicional Continuar no site após resultados */}
-      {response && (
-        <div className="mt-6 pt-4 border-t border-medical-muted/30">
-          <button
-            onClick={scrollToSite}
-            className="inline-flex items-center gap-2 text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm group"
-          >
-            Continuar explorando o site
-            <ArrowDown className="h-4 w-4 group-hover:translate-y-1 transition-transform" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };

@@ -33,7 +33,7 @@ async function connectImap(emailAccount?: string) {
     throw new Error('Credenciais de email não configuradas');
   }
 
-  console.log('Conectando ao servidor IMAP: email-ssl.com.br:993');
+  console.log('Conectando ao servidor IMAP Locaweb: imap.locaweb.com.br:993');
   console.log('Conta de email:', emailAccount || emailUser);
   
   // Emails mock específicos por conta

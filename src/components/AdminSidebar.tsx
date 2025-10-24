@@ -71,7 +71,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
         <div className="flex items-center space-x-2">
           <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-white">
             <img 
-              src="/lovable-uploads/e187619e-2328-418d-971f-86200b2bb552.png" 
+              src="/uploads/e187619e-2328-418d-971f-86200b2bb552.png" 
               alt="Instituto de Olhos Santa Luzia" 
               className="h-6 w-6 object-contain animate-spin-slow" 
             />

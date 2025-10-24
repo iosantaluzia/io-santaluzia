@@ -50,7 +50,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           </div>
           <div className="flex justify-center lg:justify-end">
             <img 
-              src="/lovable-uploads/35a55ba7-79f8-4351-a3c0-62d1d39c59f6.png"
+              src="/uploads/35a55ba7-79f8-4351-a3c0-62d1d39c59f6.png"
               alt="Instituto de Olhos Santa Luzia - Fachada"
               className="rounded-lg shadow-medium w-full max-w-sm h-auto object-cover"
             />

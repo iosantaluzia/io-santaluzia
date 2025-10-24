@@ -55,7 +55,7 @@ const Home = () => {
       <NavigationHeader showLogo={true} />
 
       {/* IA Section - Manter largura original para SymptomChecker */}
-      <section id="ia" className="pt-20 pb-16 bg-background">
+      <section id="ia" className="pt-32 pb-16 bg-background">
         <div className="max-w-4xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -63,12 +63,18 @@ const Home = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h2 className="text-2xl md:text-3xl font-sans text-medical-primary mb-4">
+            {/* Logo acima do título */}
+            <div className="mb-6 flex justify-center">
+                      <img 
+                        src="/uploads/logoiosantaluzia-removebg-preview.png" 
+                        alt="Instituto de Olhos Santa Luzia" 
+                        className="h-18 w-auto md:h-24 md:w-auto object-contain"
+                      />
+            </div>
+            
+            <h2 className="text-2xl md:text-3xl font-sans text-medical-primary mb-6">
               Análise Inteligente de Sintomas
             </h2>
-            <p className="text-lg text-medical-secondary mb-8 max-w-2xl mx-auto">
-              Nossa IA especializada ajuda você a entender seus sintomas oculares de forma rápida e confiável
-            </p>
             <SymptomChecker />
           </motion.div>
         </div>
@@ -76,6 +82,7 @@ const Home = () => {
 
       {/* Hero Section */}
       <motion.div
+        id="hero"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
@@ -88,7 +95,7 @@ const Home = () => {
               <div className="absolute inset-0 flex items-end justify-center pb-0 z-0">
                 <div className="max-w-4xl mx-auto px-4 w-full">
             <img 
-              src="/lovable-uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
+              src="/uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
                     alt="Background"
                     className="h-auto object-cover rounded-t-3xl"
                     style={{ 
@@ -105,7 +112,7 @@ const Home = () => {
               <div className="absolute inset-0 flex items-start justify-center pt-8 z-10">
                 <div className="max-w-5xl mx-auto px-4">
                   <img 
-                    src="/lovable-uploads/bghomemock.png"
+                    src="/uploads/bghomemock.png"
                     alt="Mock Background"
                     className="w-full object-contain"
                     style={{
@@ -125,7 +132,7 @@ const Home = () => {
                       {/* Mobile Mock Frame */}
                       <div className="relative mx-auto max-w-sm">
                         <img 
-                          src="/lovable-uploads/mockmobile2.png"
+                          src="/uploads/mockmobile2.png"
                           alt="Mobile Mock"
                           className="w-full h-auto object-contain"
                         />
@@ -283,7 +290,7 @@ const Home = () => {
       </div>
 
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
+        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },

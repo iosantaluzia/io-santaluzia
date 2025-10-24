@@ -13,8 +13,8 @@ const SEOStructuredData = ({ type = 'MedicalOrganization', data }: SEOStructured
       "name": "Instituto de Olhos Santa Luzia",
       "description": "Instituto de Olhos Santa Luzia em Sinop/MT - Especialistas em cirurgia de catarata, cirurgia refrativa e tratamento de ceratocone com tecnologia de ponta.",
       "url": "https://institutodeolhossantaluzia.com.br",
-      "logo": "/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png",
-      "image": "/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png",
+      "logo": "/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png",
+      "image": "/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png",
       "telephone": "+55 66 99721-5000",
       "email": "contato@institutodeolhossantaluzia.com.br",
       "address": {

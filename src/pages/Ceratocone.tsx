@@ -73,7 +73,7 @@ const Ceratocone = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/ca6a3fb8-8270-45cf-97e5-a67feca68a3e.png"
+                src="/uploads/ca6a3fb8-8270-45cf-97e5-a67feca68a3e.png"
                 alt="Tratamento de Ceratocone"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -167,7 +167,7 @@ const Ceratocone = () => {
             </div>
             <div className="relative">
               <img
-                src="/lovable-uploads/ceratocone.jpg"
+                src="/uploads/ceratocone.jpg"
                 alt="Crosslinking de Córnea"
                 className="rounded-lg shadow-medium w-full"
               />
@@ -190,7 +190,7 @@ const Ceratocone = () => {
             <div className="grid lg:grid-cols-2 gap-8 mb-8">
               <div className="relative">
                 <img
-                  src="/lovable-uploads/anelintraestromal.png"
+                  src="/uploads/anelintraestromal.png"
                   alt="Anel Intraestromal"
                   className="rounded-lg shadow-medium w-full"
                 />
@@ -290,7 +290,7 @@ const Ceratocone = () => {
             <div className="grid lg:grid-cols-2 gap-8 mb-8">
               <div className="relative">
                 <img
-                  src="/lovable-uploads/txcornea.jpg"
+                  src="/uploads/txcornea.jpg"
                   alt="Transplante de Córnea"
                   className="rounded-lg shadow-medium w-full"
                 />
@@ -402,7 +402,7 @@ const Ceratocone = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/lovable-uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
+        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
         brandName=""
         socialLinks={[
           { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
