@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AppWrapper from "@/components/AppWrapper";
 import Home from "./pages/Home";
 import Instituto from "./pages/Instituto";
 import Historia from "./pages/Historia";
@@ -27,23 +28,25 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/instituto" element={<Instituto />} />
-          <Route path="/historia" element={<Historia />} />
-          <Route path="/corpo-clinico" element={<CorpoClinico />} />
-          <Route path="/exames" element={<Exames />} />
-          <Route path="/catarata" element={<Catarata />} />
-          <Route path="/cirurgia-refrativa" element={<CirurgiaRefrativa />} />
-          <Route path="/ceratocone" element={<Ceratocone />} />
-          <Route path="/artigos" element={<Artigos />} />
-          <Route path="/portal-paciente" element={<PatientPortal />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin-dashboard-santa-luzia" element={<AdminDashboard />} />
-          <Route path="/adminio" element={<AdminDashboard />} />
-          <Route path="/oftalmologista-sinop" element={<OftalmologistaSinop />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppWrapper>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/instituto" element={<Instituto />} />
+            <Route path="/historia" element={<Historia />} />
+            <Route path="/corpo-clinico" element={<CorpoClinico />} />
+            <Route path="/exames" element={<Exames />} />
+            <Route path="/catarata" element={<Catarata />} />
+            <Route path="/cirurgia-refrativa" element={<CirurgiaRefrativa />} />
+            <Route path="/ceratocone" element={<Ceratocone />} />
+            <Route path="/artigos" element={<Artigos />} />
+            <Route path="/portal-paciente" element={<PatientPortal />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin-dashboard-santa-luzia" element={<AdminDashboard />} />
+            <Route path="/adminio" element={<AdminDashboard />} />
+            <Route path="/oftalmologista-sinop" element={<OftalmologistaSinop />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AppWrapper>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
