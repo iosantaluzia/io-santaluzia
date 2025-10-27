@@ -17,6 +17,14 @@ const Home = () => {
   const [showFloatingNav, setShowFloatingNav] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const [currentArticle, setCurrentArticle] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const heroImages = [
+    "/uploads/interior.jpg",
+    "/uploads/exames.jpg",
+    "/uploads/35a55ba7-79f8-4351-a3c0-62d1d39c59f6.png",
+    "/uploads/fachada.jpg"
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +35,23 @@ const Home = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const images = [
+      "/uploads/interior.jpg",
+      "/uploads/exames.jpg",
+      "/uploads/35a55ba7-79f8-4351-a3c0-62d1d39c59f6.png",
+      "/uploads/fachada.jpg"
+    ];
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000); // Troca a imagem a cada 5 segundos
+
+    return () => clearInterval(interval);
   }, []);
 
 
@@ -55,7 +80,7 @@ const Home = () => {
       <NavigationHeader showLogo={true} />
 
       {/* IA Section - Manter largura original para SymptomChecker */}
-      <section id="ia" className="pt-32 pb-16 bg-background">
+      <section id="ia" className="pt-20 md:pt-32 pb-8 md:pb-16 bg-background">
         <div className="max-w-4xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -72,7 +97,7 @@ const Home = () => {
                       />
             </div>
             
-            <h2 className="text-2xl md:text-3xl font-sans text-medical-primary mb-6">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-sans text-medical-primary mb-4 md:mb-6">
               Análise Inteligente de Sintomas
             </h2>
             <SymptomChecker />
@@ -91,66 +116,50 @@ const Home = () => {
         <div className="w-full">
           <div className="max-w-4xl mx-auto px-4 pb-8">
           <div className="relative">
-              {/* Background Image */}
-              <div className="absolute inset-0 flex items-end justify-center pb-0 z-0">
-                <div className="max-w-4xl mx-auto px-4 w-full">
-            <img 
-              src="/uploads/6d7d13fe-03bb-4ace-89df-262bcaccb86e.png"
-                    alt="Background"
-                    className="h-auto object-cover rounded-t-3xl"
-                    style={{ 
-                      width: '98%',
-                      filter: `contrast(1.05) brightness(0.98) saturate(1.05) blur(${Math.max(0, 3 - scrollY * 0.01)}px)`,
-                      imageRendering: 'crisp-edges',
-                      transform: 'translateY(-10%)'
-                    }}
-            />
-          </div>
+              {/* Image Carousel - Above Text for both mobile and desktop */}
+              <div className="mb-6">
+                <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-t-3xl">
+                  {heroImages.map((img, idx) => {
+                    const isAnimatedImage = img !== "/uploads/exames.jpg";
+                    return (
+                      <motion.img
+                        key={`${img}-${idx}`}
+                        src={img}
+                        alt="Instituto de Olhos Santa Luzia"
+                        className={`w-full h-full object-cover ${idx !== currentImageIndex ? 'hidden' : ''}`}
+                        style={{ 
+                          width: '100%', 
+                          height: isAnimatedImage ? '130%' : '100%',
+                          objectPosition: 'center' 
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ 
+                          opacity: idx === currentImageIndex ? 1 : 0,
+                          y: isAnimatedImage ? ['0%', '-15%', '0%'] : '0%',
+                        }}
+                        exit={{ opacity: 0 }}
+                        transition={{ 
+                          opacity: { duration: 0.8 },
+                          y: isAnimatedImage ? { 
+                            duration: 15,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          } : {}
+                        }}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-              
-              {/* Mock Background - bghomemock.png */}
-              <div className="absolute inset-0 flex items-start justify-center pt-8 z-10">
-                <div className="max-w-5xl mx-auto px-4">
-                  <img 
-                    src="/uploads/bghomemock.png"
-                    alt="Mock Background"
-                    className="w-full object-contain"
-                    style={{
-                      filter: 'hue-rotate(0deg) saturate(1) brightness(1) contrast(1) sepia(0) invert(0) grayscale(0)',
-                      transform: 'translateX(-2%)'
-                    }}
-                  />
-        </div>
-      </div>
 
               {/* Content */}
-              <div className="relative z-20 flex items-end pt-28">
+              <div className="relative z-10">
                 <div className="w-full">
-                  {/* Mobile Mock Frame with Overlay Text */}
-                  <div className="md:hidden w-full px-4 mb-8">
-                    <div className="relative">
-                      {/* Mobile Mock Frame */}
-                      <div className="relative mx-auto max-w-sm">
-                        <img 
-                          src="/uploads/mockmobile2.png"
-                          alt="Mobile Mock"
-                          className="w-full h-auto object-contain"
-                        />
-                        
-                        {/* Overlay Text "Bem vindo ao" */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <h2 className="text-lg font-medium text-gray-600 text-center">
-                            Bem vindo ao
-                          </h2>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="space-y-4">
                       {/* Desktop Welcome Text */}
                       <h2 className="hidden md:block text-lg md:text-xl font-medium text-gray-600 mb-2">Bem vindo ao</h2>
+                      {/* Title for all screen sizes */}
                       <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-medical-primary mb-6">
                         INSTITUTO DE OLHOS SANTA LUZIA
             </h1>
@@ -211,10 +220,10 @@ const Home = () => {
 
 
       {/* Services Section */}
-      <div className="py-20 bg-background">
+      <div className="py-12 md:py-20 bg-background">
         <div className="w-full px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-6">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-sans text-medical-primary mb-4 md:mb-6 px-4">
               O que <span className="text-medical-primary">oferecemos</span>
               </h2>
             </div>
@@ -226,15 +235,15 @@ const Home = () => {
       </div>
 
       {/* Articles Section */}
-      <div className="py-20 bg-background">
+      <div className="py-12 md:py-20 bg-background">
         <div className="w-full px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-6">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-sans text-medical-primary mb-4 md:mb-6 px-4">
               Últimos Artigos
             </h2>
           </div>
           
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-4 md:mb-8 px-4">
             <div className="flex space-x-2">
               <button
                 onClick={prevArticle}
@@ -253,7 +262,7 @@ const Home = () => {
           
           <div 
             ref={scrollContainerRef}
-            className="flex overflow-x-auto scrollbar-hide gap-6 pb-4"
+            className="flex overflow-x-auto scrollbar-hide gap-4 md:gap-6 pb-4 px-4"
             style={{ scrollBehavior: 'smooth' }}
           >
             {articles.map((article, index) => (
@@ -262,7 +271,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 bg-white rounded-xl shadow-medium overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                className="flex-shrink-0 w-[280px] md:w-80 bg-white rounded-xl shadow-medium overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
                 onClick={() => setSelectedArticle(article)}
               >
                 <div className="h-48 overflow-hidden">
@@ -276,10 +285,10 @@ const Home = () => {
                   <div className="flex items-center text-sm text-medical-accent mb-3">
                     <span>{article.data}</span>
                   </div>
-                  <h3 className="text-lg font-sans text-medical-primary mb-3 line-clamp-2">
+                  <h3 className="text-base md:text-lg font-sans text-medical-primary mb-2 md:mb-3 line-clamp-2">
                     {article.titulo}
                   </h3>
-                  <p className="text-medical-secondary text-sm leading-relaxed line-clamp-3">
+                  <p className="text-medical-secondary text-xs md:text-sm leading-relaxed line-clamp-3">
                     {article.subtitulo}
                   </p>
                 </div>

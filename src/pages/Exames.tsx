@@ -59,23 +59,23 @@ const Exames = () => {
   return (
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
-      <main className="pt-32 pb-16">
+      <main className="pt-20 md:pt-32 pb-12 md:pb-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
+          <div className="text-center mb-8 md:mb-12">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-4 md:mb-8 px-4">
               Exames Complementares
             </h1>
-            <p className="text-lg text-medical-secondary max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-medical-secondary max-w-3xl mx-auto px-4">
               Oferecemos uma ampla gama de exames oftalmológicos com equipamentos de última geração 
               para diagnósticos precisos e confiáveis.
             </p>
           </div>
 
           {/* Botão para pesquisar exames */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 md:mb-12 px-4">
             <button
               onClick={() => setIsSearchModalOpen(!isSearchModalOpen)}
-              className="bg-medical-primary text-white px-8 py-4 rounded-lg hover:bg-white hover:text-medical-primary hover:border-2 hover:border-medical-primary transition-colors font-semibold text-lg"
+              className="bg-medical-primary text-white px-6 py-3 md:px-8 md:py-4 rounded-lg hover:bg-white hover:text-medical-primary hover:border-2 hover:border-medical-primary transition-colors font-semibold text-base md:text-lg"
             >
               Pesquisar seu exame
             </button>
@@ -91,19 +91,19 @@ const Exames = () => {
                 className="group cursor-pointer bg-white rounded-lg shadow-soft overflow-hidden hover:shadow-medium transition-all duration-300"
                 onClick={() => setSelectedExam(exame)}
               >
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-40 md:h-48 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-medical-primary/80 to-transparent"></div>
                   <img 
                     src={exame.imagem}
                     alt={exame.nome}
-                    className="relative w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 z-10"
+                    className="relative w-full h-full object-contain p-3 md:p-4 group-hover:scale-105 transition-transform duration-300 z-10"
                   />
-                  <h3 className="absolute bottom-4 left-4 right-4 text-white font-sans text-lg font-semibold z-20">
+                  <h3 className="absolute bottom-3 md:bottom-4 left-3 md:left-4 right-3 md:right-4 text-white font-sans text-base md:text-lg font-semibold z-20">
                     {exame.nome}
                   </h3>
                 </div>
                 <div className="p-4">
-                  <p className="text-medical-secondary text-sm">
+                  <p className="text-medical-secondary text-xs md:text-sm">
                     {exame.descricao}
                   </p>
                 </div>

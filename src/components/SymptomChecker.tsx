@@ -160,13 +160,13 @@ const SymptomChecker = () => {
                   className="bg-medical-primary text-white p-2 rounded-full hover:bg-medical-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Analisar sintomas"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
                 {input && (
                   <button
                     onClick={clearInput}
                     disabled={isLoading}
-                    className="text-medical-secondary hover:text-medical-primary p-2 rounded-full hover:bg-medical-muted/30 transition-colors disabled:opacity-50"
+                    className="text-medical-secondary hover:text-medical-primary p-2 rounded-full hover:bg-medical-muted/30 transition-colors disabled:opacity-50 text-lg md:text-xl"
                     title="Limpar campo"
                   >
                     ×
@@ -179,35 +179,35 @@ const SymptomChecker = () => {
       ) : (
         <div 
           ref={resultRef}
-          className={`p-4 rounded-lg border mb-6 ${
+          className={`p-3 md:p-4 rounded-lg border mb-4 md:mb-6 ${
             response.type === 'success' 
               ? 'bg-medical-muted/20 border-medical-muted' 
               : 'bg-red-50 border-red-200'
           }`}
         >
           {response.type === 'success' ? (
-            <div className="flex flex-col lg:flex-row gap-4 items-start">
+            <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-start">
               <div className="flex-1 text-left">
-                <p className="font-semibold mb-2 text-medical-primary">Resultado da Análise:</p>
-                <p className="text-medical-secondary leading-relaxed text-sm">
+                <p className="font-semibold mb-2 text-sm md:text-base text-medical-primary">Resultado da Análise:</p>
+                <p className="text-medical-secondary leading-relaxed text-xs md:text-sm">
                   {response.message}
                 </p>
-                <p className="text-xs text-medical-secondary/70 mt-3 italic">
+                <p className="text-xs text-medical-secondary/70 mt-2 md:mt-3 italic">
                   ⚠️ Esta análise é apenas informativa. Consulte nosso corpo clínico para diagnóstico preciso.
                 </p>
               </div>
               
-              <div className="flex-shrink-0 lg:ml-4 flex flex-col gap-2">
+              <div className="flex-shrink-0 lg:ml-4 flex flex-col gap-2 w-full lg:w-auto">
                 <button 
                   onClick={handleSchedule}
-                  className="inline-flex items-center gap-2 bg-medical-primary text-white px-4 py-3 rounded-lg hover:bg-medical-secondary transition-colors text-sm font-medium shadow-soft"
+                  className="inline-flex items-center justify-center gap-2 bg-medical-primary text-white px-4 py-2 md:py-3 rounded-lg hover:bg-medical-secondary transition-colors text-xs md:text-sm font-medium shadow-soft"
                 >
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-3 w-3 md:h-4 md:w-4" />
                   Agendar Consulta
                 </button>
                 <button 
                   onClick={clearInput}
-                  className="inline-flex items-center gap-2 text-medical-secondary hover:text-medical-primary px-4 py-2 rounded-lg hover:bg-medical-muted/30 transition-colors text-sm"
+                  className="inline-flex items-center justify-center gap-2 text-medical-secondary hover:text-medical-primary px-4 py-2 rounded-lg hover:bg-medical-muted/30 transition-colors text-xs md:text-sm"
                 >
                   Nova Análise
                 </button>

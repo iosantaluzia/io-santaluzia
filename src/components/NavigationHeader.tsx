@@ -57,32 +57,32 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
 
   return (
     <>
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm rounded-full shadow-medium p-2">
-        <div className="flex items-center gap-4">
+      <div className="fixed top-2 md:top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm rounded-full shadow-medium p-1 md:p-1 lg:p-2">
+        <div className="flex items-center gap-2 md:gap-1.5 lg:gap-3 xl:gap-4">
           {showLogo && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="cursor-pointer flex-shrink-0 rounded-full overflow-hidden bg-white h-8 w-8 flex items-center justify-center"
+              className="cursor-pointer flex-shrink-0 rounded-full overflow-hidden bg-white h-7 w-7 md:h-8 md:w-8 flex items-center justify-center"
               onClick={() => navigate("/")}
             >
               <img 
                 src="/uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
                 alt="Instituto de Olhos Santa Luzia" 
-                className="h-7 w-7 object-contain animate-spin-slow"
+                className="h-6 w-6 md:h-7 md:w-7 object-contain animate-spin-slow"
               />
             </motion.div>
           )}
           
           <ul
-            className="relative flex w-fit rounded-full bg-white p-1"
+            className="relative flex items-center w-fit rounded-full bg-white p-1"
             onMouseLeave={() => setPosition((pv) => ({ ...pv, opacity: 0 }))}
           >
             {/* Instituto Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className={`relative z-10 cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full flex items-center space-x-1 ${
+                <button className={`relative z-10 cursor-pointer px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase transition-colors rounded-full flex items-center justify-center space-x-1 ${
                   location.pathname === '/historia' || location.pathname === '/corpo-clinico'
                     ? "bg-medical-primary text-white font-semibold" 
                     : "text-medical-primary hover:text-white hover:bg-medical-primary"
@@ -120,7 +120,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             {/* Cirurgias Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className={`relative z-10 cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full flex items-center space-x-1 ${
+                <button className={`relative z-10 cursor-pointer px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase transition-colors rounded-full flex items-center justify-center space-x-1 ${
                   location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone'
                     ? "bg-medical-primary text-white font-semibold" 
                     : "text-medical-primary hover:text-white hover:bg-medical-primary"
@@ -222,8 +222,18 @@ const Tab = ({
           left: ref.current.offsetLeft,
         });
       }}
-      onClick={onClick}
-      className={`relative z-10 block cursor-pointer px-3 py-2 text-xs uppercase transition-colors md:px-4 md:py-2 md:text-sm rounded-full ${
+      onClick={() => {
+        if (ref.current) {
+          const { width } = ref.current.getBoundingClientRect();
+          setPosition({
+            width,
+            opacity: 1,
+            left: ref.current.offsetLeft,
+          });
+        }
+        onClick();
+      }}
+      className={`relative z-10 block cursor-pointer px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase transition-colors rounded-full flex items-center justify-center ${
         isActive 
           ? "bg-medical-primary text-white font-semibold" 
           : "text-medical-primary hover:text-white hover:bg-medical-primary"
@@ -250,7 +260,7 @@ const Cursor = ({ position }: { position: any }) => {
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-8 rounded-full bg-medical-primary md:h-10"
+      className="absolute z-0 h-7 md:h-7 lg:h-8 xl:h-10 rounded-full bg-medical-primary"
     />
   );
 };

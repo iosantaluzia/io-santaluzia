@@ -8,13 +8,13 @@ const CorpoClinico = () => {
   return (
     <div className="min-h-screen">
       <NavigationHeader showLogo={true} />
-      <main className="pt-32 pb-16">
+      <main className="pt-20 md:pt-32 pb-12 md:pb-16">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-5xl font-sans text-medical-primary mb-8">
+          <div className="text-center mb-8 md:mb-12">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-4 md:mb-8">
               Corpo Clínico
             </h1>
-            <p className="text-lg text-medical-secondary max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-medical-secondary max-w-3xl mx-auto px-4">
               Nossa equipe é formada por oftalmologistas experientes e especializados nas mais 
               diversas áreas da medicina ocular, garantindo um atendimento de alta qualidade.
             </p>
@@ -24,21 +24,21 @@ const CorpoClinico = () => {
             {/* Dra. Fabíola Roque */}
             <div className="bg-white rounded-lg shadow-soft overflow-hidden">
               <div className="flex flex-col lg:flex-row">
-                <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
+                <div className="lg:w-1/3 p-6 md:p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
                     src="/uploads/fabiola.png"
                     alt="Dra. Fabíola Roque"
-                    className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
+                    className="w-40 h-40 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-medium"
                   />
                 </div>
-                <div className="lg:w-2/3 p-8">
-                  <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
+                <div className="lg:w-2/3 p-6 md:p-8">
+                  <h2 className="text-xl md:text-2xl font-sans font-bold text-medical-primary mb-3 md:mb-4">
                     Dra. Fabíola Roque
                   </h2>
-                  <p className="text-medical-secondary mb-6 text-lg">
+                  <p className="text-medical-secondary mb-4 md:mb-6 text-base md:text-lg">
                     Especialista em Catarata, Ceratocone, Lentes de Contato e Cirurgia Refrativa.
                   </p>
-                  <div className="space-y-2 text-medical-secondary">
+                  <div className="space-y-2 text-sm md:text-base text-medical-secondary">
                     <p>• Formação em Medicina pela FFFCMPA</p>
                     <p>• Especialização em Oftalmologia pela UFCSPA</p>
                     <p>• Fellow em Segmento Anterior pela Santa Casa de Misericórdia de Porto Alegre</p>
@@ -51,21 +51,21 @@ const CorpoClinico = () => {
             {/* Dr. Matheus Roque */}
             <div className="bg-white rounded-lg shadow-soft overflow-hidden">
               <div className="flex flex-col lg:flex-row">
-                <div className="lg:w-1/3 p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
+                <div className="lg:w-1/3 p-6 md:p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
                     src="/uploads/matheus.png"
                     alt="Dr. Matheus Roque"
-                    className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-medium"
+                    className="w-40 h-40 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-medium"
                   />
                 </div>
-                <div className="lg:w-2/3 p-8">
-                  <h2 className="text-2xl font-sans font-bold text-medical-primary mb-4">
+                <div className="lg:w-2/3 p-6 md:p-8">
+                  <h2 className="text-xl md:text-2xl font-sans font-bold text-medical-primary mb-3 md:mb-4">
                     Dr. Matheus Roque
                   </h2>
-                  <p className="text-medical-secondary mb-6 text-lg">
+                  <p className="text-medical-secondary mb-4 md:mb-6 text-base md:text-lg">
                     Especialista em Oftalmologia geral e Oftalmopediatria
                   </p>
-                  <div className="space-y-2 text-medical-secondary">
+                  <div className="space-y-2 text-sm md:text-base text-medical-secondary">
                     <p>• Formação em Medicina pela Pontifícia Universidade Católica do Paraná</p>
                     <p>• Especialização em Oftalmologia pelo Hospital de Clínicas da UFPR</p>
                   </div>
@@ -74,15 +74,15 @@ const CorpoClinico = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-soft p-8 mt-12 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-medical-primary mb-4">
+          <div className="bg-white rounded-2xl shadow-soft p-6 md:p-8 mt-8 md:mt-12 max-w-4xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-semibold text-medical-primary mb-3 md:mb-4">
               Compromisso com a Excelência
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
               Nossos profissionais estão em constante atualização, participando de congressos 
               e cursos de especialização para oferecer sempre os melhores tratamentos disponíveis.
             </p>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               Acreditamos que o cuidado humanizado, aliado à competência técnica, é fundamental 
               para o sucesso dos tratamentos e a satisfação dos nossos pacientes.
             </p>

@@ -33,7 +33,7 @@ const InteractiveCards = () => {
       title: "Ampla Gama de Exames",
       description: "Disponibilizamos exames de ponta, para garantir um diagnóstico preciso e um tratamento adequado para cada paciente. Contamos com equipamentos de última geração como OCT, topografia corneana, microscopia especular e muitos outros.",
       icon: <Stethoscope className="h-6 w-6" />,
-      image: "/uploads/oct.png",
+      image: "/uploads/exames.jpg",
       color: "text-medical-primary",
       bgColor: "bg-medical-muted/30",
       iconBg: "bg-medical-primary/10"
@@ -51,10 +51,10 @@ const InteractiveCards = () => {
   ];
 
   return (
-    <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4">
+    <div className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide px-2 md:px-4">
       {cardsData.map((card) => {
         const isExpanded = expandedCard === card.id;
-        const cardWidth = isExpanded ? 600 : 280;
+        const cardWidth = isExpanded ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 320 : 600) : (typeof window !== 'undefined' && window.innerWidth < 768 ? 240 : 280);
         
         return (
           <motion.div
@@ -79,7 +79,7 @@ const InteractiveCards = () => {
             }}
           >
             {/* Card Background */}
-            <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-medical-primary/5 to-medical-accent/5">
+            <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-medical-primary/5 to-medical-accent/5">
               {/* Background Image */}
               <div className="absolute inset-0">
                 <img
@@ -101,16 +101,16 @@ const InteractiveCards = () => {
               }`}></div>
               
               {/* Content */}
-              <div className="relative z-10 p-6 h-full flex flex-col">
+              <div className="relative z-10 p-4 md:p-6 h-full flex flex-col">
                 {/* Header with Icon and Title */}
-                <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center ${card.iconBg} ${card.color} flex-shrink-0`} style={{ filter: 'drop-shadow(2px 2px 0 white) drop-shadow(-2px -2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px 2px 0 white)' }}>
+                  <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center ${card.iconBg} ${card.color} flex-shrink-0`} style={{ filter: 'drop-shadow(2px 2px 0 white) drop-shadow(-2px -2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px 2px 0 white)' }}>
                     {card.icon}
                   </div>
                   
                   {/* Title */}
-                  <h3 className={`text-xl font-bold ${card.color} flex-1`} style={{ textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white' }}>
+                  <h3 className={`text-base md:text-xl font-bold ${card.color} flex-1`} style={{ textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white' }}>
                     {card.title}
                   </h3>
                 </div>
@@ -128,8 +128,8 @@ const InteractiveCards = () => {
                       }}
                       className="overflow-hidden"
                     >
-                      <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
-                        <p className="text-gray-700 leading-relaxed text-sm">
+                      <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 md:p-4 shadow-lg">
+                        <p className="text-gray-700 leading-relaxed text-xs md:text-sm">
                           {card.description}
                         </p>
                       </div>
