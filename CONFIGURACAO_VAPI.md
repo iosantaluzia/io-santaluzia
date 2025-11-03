@@ -18,20 +18,14 @@
 
 ## 📋 Configurações Necessárias no Dashboard da Vapi
 
-### 1. Configurar Webhook URL
+### 1. Configurar Webhook URL ✅ CONCLUÍDO AUTOMATICAMENTE
 
-Acesse o dashboard da Vapi (https://dashboard.vapi.ai) e configure o webhook:
-
-**URL do Webhook:**
+**URL do Webhook configurada:**
 ```
 https://aobjtwikccovikmfoicg.supabase.co/functions/v1/vapi-webhook
 ```
 
-**Como configurar:**
-1. Acesse: https://dashboard.vapi.ai/assistant/0eee3a3e-ab36-478d-acd2-cdf4aa3fdcb5
-2. Vá em "Settings" ou "Webhooks"
-3. Adicione a URL do webhook acima
-4. Marque os eventos: `function-call`, `end-of-call-report`
+✅ O webhook foi configurado automaticamente via API no Assistant `0eee3a3e-ab36-478d-acd2-cdf4aa3fdcb5`.
 
 ### 2. Configurar Function Call para Agendamento
 
