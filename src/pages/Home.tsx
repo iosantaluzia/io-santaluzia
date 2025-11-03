@@ -10,6 +10,7 @@ import { Footer } from "@/components/ui/footer";
 import FloatingWhatsAppButton from "@/components/FloatingWhatsAppButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ArticleModal from "@/components/ArticleModal";
+import { VoiceChatButton } from "@/components/VoiceChatButton";
 import { articles } from '@/data/articles';
 
 const Home = () => {
@@ -321,6 +322,7 @@ const Home = () => {
         }}
       />
       <FloatingWhatsAppButton />
+      <VoiceChatButton variant="floating" />
       
       {/* Article Modal */}
       {selectedArticle && (
