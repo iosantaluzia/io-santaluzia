@@ -80,6 +80,8 @@ export function VoiceChatButton({
       setIsLoading(true);
       
       // Iniciar chamada via API da Vapi (outboundPhoneCall - usuário recebe ligação)
+      // A Vapi requer phoneNumber no objeto customer ou phoneNumberId
+      // Baseado no erro: "Need Either `phoneNumberId` Or `phoneNumber`"
       const response = await fetch('https://api.vapi.ai/call', {
         method: 'POST',
         headers: {
@@ -89,7 +91,7 @@ export function VoiceChatButton({
         body: JSON.stringify({
           assistantId: assistantId,
           customer: {
-            number: phone,
+            phoneNumber: phone, // Usar phoneNumber (não number)
           },
           metadata: {
             source: 'website',
