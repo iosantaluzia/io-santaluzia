@@ -19,6 +19,8 @@ interface VoiceChatButtonProps {
 }
 
 const VAPI_PRIVATE_KEY = 'f5f59844-231f-4d0d-a4b2-bc7d8933bed6';
+// Phone Number ID do Twilio cadastrado na Vapi
+const VAPI_PHONE_NUMBER_ID = 'c4e06869-557f-40bc-9628-9423d144b262';
 
 export function VoiceChatButton({ 
   variant = 'default', 
@@ -80,8 +82,7 @@ export function VoiceChatButton({
       setIsLoading(true);
       
       // Iniciar chamada via API da Vapi (outboundPhoneCall - usuário recebe ligação)
-      // A Vapi requer phoneNumber no objeto customer ou phoneNumberId
-      // Baseado no erro: "Need Either `phoneNumberId` Or `phoneNumber`"
+      // Usando phoneNumberId do número Twilio cadastrado na Vapi
       const response = await fetch('https://api.vapi.ai/call', {
         method: 'POST',
         headers: {
@@ -91,8 +92,9 @@ export function VoiceChatButton({
         body: JSON.stringify({
           assistantId: assistantId,
           customer: {
-            phoneNumber: phone, // Usar phoneNumber (não number)
+            phoneNumber: phone, // Número do destinatário (quem receberá a ligação)
           },
+          phoneNumberId: VAPI_PHONE_NUMBER_ID, // ID do número Twilio cadastrado na Vapi
           metadata: {
             source: 'website',
             page: window.location.pathname,
