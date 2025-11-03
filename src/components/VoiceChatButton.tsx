@@ -43,48 +43,17 @@ export function VoiceChatButton({
         return;
       }
 
-      // Criar chamada via API da Vapi sem número de telefone (browser call)
-      const response = await fetch('https://api.vapi.ai/call', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${VAPI_PRIVATE_KEY}`,
-        },
-        body: JSON.stringify({
-          assistantId: assistantId,
-          // Não fornecer número de telefone = chamada no navegador
-          type: 'webCall', // Tipo de chamada no navegador
-          metadata: {
-            source: 'website',
-            page: window.location.pathname,
-            browserCall: true,
-          },
-        }),
+      // A Vapi não suporta chamadas WebRTC diretas via API REST
+      // Para teste no navegador, vamos redirecionar para o simulador da Vapi
+      toast.info('Para testar no navegador, use o simulador no dashboard da Vapi.', {
+        duration: 5000,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Erro ao iniciar chamada');
-      }
-
-      const data = await response.json();
-      setCallId(data.id);
       
-      // Se a chamada retornar uma URL de WebRTC ou similar, conectar aqui
-      if (data.clientUrl || data.webrtcUrl) {
-        // Redirecionar ou abrir em iframe para chamada WebRTC
-        toast.success('Chamada iniciada! Conectando...');
-        setIsCalling(true);
-        setIsLoading(false);
-        
-        // Abrir interface de chamada em modal ou iframe
-        // Você pode implementar aqui a conexão WebRTC se a Vapi fornecer
-      } else {
-        // Fallback: mostrar mensagem de sucesso
-        toast.success('Chamada iniciada! Use o dashboard da Vapi para testar.');
-        setIsCalling(true);
-        setIsLoading(false);
-      }
+      // Abrir dashboard da Vapi em nova aba para teste
+      const dashboardUrl = `https://dashboard.vapi.ai/assistant/${assistantId}`;
+      window.open(dashboardUrl, '_blank');
+      
+      setIsLoading(false);
       
     } catch (error: any) {
       console.error('Erro ao iniciar chamada no navegador:', error);
