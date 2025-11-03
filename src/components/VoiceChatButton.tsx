@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Phone, PhoneOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -6,18 +6,95 @@ import { toast } from 'sonner';
 interface VoiceChatButtonProps {
   variant?: 'default' | 'floating' | 'inline';
   className?: string;
+  useBrowserCall?: boolean; // Nova prop para escolher entre ligação telefônica ou navegador
 }
 
 const VAPI_PUBLIC_KEY = '0aafc1eb-1ef3-4bd9-9dad-b763c58a0b44';
 const VAPI_PRIVATE_KEY = 'f5f59844-231f-4d0d-a4b2-bc7d8933bed6';
 
-export function VoiceChatButton({ variant = 'default', className = '' }: VoiceChatButtonProps) {
+export function VoiceChatButton({ 
+  variant = 'default', 
+  className = '',
+  useBrowserCall = true // Por padrão, usar chamada no navegador
+}: VoiceChatButtonProps) {
   const [isCalling, setIsCalling] = useState(false);
   const [callId, setCallId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
   // Assistant ID encontrado na sua conta Vapi (configurado para Instituto de Olhos Santa Luzia)
   const [assistantId] = useState<string>('0eee3a3e-ab36-478d-acd2-cdf4aa3fdcb5');
 
-  const startCall = async () => {
+  // Chamada via navegador (cria chamada sem número de telefone)
+  const startBrowserCall = async () => {
+    if (!assistantId) {
+      toast.error('Assistente não configurado. Verifique sua conta Vapi.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Solicitar permissão de microfone
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (error) {
+        toast.error('Permissão de microfone necessária para usar o chat de voz.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Criar chamada via API da Vapi sem número de telefone (browser call)
+      const response = await fetch('https://api.vapi.ai/call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${VAPI_PRIVATE_KEY}`,
+        },
+        body: JSON.stringify({
+          assistantId: assistantId,
+          // Não fornecer número de telefone = chamada no navegador
+          type: 'webCall', // Tipo de chamada no navegador
+          metadata: {
+            source: 'website',
+            page: window.location.pathname,
+            browserCall: true,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Erro ao iniciar chamada');
+      }
+
+      const data = await response.json();
+      setCallId(data.id);
+      
+      // Se a chamada retornar uma URL de WebRTC ou similar, conectar aqui
+      if (data.clientUrl || data.webrtcUrl) {
+        // Redirecionar ou abrir em iframe para chamada WebRTC
+        toast.success('Chamada iniciada! Conectando...');
+        setIsCalling(true);
+        setIsLoading(false);
+        
+        // Abrir interface de chamada em modal ou iframe
+        // Você pode implementar aqui a conexão WebRTC se a Vapi fornecer
+      } else {
+        // Fallback: mostrar mensagem de sucesso
+        toast.success('Chamada iniciada! Use o dashboard da Vapi para testar.');
+        setIsCalling(true);
+        setIsLoading(false);
+      }
+      
+    } catch (error: any) {
+      console.error('Erro ao iniciar chamada no navegador:', error);
+      toast.error(error.message || 'Erro ao iniciar chamada. Tente novamente.');
+      setIsLoading(false);
+    }
+  };
+
+  // Chamada telefônica (modo original)
+  const startPhoneCall = async () => {
     if (!assistantId) {
       toast.error('Assistente não configurado. Verifique sua conta Vapi.');
       return;
@@ -27,7 +104,7 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
       setIsCalling(true);
       
       // Solicitar número de telefone do usuário
-      const phoneNumber = prompt('Digite seu número de telefone com DDD (ex: 66997215000):');
+      const phoneNumber = prompt('Digite seu número de telefone com DDD (ex: 41998620321):');
       if (!phoneNumber) {
         setIsCalling(false);
         return;
@@ -52,7 +129,6 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
           customer: {
             number: formattedPhone,
           },
-          // Configurações adicionais para agendamento
           metadata: {
             source: 'website',
             page: window.location.pathname,
@@ -76,6 +152,14 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
     }
   };
 
+  const startCall = () => {
+    if (useBrowserCall) {
+      startBrowserCall();
+    } else {
+      startPhoneCall();
+    }
+  };
+
   const endCall = async () => {
     if (callId) {
       try {
@@ -94,6 +178,7 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
         console.error('Erro ao encerrar chamada:', error);
       }
     }
+    
     setCallId(null);
     setIsCalling(false);
     toast.info('Chamada encerrada');
@@ -103,13 +188,16 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
     return (
       <button
         onClick={isCalling ? endCall : startCall}
+        disabled={isLoading}
         className={`fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full bg-medical-primary text-white shadow-lg hover:bg-medical-primary/90 transition-all duration-300 hover:scale-110 flex items-center justify-center ${
           isCalling ? 'animate-pulse bg-red-600' : ''
-        } ${className}`}
-        aria-label={isCalling ? 'Encerrar chamada' : 'Iniciar chamada de voz'}
-        title={isCalling ? 'Encerrar chamada' : 'Agendar por chamada de voz'}
+        } ${isLoading ? 'opacity-50 cursor-wait' : ''} ${className}`}
+        aria-label={isCalling ? 'Encerrar chamada' : 'Iniciar chat de voz'}
+        title={isCalling ? 'Encerrar chamada' : useBrowserCall ? 'Testar assistente de voz no navegador' : 'Agendar por chamada telefônica'}
       >
-        {isCalling ? (
+        {isLoading ? (
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+        ) : isCalling ? (
           <PhoneOff className="h-6 w-6 md:h-7 md:w-7" />
         ) : (
           <Phone className="h-6 w-6 md:h-7 md:w-7" />
@@ -123,9 +211,14 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
       <Button
         onClick={isCalling ? endCall : startCall}
         className={`bg-medical-primary hover:bg-medical-primary/90 ${isCalling ? 'bg-red-600' : ''} ${className}`}
-        disabled={isCalling}
+        disabled={isCalling || isLoading}
       >
-        {isCalling ? (
+        {isLoading ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+            Conectando...
+          </>
+        ) : isCalling ? (
           <>
             <PhoneOff className="h-4 w-4 mr-2" />
             Encerrar Chamada
@@ -133,7 +226,7 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
         ) : (
           <>
             <Phone className="h-4 w-4 mr-2" />
-            Agendar por Voz
+            {useBrowserCall ? 'Testar Assistente' : 'Agendar por Voz'}
           </>
         )}
       </Button>
@@ -145,9 +238,14 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
       onClick={isCalling ? endCall : startCall}
       className={`bg-medical-primary hover:bg-medical-primary/90 ${isCalling ? 'bg-red-600' : ''} ${className}`}
       size="lg"
-        disabled={isCalling}
+      disabled={isCalling || isLoading}
     >
-      {isCalling ? (
+      {isLoading ? (
+        <>
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2" />
+          Conectando...
+        </>
+      ) : isCalling ? (
         <>
           <PhoneOff className="h-5 w-5 mr-2" />
           Encerrar Chamada
@@ -155,10 +253,9 @@ export function VoiceChatButton({ variant = 'default', className = '' }: VoiceCh
       ) : (
         <>
           <Phone className="h-5 w-5 mr-2" />
-          Agendar por Chamada de Voz
+          {useBrowserCall ? 'Testar Assistente de Voz' : 'Agendar por Chamada de Voz'}
         </>
       )}
     </Button>
   );
 }
-

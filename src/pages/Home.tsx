@@ -322,7 +322,7 @@ const Home = () => {
         }}
       />
       <FloatingWhatsAppButton />
-      <VoiceChatButton variant="floating" />
+      <VoiceChatButton variant="floating" useBrowserCall={true} />
       
       {/* Article Modal */}
       {selectedArticle && (
