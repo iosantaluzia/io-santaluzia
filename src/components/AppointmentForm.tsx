@@ -22,8 +22,11 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
     phone: '',
     email: '',
     address: '',
+    cep: '',
+    city: '',
     doctor: '',
     time: '',
+    appointmentType: '',
     notes: ''
   });
 
@@ -69,11 +72,21 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
     return phone;
   };
 
+  const formatCEP = (cep: string) => {
+    const numbers = cep.replace(/\D/g, '');
+    if (numbers.length <= 8) {
+      return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
+    }
+    return cep;
+  };
+
   const handleInputChange = (field: string, value: string) => {
     if (field === 'cpf') {
       value = formatCPF(value);
     } else if (field === 'phone') {
       value = formatPhone(value);
+    } else if (field === 'cep') {
+      value = formatCEP(value);
     }
     
     setFormData({ ...formData, [field]: value });
@@ -83,7 +96,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
     e.preventDefault();
     
     // Validation
-    if (!formData.name || !formData.cpf || !formData.phone || !formData.doctor || !formData.time) {
+    if (!formData.name || !formData.cpf || !formData.phone || !formData.doctor || !formData.time || !formData.appointmentType) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
@@ -107,8 +120,11 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
       phone: '',
       email: '',
       address: '',
+      cep: '',
+      city: '',
       doctor: '',
       time: '',
+      appointmentType: '',
       notes: ''
     });
     onClose();
@@ -199,6 +215,21 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
                 <Clock className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               </div>
             </div>
+
+            <div>
+              <Label htmlFor="appointmentType">Tipo de Agendamento *</Label>
+              <Select value={formData.appointmentType} onValueChange={(value) => handleInputChange('appointmentType', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="consulta">Consulta</SelectItem>
+                  <SelectItem value="retorno">Retorno</SelectItem>
+                  <SelectItem value="exame">Exame</SelectItem>
+                  <SelectItem value="pagamento_honorarios">Pagamento de Honorários</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Campos Opcionais */}
@@ -228,11 +259,34 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
                     id="address"
                     value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    placeholder="Rua, Cidade, CEP"
+                    placeholder="Rua, número, bairro"
                     className="pl-10"
                   />
                   <MapPin className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cep">CEP</Label>
+                <Input
+                  id="cep"
+                  value={formData.cep}
+                  onChange={(e) => handleInputChange('cep', e.target.value)}
+                  placeholder="00000-000"
+                  maxLength={9}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="city">Cidade</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  placeholder="Cidade"
+                />
               </div>
             </div>
 

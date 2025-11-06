@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executar SQL - Criar Tabela Waitlist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .sql-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .btn-copy {
+            background: #10b981;
+        }
+        .btn-copy:hover {
+            background: #059669;
+        }
+        .btn-open {
+            background: #f59e0b;
+        }
+        .btn-open:hover {
+            background: #d97706;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+            display: block;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+            display: block;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+            display: block;
+        }
+        .instructions {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            color: #555;
+            line-height: 1.8;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        .instructions a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .instructions a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Criar Tabela Waitlist</h1>
+        <p class="subtitle">Execute este SQL no Supabase Dashboard para criar a tabela de lista de espera</p>
+        
+        <div class="sql-box" id="sqlBox">
+-- Script para criar a tabela waitlist no Supabase
+-- Execute este script no SQL Editor do Supabase Dashboard
+
+-- Criar tabela de lista de espera
+CREATE TABLE IF NOT EXISTS public.waitlist (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  patient_name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  observations TEXT,
+  contact_attempts INTEGER DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'waiting',
+  patient_id UUID REFERENCES public.patients(id) ON DELETE SET NULL,
+  scheduled_consultation_id UUID REFERENCES public.consultations(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  created_by VARCHAR(255)
+);
+
+-- Habilitar RLS
+ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
+
+-- Remover políticas existentes se houver
+DROP POLICY IF EXISTS "Allow authenticated users to view waitlist" ON public.waitlist;
+DROP POLICY IF EXISTS "Allow authenticated users to insert waitlist" ON public.waitlist;
+DROP POLICY IF EXISTS "Allow authenticated users to update waitlist" ON public.waitlist;
+DROP POLICY IF EXISTS "Allow authenticated users to delete waitlist" ON public.waitlist;
+
+-- Políticas RLS para waitlist
+CREATE POLICY "Allow authenticated users to view waitlist" ON public.waitlist
+FOR SELECT USING (true);
+
+CREATE POLICY "Allow authenticated users to insert waitlist" ON public.waitlist
+FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated users to update waitlist" ON public.waitlist
+FOR UPDATE USING (true);
+
+CREATE POLICY "Allow authenticated users to delete waitlist" ON public.waitlist
+FOR DELETE USING (true);
+
+-- Criar índices para melhor performance
+CREATE INDEX IF NOT EXISTS idx_waitlist_status ON public.waitlist(status);
+CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON public.waitlist(created_at);
+CREATE INDEX IF NOT EXISTS idx_waitlist_patient_id ON public.waitlist(patient_id);
+
+-- Comentários para documentação
+COMMENT ON TABLE public.waitlist IS 'Tabela para armazenar pacientes na lista de espera';
+COMMENT ON COLUMN public.waitlist.status IS 'Status: waiting, scheduled, cancelled';
+COMMENT ON COLUMN public.waitlist.patient_id IS 'ID do paciente na tabela patients (pode ser NULL para pacientes não cadastrados)';
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-copy" onclick="copySQL()">📋 Copiar SQL</button>
+            <button class="btn-open" onclick="openSupabase()">🔗 Abrir Supabase Dashboard</button>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="instructions">
+            <h3>📝 Instruções:</h3>
+            <ol>
+                <li>Clique em <strong>"Copiar SQL"</strong> para copiar o código</li>
+                <li>Clique em <strong>"Abrir Supabase Dashboard"</strong> para ir ao SQL Editor</li>
+                <li>No SQL Editor do Supabase, cole o SQL copiado</li>
+                <li>Clique em <strong>"Run"</strong> para executar</li>
+                <li>Aguarde a confirmação de sucesso</li>
+            </ol>
+            <p style="margin-top: 15px; color: #666;">
+                <strong>Link direto:</strong> <a href="https://supabase.com/dashboard/project/aobjtwikccovikmfoicg/sql" target="_blank">https://supabase.com/dashboard/project/aobjtwikccovikmfoicg/sql</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        const sql = document.getElementById('sqlBox').textContent;
+        const status = document.getElementById('status');
+        
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status ' + type;
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        function copySQL() {
+            navigator.clipboard.writeText(sql).then(() => {
+                showStatus('✅ SQL copiado para a área de transferência!', 'success');
+            }).catch(() => {
+                // Fallback para navegadores antigos
+                const textarea = document.createElement('textarea');
+                textarea.value = sql;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showStatus('✅ SQL copiado para a área de transferência!', 'success');
+            });
+        }
+        
+        function openSupabase() {
+            window.open('https://supabase.com/dashboard/project/aobjtwikccovikmfoicg/sql', '_blank');
+            showStatus('🔗 Abrindo Supabase Dashboard em nova aba...', 'info');
+        }
+        
+        // Mostrar mensagem inicial
+        showStatus('💡 Clique em "Copiar SQL" e depois em "Abrir Supabase Dashboard" para executar', 'info');
+    </script>
+</body>
+</html>
+

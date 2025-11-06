@@ -283,7 +283,7 @@ const Home = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <div className="flex items-center text-sm text-medical-accent mb-3">
+                  <div className="flex items-center text-sm text-gray-600 mb-3">
                     <span>{article.data}</span>
                   </div>
                   <h3 className="text-base md:text-lg font-sans text-medical-primary mb-2 md:mb-3 line-clamp-2">

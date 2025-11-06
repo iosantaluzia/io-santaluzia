@@ -26,9 +26,9 @@ const CorpoClinico = () => {
               <div className="flex flex-col lg:flex-row">
                 <div className="lg:w-1/3 p-6 md:p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
-                    src="/uploads/fabiola.png"
+                    src="/uploads/drafabiola.png"
                     alt="Dra. Fabíola Roque"
-                    className="w-40 h-40 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-medium"
+                    className="w-40 h-40 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-medium bg-amber-50"
                   />
                 </div>
                 <div className="lg:w-2/3 p-6 md:p-8">
@@ -53,9 +53,9 @@ const CorpoClinico = () => {
               <div className="flex flex-col lg:flex-row">
                 <div className="lg:w-1/3 p-6 md:p-8 flex justify-center items-center bg-gradient-to-br from-medical-accent to-medical-muted">
                   <img
-                    src="/uploads/matheus.png"
+                    src="/uploads/drmatheus.png"
                     alt="Dr. Matheus Roque"
-                    className="w-40 h-40 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-medium"
+                    className="w-40 h-40 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-medium bg-amber-50"
                   />
                 </div>
                 <div className="lg:w-2/3 p-6 md:p-8">

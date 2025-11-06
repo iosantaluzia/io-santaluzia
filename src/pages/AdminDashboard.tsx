@@ -204,7 +204,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen flex w-full bg-gray-50">
         <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
         
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col relative">
           {/* Header */}
           <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-40">
             <div className="flex items-center space-x-4">
@@ -283,8 +283,22 @@ const AdminDashboard = () => {
           </header>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto">
-            {renderContent()}
+          <div className="flex-1 overflow-auto relative">
+            {/* Background circlebg no canto inferior direito - ampliada 1.68x (reduzida 20%) */}
+            <div className="fixed bottom-0 right-0 w-[300px] h-[300px] pointer-events-none z-0 overflow-visible">
+              <img
+                src="/uploads/circlebg.png"
+                alt="Background"
+                className="w-full h-full object-contain"
+                style={{
+                  transform: 'scale(1.68)',
+                  transformOrigin: 'bottom right'
+                }}
+              />
+            </div>
+            <div className="relative z-10">
+              {renderContent()}
+            </div>
           </div>
         </main>
       </div>
