@@ -12,13 +12,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import PatientPortalModal from "./PatientPortalModal";
+import { cn } from "@/lib/utils";
 
 interface NavigationHeaderProps {
   showLogo: boolean;
 }
 
+type HighlightPosition = {
+  left: number;
+  width: number;
+  opacity: number;
+};
+
 function NavigationHeader({ showLogo }: NavigationHeaderProps) {
-  const [position, setPosition] = useState({
+  const [position, setPosition] = useState<HighlightPosition>({
     left: 0,
     width: 0,
     opacity: 0,
@@ -57,8 +64,18 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
 
   return (
     <>
-      <div className="fixed top-2 md:top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm rounded-full shadow-medium p-1 md:p-1 lg:p-2">
-        <div className="flex items-center gap-2 md:gap-1.5 lg:gap-3 xl:gap-4">
+      <div
+        className={cn(
+          "fixed top-2 md:top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm rounded-full shadow-medium",
+          isMobile ? "w-[calc(100vw-1.5rem)] px-2 py-1" : "p-1 md:p-1 lg:p-2"
+        )}
+      >
+        <div
+          className={cn(
+            "flex items-center gap-2 md:gap-1.5 lg:gap-3 xl:gap-4",
+            isMobile && "w-full justify-between"
+          )}
+        >
           {showLogo && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -76,8 +93,14 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
           )}
           
           <ul
-            className="relative flex items-center w-fit rounded-full bg-white p-1"
-            onMouseLeave={() => setPosition((pv) => ({ ...pv, opacity: 0 }))}
+            className={cn(
+              "relative flex items-center rounded-full bg-white",
+              isMobile ? "w-full justify-between px-1.5 py-1 gap-1" : "w-fit p-1"
+            )}
+            onMouseLeave={() => {
+              if (isMobile) return;
+              setPosition((pv) => ({ ...pv, opacity: 0 }));
+            }}
           >
             {/* Instituto Dropdown */}
             <DropdownMenu>
@@ -180,7 +203,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               Portal do Paciente
             </Tab>
 
-            <Cursor position={position} />
+            <Cursor position={position} isMobile={isMobile} />
           </ul>
         </div>
       </div>
@@ -202,25 +225,42 @@ const Tab = ({
   icon: Icon,
 }: {
   children: React.ReactNode;
-  setPosition: any;
+  setPosition: React.Dispatch<React.SetStateAction<HighlightPosition>>;
   isActive: boolean;
   onClick: () => void;
   isMobile: boolean;
-  icon: any;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }) => {
   const ref = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (!isActive || !ref.current) return;
+    const { width } = ref.current.getBoundingClientRect();
+    setPosition({
+      width,
+      opacity: 1,
+      left: ref.current.offsetLeft,
+    });
+  }, [isActive, setPosition]);
   
   return (
     <li
       ref={ref}
       onMouseEnter={() => {
-        if (!ref.current) return;
+        if (isMobile || !ref.current) return;
         const { width } = ref.current.getBoundingClientRect();
         setPosition({
           width,
           opacity: 1,
           left: ref.current.offsetLeft,
         });
+      }}
+      onMouseLeave={() => {
+        if (isActive || isMobile) return;
+        setPosition((prev) => ({
+          ...prev,
+          opacity: 0,
+        }));
       }}
       onClick={() => {
         if (ref.current) {
@@ -233,20 +273,21 @@ const Tab = ({
         }
         onClick();
       }}
-      className={`relative z-10 block cursor-pointer px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase transition-colors rounded-full flex items-center justify-center ${
-        isActive 
-          ? "bg-medical-primary text-white font-semibold" 
+      className={cn(
+        "relative z-10 block cursor-pointer transition-colors rounded-full flex items-center justify-center",
+        isMobile
+          ? "flex-1 min-w-0 px-2 py-1 text-[11px] uppercase tracking-tight"
+          : "px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase",
+        isActive
+          ? "bg-medical-primary text-white font-semibold shadow-soft"
           : "text-medical-primary hover:text-white hover:bg-medical-primary"
-      }`}
+      )}
     >
       {isMobile ? (
-        isActive ? (
-          <span className="text-xs whitespace-nowrap">
-            {children}
-          </span>
-        ) : (
+        <div className="flex flex-col items-center gap-0.5 leading-none">
           <Icon className="w-4 h-4" />
-        )
+          <span className="text-[10px] whitespace-nowrap">{children}</span>
+        </div>
       ) : (
         <span className="whitespace-nowrap">
           {children}
@@ -256,11 +297,15 @@ const Tab = ({
   );
 };
 
-const Cursor = ({ position }: { position: any }) => {
+const Cursor = ({ position, isMobile }: { position: HighlightPosition; isMobile: boolean }) => {
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-7 md:h-7 lg:h-8 xl:h-10 rounded-full bg-medical-primary"
+      transition={{ type: "spring", stiffness: 500, damping: 40 }}
+      className={cn(
+        "absolute z-0 pointer-events-none rounded-full bg-medical-primary",
+        isMobile ? "top-0.5 bottom-0.5" : "h-7 md:h-7 lg:h-8 xl:h-10"
+      )}
     />
   );
 };

@@ -3,7 +3,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, AlertTriangle, RefreshCw, Calendar, ArrowDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-const SymptomChecker = () => {
+type SymptomCheckerProps = {
+  className?: string;
+};
+
+const SymptomChecker: React.FC<SymptomCheckerProps> = ({ className }) => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<{
@@ -126,7 +130,7 @@ const SymptomChecker = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto text-center">
+    <div className={`max-w-2xl mx-auto text-center ${className || ""}`}>
       {!response ? (
         <>
           <div className="max-w-3xl mx-auto space-y-4 mb-8">
@@ -137,8 +141,8 @@ const SymptomChecker = () => {
               Digite seus sintomas oculares e receba uma análise inicial. Para diagnóstico preciso, agende uma consulta.
             </p>
           </div>
-          <div className="bg-white rounded-lg border border-medical-muted p-4 mb-6">
-            <div className="flex gap-3">
+          <div className="bg-white rounded-lg border border-marrom-acentuado/70 shadow-soft p-4 mb-6">
+            <div className="flex gap-3 items-start">
               <textarea
                 value={input}
                 onChange={(e) => {
@@ -148,8 +152,8 @@ const SymptomChecker = () => {
                     setShowScheduleButton(false);
                   }
                 }}
-                placeholder="Descreva seus sintomas oculares (ex: 'visão embaçada e sensibilidade à luz', 'dor de cabeça e vista cansada', 'manchas na visão', 'dificuldade para enxergar de perto')"
-                className="flex-1 min-h-[60px] resize-none border-none outline-none bg-transparent text-medical-primary placeholder:text-medical-secondary/60"
+                placeholder="Descreva seus sintomas oculares (ex: visão embaçada, manchas na visão...)"
+                className="flex-1 min-h-[60px] resize-none border-none outline-none bg-transparent text-medical-primary placeholder:text-medical-secondary/60 px-3 py-2 focus:ring-1 focus:ring-marrom-acentuado/50 rounded-lg"
                 rows={2}
                 disabled={isLoading}
               />
@@ -232,17 +236,6 @@ const SymptomChecker = () => {
         </div>
       )}
 
-      {/* Botão Continuar no site - sempre visível */}
-      <div className="mb-8">
-        <button
-          onClick={scrollToSite}
-          className="inline-flex items-center gap-2 text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm group"
-        >
-          Continuar no site
-          <ArrowDown className="h-4 w-4 group-hover:translate-y-1 transition-transform" />
-        </button>
-      </div>
-
       {isLoading && (
         <div className="mt-4 text-medical-secondary">
           <div className="flex items-center justify-center gap-3 mb-2">
@@ -255,6 +248,15 @@ const SymptomChecker = () => {
         </div>
       )}
 
+      <div className="mb-8 flex justify-center md:justify-start">
+        <button
+          onClick={scrollToSite}
+          className="inline-flex items-center gap-2 text-medical-primary hover:text-medical-secondary transition-colors font-medium text-sm group px-4 py-2 md:px-5 md:py-3 border border-medical-muted/60 rounded-full"
+        >
+          Continuar no site
+          <ArrowDown className="h-4 w-4 group-hover:translate-y-1 transition-transform" />
+        </button>
+      </div>
     </div>
   );
 };

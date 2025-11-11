@@ -77,34 +77,8 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-24 md:pt-32">
       <NavigationHeader showLogo={true} />
-
-      {/* IA Section - Manter largura original para SymptomChecker */}
-      <section id="ia" className="pt-20 md:pt-32 pb-8 md:pb-16 bg-background">
-        <div className="max-w-4xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            {/* Logo acima do título */}
-            <div className="mb-6 flex justify-center">
-                      <img 
-                        src="/uploads/logoiosantaluzia-removebg-preview.png" 
-                        alt="Instituto de Olhos Santa Luzia" 
-                        className="h-18 w-auto md:h-24 md:w-auto object-contain"
-                      />
-            </div>
-            
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-sans text-medical-primary mb-4 md:mb-6">
-              Análise Inteligente de Sintomas
-            </h2>
-            <SymptomChecker />
-          </motion.div>
-        </div>
-      </section>
 
       {/* Hero Section */}
       <motion.div
@@ -116,10 +90,17 @@ const Home = () => {
       >
         <div className="w-full">
           <div className="max-w-4xl mx-auto px-4 pb-8">
+          <div className="mb-6 flex justify-center">
+            <img 
+              src="/uploads/logoiosantaluzia-removebg-preview.png" 
+              alt="Instituto de Olhos Santa Luzia" 
+              className="h-18 w-auto md:h-24 md:w-auto object-contain"
+            />
+          </div>
           <div className="relative">
               {/* Image Carousel - Above Text for both mobile and desktop */}
               <div className="mb-6">
-                <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-t-3xl">
+                <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-3xl">
                   {heroImages.map((img, idx) => {
                     const isAnimatedImage = img !== "/uploads/exames.jpg";
                     return (
@@ -219,6 +200,44 @@ const Home = () => {
         </div>
       </motion.div>
 
+      {/* IA Section - Manter largura original para SymptomChecker */}
+      <section id="ia" className="pt-20 md:pt-32 pb-8 md:pb-16 bg-background">
+        <div className="max-w-4xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-sans text-medical-primary mb-4 md:mb-6">
+              Análise Inteligente de Sintomas
+            </h2>
+            <div className="mt-8 flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-16 md:justify-center">
+              <motion.div 
+                className="flex-shrink-0 order-1 md:order-none"
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                viewport={{ once: true, amount: 0.5 }}
+              >
+                <motion.img
+                  src="/uploads/iomascot.png"
+                  alt="Mascote do Instituto de Olhos Santa Luzia"
+                  className="w-28 sm:w-36 md:w-44 lg:w-52 drop-shadow-xl"
+                  initial={{ rotate: -6, opacity: 0 }}
+                  whileInView={{ rotate: [0, -4, 2, 0], opacity: 1 }}
+                  transition={{ duration: 1.4, ease: "easeInOut", delay: 0.2 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                />
+              </motion.div>
+              <div className="w-full md:max-w-2xl lg:max-w-3xl">
+                <SymptomChecker className="md:mx-0 md:text-left" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
 
       {/* Services Section */}
       <div className="py-12 md:py-20 bg-background">
@@ -244,19 +263,19 @@ const Home = () => {
             </h2>
           </div>
           
-          <div className="flex justify-between items-center mb-4 md:mb-8 px-4">
+          <div className="flex justify-center items-center mb-4 md:mb-8 px-4">
             <div className="flex space-x-2">
               <button
                 onClick={prevArticle}
-                className="p-2 rounded-full bg-white shadow-soft hover:shadow-medium transition-shadow"
+                className="p-2 rounded-full bg-medical-primary shadow-soft hover:bg-medical-primary/90 hover:shadow-medium transition-all"
               >
-                <ChevronLeft className="h-5 w-5 text-medical-primary" />
+                <ChevronLeft className="h-5 w-5 text-white" />
               </button>
               <button
                 onClick={nextArticle}
-                className="p-2 rounded-full bg-white shadow-soft hover:shadow-medium transition-shadow"
+                className="p-2 rounded-full bg-medical-primary shadow-soft hover:bg-medical-primary/90 hover:shadow-medium transition-all"
               >
-                <ChevronRight className="h-5 w-5 text-medical-primary" />
+                <ChevronRight className="h-5 w-5 text-white" />
               </button>
             </div>
           </div>
@@ -322,7 +341,6 @@ const Home = () => {
         }}
       />
       <FloatingWhatsAppButton />
-      <VoiceChatButton variant="floating" />
       
       {/* Article Modal */}
       {selectedArticle && (
