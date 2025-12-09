@@ -21,6 +21,7 @@ import {
 import { LoginForm } from '@/components/LoginForm';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { LazyComponents } from '@/components/LazyComponents';
+import { DownloadExecutableButton } from '@/components/DownloadExecutableButton';
 import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
@@ -245,6 +246,7 @@ const AdminDashboard = () => {
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-bege-principal focus:border-bege-principal"
                 />
               </div>
+              <DownloadExecutableButton />
               <button className="p-2 text-gray-600 hover:text-cinza-escuro relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
