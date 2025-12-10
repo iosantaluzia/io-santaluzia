@@ -22,6 +22,7 @@ import { LoginForm } from '@/components/LoginForm';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { LazyComponents } from '@/components/LazyComponents';
 import { DownloadExecutableButton } from '@/components/DownloadExecutableButton';
+import { FloatingChat } from '@/components/FloatingChat';
 import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
@@ -303,6 +304,11 @@ const AdminDashboard = () => {
             </div>
           </div>
         </main>
+        
+        {/* Chat flutuante para comunicação interna */}
+        {isAuthenticated && appUser && (
+          <FloatingChat currentUsername={appUser.username} />
+        )}
       </div>
     </SidebarProvider>
   );

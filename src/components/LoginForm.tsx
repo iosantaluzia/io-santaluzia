@@ -27,7 +27,11 @@ export function LoginForm() {
       if (error) {
         console.error('Login error:', error);
         if (error.message.includes('Invalid login credentials')) {
-          toast.error('Credenciais inválidas. Verifique seu usuário e senha.');
+          if (username.toLowerCase() === 'financeiro') {
+            toast.error('Credenciais inválidas. O usuário financeiro pode precisar ter sua conta criada. Acesse "Gerenciar Usuários" no dashboard para configurar.');
+          } else {
+            toast.error('Credenciais inválidas. Verifique seu usuário e senha.');
+          }
         } else if (error.message.includes('Email not confirmed')) {
           toast.error('Email não confirmado. Verifique sua caixa de entrada.');
         } else {

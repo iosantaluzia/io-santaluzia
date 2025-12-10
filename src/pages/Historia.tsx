@@ -42,7 +42,7 @@ const Historia = () => {
           </div>
           <div className="flex justify-center">
             <img
-              src="/uploads/Gemini_Generated_Image_mhsbckmhsbckmhsb.png"
+              src="/uploads/ZEISS-MEL-90-photo.jpeg"
               alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
               className="rounded-lg shadow-medium w-full max-w-md h-auto object-cover"
             />

@@ -107,43 +107,59 @@ export function FinanceiroSection() {
       
       {/* Cards de Resumo Financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[140px]">
+          <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Receita Mensal</p>
               <p className="text-2xl font-bold text-green-600">{formatCurrency(financialData.monthlyRevenue)}</p>
             </div>
-            <TrendingUp className="h-8 w-8 text-green-500" />
+            <img 
+              src="/dashboard/caixa.png" 
+              alt="Caixa" 
+              className="h-24 w-24 object-contain"
+            />
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[140px]">
+          <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Média Diária</p>
               <p className="text-2xl font-bold text-bege-principal">{formatCurrency(financialData.dailyAverage)}</p>
             </div>
-            <Calendar className="h-8 w-8 text-bege-principal" />
+            <img 
+              src="/dashboard/receitas.png" 
+              alt="Receitas" 
+              className="h-24 w-24 object-contain"
+            />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[140px]">
+          <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Pagamentos Pendentes</p>
               <p className="text-2xl font-bold text-yellow-600">{formatCurrency(financialData.pendingPayments)}</p>
             </div>
-            <DollarSign className="h-8 w-8 text-yellow-500" />
+            <img 
+              src="/dashboard/boletos.png" 
+              alt="Boletos" 
+              className="h-24 w-24 object-contain"
+            />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[140px]">
+          <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Pacientes Atendidos</p>
               <p className="text-2xl font-bold text-cinza-escuro">{financialData.totalPatients}</p>
             </div>
-            <FileText className="h-8 w-8 text-cinza-escuro" />
+            <img 
+              src="/dashboard/anotacoes.png" 
+              alt="Anotações" 
+              className="h-24 w-24 object-contain"
+            />
           </div>
         </div>
       </div>

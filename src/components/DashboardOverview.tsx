@@ -86,7 +86,7 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
       icon: AlertTriangle,
       overlayIcon: Box,
       section: "estoque",
-      image: "https://placehold.co/200x190/F0F0F0/4A4A4A?text=Estoque",
+      image: "/dashboard/estoque.png",
       tags: ["estoque", "insumos"]
     },
   ];
@@ -265,29 +265,57 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
                     >
                       <div className="group relative break-inside-avoid w-full">
                         <div className="w-full">
-                          <div className="rounded-[24px] bg-white p-2 no-underline transition-colors hover:bg-gray-50 shadow-sm border border-gray-100 w-full">
-                            <div className="relative h-[190px] w-full rounded-[20px] mb-6 shadow-sm overflow-hidden">
-                              <img
-                                src={card.image}
-                                alt={card.title}
-                                width="200"
-                                height="200"
-                                className="rounded-[16px] object-cover absolute h-full w-full inset-0"
-                              />
-                              {/* Ícone SVG específico para cada card */}
-                              <div className="absolute inset-0 rounded-[16px] flex items-center justify-center bg-gradient-to-b from-black/20 via-black/10 to-transparent">
-                                <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30 shadow-xl">
-                                  <card.overlayIcon className="h-12 w-12 text-white drop-shadow-2xl" strokeWidth={2} />
+                          <div className={`rounded-[24px] ${card.section === 'estoque' ? 'bg-white' : 'bg-white'} p-2 no-underline transition-colors hover:bg-gray-50 shadow-sm border border-gray-100 w-full`}>
+                            {card.section === 'estoque' ? (
+                              /* Layout especial para estoque: texto à esquerda, imagem à direita */
+                              <div className="flex items-center gap-4 h-[190px] px-2">
+                                <div className="flex-1 flex flex-col justify-center">
+                                  <h3 className="text-xl text-cinza-escuro leading-tight font-bold mb-2">{card.title}</h3>
+                                </div>
+                                <div className="relative h-full w-48 flex-shrink-0 rounded-[16px] overflow-hidden bg-white">
+                                  <img
+                                    src="/dashboard/estoque.png"
+                                    alt={card.title}
+                                    className="rounded-[16px] object-contain h-full w-full bg-white"
+                                  />
                                 </div>
                               </div>
-                            </div>
-                            <h3 className="text-lg mt-2 text-cinza-escuro leading-tight px-1 font-semibold mb-0.5">{card.title}</h3>
-                            <div className="flex items-center p-6 pt-0">
-                              <div className="p-1 py-1.5 px-1.5 rounded-md text-gray-500 flex items-center gap-1 absolute bottom-2 right-2 rounded-br-[16px]">
-                                <Tag className="h-4 w-4 ml-[1px]" />
-                                <p className="flex items-center gap-1 tracking-tight text-gray-700 pr-1 text-xs">{card.tags.join(', ')}</p>
+                            ) : (
+                              <>
+                                <div className="relative h-[190px] w-full rounded-[20px] mb-6 shadow-sm overflow-hidden">
+                                  <img
+                                    src={card.image}
+                                    alt={card.title}
+                                    width="200"
+                                    height="200"
+                                    className="rounded-[16px] object-cover absolute h-full w-full inset-0"
+                                  />
+                                  {/* Ícone SVG específico para cada card */}
+                                  <div className="absolute inset-0 rounded-[16px] flex items-center justify-center bg-gradient-to-b from-black/20 via-black/10 to-transparent">
+                                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30 shadow-xl">
+                                      <card.overlayIcon className="h-12 w-12 text-white drop-shadow-2xl" strokeWidth={2} />
+                                    </div>
+                                  </div>
+                                </div>
+                                <h3 className="text-lg mt-2 text-cinza-escuro leading-tight px-1 font-semibold mb-0.5">{card.title}</h3>
+                              </>
+                            )}
+                            {card.section !== 'estoque' && (
+                              <div className="flex items-center p-6 pt-0">
+                                <div className="p-1 py-1.5 px-1.5 rounded-md text-gray-500 flex items-center gap-1 absolute bottom-2 right-2 rounded-br-[16px]">
+                                  <Tag className="h-4 w-4 ml-[1px]" />
+                                  <p className="flex items-center gap-1 tracking-tight text-gray-700 pr-1 text-xs">{card.tags.join(', ')}</p>
+                                </div>
                               </div>
-                            </div>
+                            )}
+                            {card.section === 'estoque' && (
+                              <div className="flex items-center px-2 pb-2">
+                                <div className="p-1 py-1.5 px-1.5 rounded-md text-gray-500 flex items-center gap-1">
+                                  <Tag className="h-4 w-4 ml-[1px]" />
+                                  <p className="flex items-center gap-1 tracking-tight text-gray-700 pr-1 text-xs">{card.tags.join(', ')}</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

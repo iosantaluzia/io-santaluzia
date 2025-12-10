@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { UserAuthSetup } from './UserAuthSetup';
 
 interface AppUser {
   id: string;
@@ -95,9 +94,6 @@ export function UserManagement() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-marrom-principal">Gerenciamento de Usuários</h2>
       </div>
-
-      {/* Componente para criar autenticação do usuário financeiro */}
-      <UserAuthSetup />
 
       <div className="grid gap-4">
         {users.map((user) => (
