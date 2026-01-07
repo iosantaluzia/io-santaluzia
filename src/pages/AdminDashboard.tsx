@@ -21,12 +21,8 @@ import {
 import { LoginForm } from '@/components/LoginForm';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { LazyComponents } from '@/components/LazyComponents';
-<<<<<<< Updated upstream
-import { DownloadExecutableButton } from '@/components/DownloadExecutableButton';
 import { FloatingChat } from '@/components/FloatingChat';
-=======
 import { SyncStatusButton } from '@/components/SyncStatusButton';
->>>>>>> Stashed changes
 import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
