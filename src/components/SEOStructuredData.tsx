@@ -98,6 +98,7 @@ const SEOStructuredData = ({ type = 'MedicalOrganization', data }: SEOStructured
     return { ...baseData, ...data };
   };
 
+  // SECURITY: JSON.stringify automatically escapes HTML, safe for dangerouslySetInnerHTML
   return (
     <script
       type="application/ld+json"

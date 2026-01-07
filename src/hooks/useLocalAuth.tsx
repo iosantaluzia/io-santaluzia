@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/utils/logger';
 
 interface LocalUser {
   username: string;
@@ -19,7 +20,24 @@ const VALID_USERS = [
   { username: 'beatriz', role: 'secretary' }
 ];
 
-const VALID_PASSWORD = 'iosantaluzia';
+// ⚠️ SECURITY WARNING: This local auth system is DEPRECATED and less secure than Supabase Auth
+// 
+// RISKS:
+// - Passwords stored in localStorage are vulnerable to XSS attacks
+// - No server-side validation
+// - No session management
+// - No password hashing
+//
+// RECOMMENDATION: 
+// - Use only Supabase Auth (useAuth.tsx) for production
+// - This hook should be removed in future versions
+// - If still needed, ensure VITE_LOCAL_AUTH_PASSWORD is set in environment
+
+const VALID_PASSWORD = import.meta.env.VITE_LOCAL_AUTH_PASSWORD || '';
+
+if (!VALID_PASSWORD && import.meta.env.PROD) {
+  logger.warn('⚠️ VITE_LOCAL_AUTH_PASSWORD not set. Local auth will not work in production.');
+}
 
 export function useLocalAuth() {
   const [authState, setAuthState] = useState<AuthState>({
@@ -54,7 +72,8 @@ export function useLocalAuth() {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
-      if (password !== VALID_PASSWORD) {
+      // SECURITY FIX: Validate password exists and matches
+      if (!VALID_PASSWORD || password !== VALID_PASSWORD) {
         throw new Error('Senha incorreta');
       }
 
@@ -77,7 +96,7 @@ export function useLocalAuth() {
         error: null
       });
 
-      console.log('Login successful:', userData);
+      logger.log('Login successful (local auth):', { username: userData.username, role: userData.role });
       return { data: { user: userData }, error: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';

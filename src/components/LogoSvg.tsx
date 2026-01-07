@@ -249,6 +249,7 @@ export function LogoSvg({
   <circle cx="493.79" cy="911.93" r="2.94" fill="rgb(217,213,188)"/>
 </svg>`;
 
+  // SECURITY: SVG content is static and hardcoded, safe for dangerouslySetInnerHTML
   return (
     <div 
       className={className}

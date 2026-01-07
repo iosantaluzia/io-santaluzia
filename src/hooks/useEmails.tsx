@@ -71,9 +71,10 @@ export function useEmails() {
   const queryClient = useQueryClient();
   const currentUser = useCurrentUser();
 
-  // Sempre usar a conta financeiro@iosantaluzia.com.br para todos os usuários
+  // SECURITY: Email account should come from environment variable or database
+  // Using environment variable for better security and maintainability
   const getEmailAccount = () => {
-    return 'financeiro@iosantaluzia.com.br';
+    return import.meta.env.VITE_EMAIL_ACCOUNT || 'financeiro@iosantaluzia.com.br';
   };
 
   // Buscar emails diretamente do banco de dados com filtros baseados no usuário

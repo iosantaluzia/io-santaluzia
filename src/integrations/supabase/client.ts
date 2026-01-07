@@ -2,15 +2,17 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-let SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://aobjtwikccovikmfoicg.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvYmp0d2lrY2NvdmlrbWZvaWNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NzQ1MDksImV4cCI6MjA3MDE1MDUwOX0.eEBwMUzQxO-6kjSjqpLzi10dklAOWna1Mc5Q85MRbw4";
+// SECURITY FIX: Removed hardcoded credentials - must use environment variables
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Garantir que a URL sempre tem o protocolo https://
-if (SUPABASE_URL && !SUPABASE_URL.startsWith('http://') && !SUPABASE_URL.startsWith('https://')) {
-  SUPABASE_URL = `https://${SUPABASE_URL}`;
+let finalSupabaseUrl = SUPABASE_URL;
+if (finalSupabaseUrl && !finalSupabaseUrl.startsWith('http://') && !finalSupabaseUrl.startsWith('https://')) {
+  finalSupabaseUrl = `https://${finalSupabaseUrl}`;
 }
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+if (!finalSupabaseUrl || !SUPABASE_PUBLISHABLE_KEY) {
   console.error('Missing Supabase environment variables');
   throw new Error('Missing Supabase configuration. Please check your environment variables.');
 }
@@ -18,7 +20,7 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(finalSupabaseUrl, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,

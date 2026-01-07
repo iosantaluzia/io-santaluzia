@@ -5,10 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User, Phone, Mail, MapPin, Calendar, FileText, Stethoscope, Eye, Clock, Edit, Save, X, Settings } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { User, Phone, Mail, MapPin, Calendar, FileText, Stethoscope, Eye, Clock, Edit, Save, X, Settings, CalendarIcon, MessageCircle, Play } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { formatCurrencyInput, getNumericValue } from '@/utils/currency';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale/pt-BR';
 
 interface PatientDetailsModalProps {
   isOpen: boolean;
@@ -24,9 +31,14 @@ interface PatientDetailsModalProps {
     birthDate?: string;
     observations?: string;
     patientId?: string;
+    consultationId?: string;
+    appointmentDate?: string;
+    appointmentType?: string;
   };
   onOpenConsultation?: () => void;
   onPatientUpdate?: () => void;
+  onSectionChange?: (section: string) => void;
+  onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
 }
 
 interface Consultation {
@@ -35,6 +47,11 @@ interface Consultation {
   doctor_name: string;
   diagnosis?: string;
   status?: string;
+  observations?: string;
+  amount?: number | null;
+  payment_received?: boolean | null;
+  anamnesis?: string;
+  prescription?: string;
 }
 
 interface Exam {
@@ -236,9 +253,146 @@ const fakeHistoryData: { [key: string]: { consultations: Consultation[], exams: 
   }
 };
 
-export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultation, onPatientUpdate }: PatientDetailsModalProps) {
+export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultation, onPatientUpdate, onSectionChange, onOpenConsultationForPatient }: PatientDetailsModalProps) {
   const { appUser } = useAuth();
-  const isDoctor = appUser?.role === 'doctor';
+  const isDoctor = appUser?.role === 'doctor' || appUser?.role === 'admin';
+  const isSecretary = appUser?.role === 'secretary';
+  
+  // Função para traduzir status para português
+  const translateStatus = (status: string | null | undefined): string => {
+    if (!status) return 'Agendado';
+    
+    const statusMap: { [key: string]: string } = {
+      'scheduled': 'Agendado',
+      'pending': 'Aguardando Pagamento',
+      'in_progress': 'Em atendimento',
+      'in_attendance': 'Em atendimento',
+      'completed': 'Realizado',
+      'confirmed': 'Confirmado',
+      'cancelled': 'Cancelado',
+      'agendado': 'Agendado',
+      'aguardando_pagamento': 'Aguardando Pagamento',
+      'em_atendimento': 'Em atendimento',
+      'realizado': 'Realizado'
+    };
+    
+    return statusMap[status.toLowerCase()] || status;
+  };
+
+  // Função para formatar número de telefone para WhatsApp
+  const formatPhoneForWhatsApp = (phone: string): string => {
+    if (!phone) return '';
+    // Remove todos os caracteres não numéricos
+    const numbers = phone.replace(/\D/g, '');
+    // Se já começa com 55 (código do Brasil), retorna como está
+    if (numbers.startsWith('55')) {
+      return numbers;
+    }
+    // Se começa com 0, remove o 0 e adiciona 55
+    if (numbers.startsWith('0')) {
+      return '55' + numbers.substring(1);
+    }
+    // Se tem 11 dígitos (DDD + número), adiciona 55
+    if (numbers.length === 11) {
+      return '55' + numbers;
+    }
+    // Se tem 10 dígitos (DDD + número sem 9), adiciona 55
+    if (numbers.length === 10) {
+      return '55' + numbers;
+    }
+    // Caso padrão, adiciona 55
+    return '55' + numbers;
+  };
+
+  // Função para abrir WhatsApp
+  const openWhatsApp = (phone: string) => {
+    if (!phone) return;
+    const formattedPhone = formatPhoneForWhatsApp(phone);
+    const whatsappUrl = `https://wa.me/${formattedPhone}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  // Função para verificar se o agendamento é da data atual
+  const isTodayAppointment = (): boolean => {
+    if (!patient.appointmentDate) return false;
+    const today = new Date();
+    const appointmentDate = new Date(patient.appointmentDate);
+    return (
+      today.getFullYear() === appointmentDate.getFullYear() &&
+      today.getMonth() === appointmentDate.getMonth() &&
+      today.getDate() === appointmentDate.getDate()
+    );
+  };
+
+  // Função para verificar se a consulta pode ser editada (até 12h após o primeiro salvamento)
+  const canEditCurrentConsultation = (): boolean => {
+    if (!patient.consultationId) return true; // Se não tem consulta ainda, pode criar
+    
+    // Buscar a consulta relacionada ao agendamento
+    const consultation = consultations.find(c => c.id === patient.consultationId);
+    if (!consultation) return true; // Se não encontrou, pode criar
+    
+    if (!consultation.anamnesis) return true; // Se não tem anamnese, ainda não foi salva
+    
+    // Usar a data da consulta como referência
+    const consultationDate = new Date(consultation.consultation_date);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - consultationDate.getTime()) / (1000 * 60 * 60);
+    
+    return hoursDiff <= 12;
+  };
+
+  // Função para iniciar consulta do agendamento atual
+  const handleStartCurrentConsultation = () => {
+    if (!patient.patientId) {
+      toast.error('ID do paciente não encontrado');
+      return;
+    }
+    
+    // Fechar o modal de detalhes do paciente
+    onClose();
+    
+    // Navegar para a seção de pacientes e abrir a consulta
+    if (onOpenConsultationForPatient) {
+      onOpenConsultationForPatient(patient.patientId, patient.consultationId);
+      if (onSectionChange) {
+        onSectionChange('pacientes');
+      }
+      toast.success('Abrindo janela de nova consulta');
+    } else if (onSectionChange) {
+      onSectionChange('pacientes');
+      toast.info('Navegue para a seção de Pacientes e abra a consulta manualmente');
+    } else if (onOpenConsultation) {
+      onOpenConsultation();
+      toast.info('Navegue para a seção de Pacientes e abra a consulta manualmente');
+    }
+  };
+
+  // Função para obter cor do status
+  const getStatusColor = (status: string | null | undefined): string => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'scheduled' || statusLower === 'agendado') {
+      return 'bg-blue-100 text-blue-800';
+    }
+    if (statusLower === 'pending' || statusLower === 'aguardando_pagamento' || statusLower === 'aguardando pagamento') {
+      return 'bg-yellow-100 text-yellow-800';
+    }
+    if (statusLower === 'in_progress' || statusLower === 'in_attendance' || statusLower === 'em_atendimento' || statusLower === 'em atendimento') {
+      return 'bg-purple-100 text-purple-800';
+    }
+    if (statusLower === 'completed' || statusLower === 'realizado') {
+      return 'bg-green-100 text-green-800';
+    }
+    if (statusLower === 'confirmed' || statusLower === 'confirmado') {
+      return 'bg-green-100 text-green-800';
+    }
+    if (statusLower === 'cancelled' || statusLower === 'cancelado') {
+      return 'bg-red-100 text-red-800';
+    }
+    return 'bg-gray-100 text-gray-800';
+  };
   const [patientId, setPatientId] = useState<string | null>(null);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
@@ -264,6 +418,37 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
     date_of_birth: ''
   });
   const [saving, setSaving] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<{
+    date: Date;
+    time: string;
+    doctor: string;
+    appointmentType: string;
+    amount: string;
+    payment_received: boolean;
+    observations: string;
+    status: string;
+  }>({
+    date: new Date(),
+    time: '',
+    doctor: '',
+    appointmentType: '',
+    amount: '',
+    payment_received: false,
+    observations: '',
+    status: 'scheduled'
+  });
+  const [savingAppointment, setSavingAppointment] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
+  const [showConsultationDetails, setShowConsultationDetails] = useState(false);
+
+  const availableTimes = [
+    '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
+    '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+    '16:00', '16:30', '17:00', '17:30'
+  ];
 
   const fetchPatientData = useCallback(async () => {
     try {
@@ -380,7 +565,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
       // Buscar consultas do paciente
       const { data: consultationsData, error: consultationsError } = await supabase
         .from('consultations')
-        .select('id, consultation_date, doctor_name, diagnosis, status')
+        .select('id, consultation_date, doctor_name, diagnosis, status, observations, amount, payment_received, anamnesis, prescription')
         .eq('patient_id', foundPatientId)
         .order('consultation_date', { ascending: false })
         .limit(10);
@@ -597,6 +782,208 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
     }
   };
 
+  const handleEditAppointment = async () => {
+    if (!patient.consultationId) {
+      toast.error('ID da consulta não encontrado');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Buscar dados atuais da consulta
+      const { data: consultation, error } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('id', patient.consultationId)
+        .single();
+
+      if (error || !consultation) {
+        toast.error('Erro ao carregar dados do agendamento');
+        return;
+      }
+
+      // Preparar dados para edição
+      const consultationDate = new Date(consultation.consultation_date);
+      const time = consultationDate.toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+
+      const doctorValue = consultation.doctor_name?.toLowerCase().includes('matheus') 
+        ? 'matheus' 
+        : consultation.doctor_name?.toLowerCase().includes('fabiola') || consultation.doctor_name?.toLowerCase().includes('fabíola')
+        ? 'fabiola'
+        : '';
+
+      setEditingAppointment({
+        date: consultationDate,
+        time: time,
+        doctor: doctorValue,
+        appointmentType: '', // Campo não existe na tabela, mantido apenas para compatibilidade do estado
+        amount: consultation.amount ? consultation.amount.toFixed(2).replace('.', ',') : '',
+        payment_received: consultation.payment_received || false,
+        observations: consultation.observations || '',
+        status: consultation.status || 'scheduled'
+      });
+
+      setShowEditModal(true);
+    } catch (error: any) {
+      console.error('Erro ao carregar agendamento:', error);
+      toast.error('Erro ao carregar dados do agendamento');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAppointment = async () => {
+    if (!patient.consultationId) {
+      toast.error('ID da consulta não encontrado');
+      return;
+    }
+
+    try {
+      setSavingAppointment(true);
+
+      // Preparar data e horário
+      const consultationDateTime = new Date(editingAppointment.date);
+      const [hours, minutes] = editingAppointment.time.split(':');
+      consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      // Mapear nome do médico
+      const doctorName = editingAppointment.doctor === 'matheus' 
+        ? 'Dr. Matheus' 
+        : editingAppointment.doctor === 'fabiola' 
+        ? 'Dra. Fabíola' 
+        : editingAppointment.doctor;
+
+      // Preparar dados para atualização
+      const updateData: any = {
+        doctor_name: doctorName,
+        consultation_date: consultationDateTime.toISOString(),
+        observations: editingAppointment.observations || null,
+        payment_received: editingAppointment.payment_received || false,
+        status: editingAppointment.status || 'scheduled'
+      };
+
+      // Adicionar amount se fornecido
+      if (editingAppointment.amount) {
+        updateData.amount = getNumericValue(editingAppointment.amount);
+      }
+
+      // Atualizar no banco
+      const { error } = await supabase
+        .from('consultations')
+        .update(updateData)
+        .eq('id', patient.consultationId);
+
+      if (error) {
+        console.error('Erro ao atualizar agendamento:', error);
+        toast.error('Erro ao atualizar agendamento: ' + (error.message || 'Erro desconhecido'));
+        return;
+      }
+
+      toast.success('Agendamento atualizado com sucesso!');
+      setShowEditModal(false);
+      
+      // Atualizar dados no componente pai se callback fornecido
+      if (onPatientUpdate) {
+        onPatientUpdate();
+      }
+
+      // Fechar modal principal também para recarregar dados
+      onClose();
+
+    } catch (error: any) {
+      console.error('Erro ao salvar agendamento:', error);
+      toast.error('Erro ao salvar alterações: ' + (error.message || 'Erro desconhecido'));
+    } finally {
+      setSavingAppointment(false);
+    }
+  };
+
+  const handleDeleteAppointment = () => {
+    if (!patient.consultationId) {
+      toast.error('ID da consulta não encontrado');
+      return;
+    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteAppointment = async () => {
+    if (!patient.consultationId) {
+      console.error('ID da consulta não encontrado');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setShowDeleteConfirm(false);
+
+      console.log('Removendo consulta com ID:', patient.consultationId);
+      console.log('Dados do paciente:', { name: patient.name, consultationId: patient.consultationId });
+
+      // Verificar se a consulta existe antes de remover
+      const { data: checkData } = await supabase
+        .from('consultations')
+        .select('id')
+        .eq('id', patient.consultationId)
+        .single();
+      
+      console.log('Consulta encontrada antes da remoção:', checkData);
+
+      // Remover consulta do banco
+      const { data, error } = await supabase
+        .from('consultations')
+        .delete()
+        .eq('id', patient.consultationId)
+        .select();
+
+      console.log('Resultado da remoção:', { data, error, rowsDeleted: data?.length || 0 });
+
+      if (error) {
+        console.error('Erro ao remover agendamento:', error);
+        toast.error('Erro ao remover agendamento: ' + (error.message || 'Erro desconhecido'));
+        setLoading(false);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        console.warn('Nenhuma linha foi removida. Verifique se o ID está correto.');
+        toast.error('Não foi possível remover o agendamento. Verifique se ele ainda existe.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Consulta removida com sucesso:', data);
+      toast.success('Agendamento removido com sucesso!');
+      
+      // Aguardar um pouco mais para garantir que o banco foi atualizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Atualizar dados no componente pai se callback fornecido
+      if (onPatientUpdate) {
+        console.log('Chamando onPatientUpdate para atualizar lista de agendamentos');
+        await onPatientUpdate();
+        // Aguardar mais um pouco após a atualização
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Recarregar histórico do paciente
+      await fetchPatientHistory();
+
+      // Fechar modal após garantir que tudo foi atualizado
+      setLoading(false);
+      onClose();
+
+    } catch (error: any) {
+      console.error('Erro ao remover agendamento:', error);
+      toast.error('Erro ao remover agendamento: ' + (error.message || 'Erro desconhecido'));
+      setLoading(false);
+    }
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
     // Restaurar dados originais
@@ -604,6 +991,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
@@ -665,6 +1053,17 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-gray-600" />
                       <p className="text-sm text-gray-700">{editingPatient.phone || patient.phone}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openWhatsApp(editingPatient.phone || patient.phone || '')}
+                        className="h-7 px-2 text-xs bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                        title="Abrir WhatsApp"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5 mr-1" />
+                        WhatsApp
+                      </Button>
                     </div>
                   )}
 
@@ -832,18 +1231,20 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                         </h4>
                         <div className="space-y-2">
                           {consultations.map((consultation) => (
-                            <div key={consultation.id} className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                            <div 
+                              key={consultation.id} 
+                              className="bg-gray-50 p-3 rounded-md border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                              onClick={() => {
+                                setSelectedConsultation(consultation);
+                                setShowConsultationDetails(true);
+                              }}
+                            >
                               <div className="flex items-center justify-between mb-1">
                                 <p className="text-xs font-medium text-gray-700">
                                   {new Date(consultation.consultation_date).toLocaleDateString('pt-BR')}
                                 </p>
-                                <span className={`px-2 py-0.5 rounded text-xs font-semibold
-                                  ${consultation.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                    consultation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-gray-100 text-gray-800'}`}>
-                                  {consultation.status === 'completed' ? 'Concluída' :
-                                   consultation.status === 'pending' ? 'Pendente' :
-                                   consultation.status || 'Agendada'}
+                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusColor(consultation.status)}`}>
+                                  {translateStatus(consultation.status)}
                                 </span>
                               </div>
                               <p className="text-xs text-gray-600">{consultation.doctor_name}</p>
@@ -870,16 +1271,8 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                                 <p className="text-xs font-medium text-gray-700">
                                   {new Date(exam.exam_date).toLocaleDateString('pt-BR')}
                                 </p>
-                                <span className={`px-2 py-0.5 rounded text-xs font-semibold
-                                  ${exam.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                    exam.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    exam.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                    'bg-gray-100 text-gray-800'}`}>
-                                  {exam.status === 'completed' ? 'Concluído' :
-                                   exam.status === 'pending' ? 'Pendente' :
-                                   exam.status === 'in_progress' ? 'Em Andamento' :
-                                   exam.status === 'cancelled' ? 'Cancelado' :
-                                   exam.status || 'Agendado'}
+                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusColor(exam.status)}`}>
+                                  {translateStatus(exam.status)}
                                 </span>
                               </div>
                               <p className="text-xs text-gray-700 font-medium">
@@ -906,49 +1299,425 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
           </div>
 
           {/* Informações do Agendamento */}
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-4 rounded-lg relative">
+            <div className="absolute top-3 right-3 flex gap-2">
+              {patient.consultationId && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditAppointment}
+                    className="h-7 px-2 text-xs"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDeleteAppointment}
+                    className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Remover
+                  </Button>
+                </>
+              )}
+              {/* Botão "Iniciar Consulta" para médicos quando o agendamento é da data atual */}
+              {isDoctor && isTodayAppointment() && (
+                <Button
+                  size="sm"
+                  onClick={handleStartCurrentConsultation}
+                  className="h-7 px-3 text-xs bg-bege-principal hover:bg-bege-principal/90 text-white"
+                  disabled={!canEditCurrentConsultation()}
+                >
+                  <Play className="h-3 w-3 mr-1" />
+                  {canEditCurrentConsultation() ? 'Iniciar Consulta' : 'Consulta não pode ser editada (após 12h)'}
+                </Button>
+              )}
+            </div>
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="h-4 w-4 text-gray-600" />
               <span className="font-semibold text-gray-700">Agendamento:</span>
             </div>
             <p className="text-sm text-gray-600 ml-6">Horário: {patient.time}</p>
+            {patient.appointmentDate && (
+              <p className="text-sm text-gray-600 ml-6">
+                Data: {new Date(patient.appointmentDate).toLocaleDateString('pt-BR')}
+              </p>
+            )}
+            {patient.appointmentType && (
+              <p className="text-sm text-gray-600 ml-6">
+                Tipo: {patient.appointmentType === 'consulta' ? 'Consulta' :
+                       patient.appointmentType === 'retorno' ? 'Retorno' :
+                       patient.appointmentType === 'exame' ? 'Exame' :
+                       patient.appointmentType === 'pagamento_honorarios' ? 'Pagamento de Honorários' :
+                       patient.appointmentType}
+              </p>
+            )}
             <div className="ml-6 mt-1">
-              <span className={`px-2 py-1 rounded-full text-xs font-semibold inline-block
-                ${patient.status === 'Confirmado' ? 'bg-green-100 text-green-800' :
-                  patient.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'}`}>
-                {patient.status}
+              <span className={`px-2 py-1 rounded-full text-xs font-semibold inline-block ${getStatusColor(patient.status)}`}>
+                {translateStatus(patient.status)}
               </span>
             </div>
           </div>
 
-          {/* Botão para Acessar Consulta (Só para Médicos) */}
-          {isDoctor && onOpenConsultation && (
-            <div className="pt-4 border-t">
-              <Button
-                onClick={onOpenConsultation}
-                className="w-full bg-medical-primary hover:bg-medical-primary/90"
-              >
-                <Stethoscope className="h-4 w-4 mr-2" />
-                Acessar Dados da Consulta
-              </Button>
-              <p className="text-xs text-gray-500 text-center mt-2">
-                Acesso exclusivo para médicos
-              </p>
-            </div>
-          )}
-
-          {!isDoctor && (
-            <div className="pt-4 border-t">
-              <p className="text-xs text-gray-500 text-center">
-                <Stethoscope className="h-3 w-3 inline mr-1" />
-                Dados de consulta disponíveis apenas para médicos
-              </p>
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Modal de Edição de Agendamento */}
+    <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar Agendamento</DialogTitle>
+          <DialogDescription>
+            Edite as informações do agendamento de {patient.name}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Data e Horário */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium">Data do Agendamento *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal h-10"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editingAppointment.date ? (
+                      format(editingAppointment.date, "PPP", { locale: ptBR })
+                    ) : (
+                      <span>Selecione a data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={editingAppointment.date}
+                    onSelect={(date) => {
+                      if (date) {
+                        setEditingAppointment({ ...editingAppointment, date });
+                      }
+                    }}
+                    initialFocus
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">Horário *</Label>
+              <Select 
+                value={editingAppointment.time} 
+                onValueChange={(value) => setEditingAppointment({ ...editingAppointment, time: value })}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Selecione o horário" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTimes.map(time => (
+                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Médico */}
+          <div>
+            <Label className="text-sm font-medium">Médico *</Label>
+            <Select 
+              value={editingAppointment.doctor} 
+              onValueChange={(value) => setEditingAppointment({ ...editingAppointment, doctor: value })}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Selecione o médico" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="matheus">Dr. Matheus</SelectItem>
+                <SelectItem value="fabiola">Dra. Fabíola</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Valor e Status de Pagamento */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium">Valor Pago (R$)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">R$</span>
+                <Input
+                  type="text"
+                  value={editingAppointment.amount}
+                  onChange={(e) => {
+                    const formatted = formatCurrencyInput(e.target.value);
+                    setEditingAppointment({ ...editingAppointment, amount: formatted });
+                  }}
+                  placeholder="0,00"
+                  className="pl-10 h-10"
+                  inputMode="numeric"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-8">
+              <Checkbox
+                id="payment_received_edit"
+                checked={editingAppointment.payment_received}
+                onCheckedChange={(checked) => 
+                  setEditingAppointment({ ...editingAppointment, payment_received: checked === true })
+                }
+              />
+              <Label htmlFor="payment_received_edit" className="text-sm font-normal cursor-pointer">
+                Pagamento realizado
+              </Label>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <Label className="text-sm font-medium">Status</Label>
+            <Select 
+              value={editingAppointment.status} 
+              onValueChange={(value) => setEditingAppointment({ ...editingAppointment, status: value })}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="scheduled">Agendado</SelectItem>
+                <SelectItem value="confirmed">Confirmado</SelectItem>
+                <SelectItem value="pending">Pendente</SelectItem>
+                <SelectItem value="completed">Concluído</SelectItem>
+                <SelectItem value="cancelled">Cancelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Observações */}
+          <div>
+            <Label className="text-sm font-medium">Observações</Label>
+            <Textarea
+              value={editingAppointment.observations}
+              onChange={(e) => setEditingAppointment({ ...editingAppointment, observations: e.target.value })}
+              placeholder="Observações sobre o agendamento..."
+              rows={3}
+              className="mt-1"
+            />
+          </div>
+
+          {/* Botões */}
+          <div className="flex gap-3 pt-4 border-t">
+            <Button 
+              onClick={handleSaveAppointment} 
+              disabled={savingAppointment || !editingAppointment.time || !editingAppointment.doctor}
+              className="flex-1 bg-medical-primary hover:bg-medical-primary/90"
+            >
+              {savingAppointment ? 'Salvando...' : 'Salvar Alterações'}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditModal(false)}
+              disabled={savingAppointment}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Modal de Confirmação de Exclusão */}
+    <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Confirmar Exclusão</DialogTitle>
+          <DialogDescription>
+            Tem certeza que deseja remover este agendamento?
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-sm font-medium text-gray-700 mb-2">Paciente: {patient.name}</p>
+            {patient.appointmentDate && (
+              <p className="text-sm text-gray-600">
+                Data: {new Date(patient.appointmentDate).toLocaleDateString('pt-BR')}
+              </p>
+            )}
+            <p className="text-sm text-gray-600">Horário: {patient.time}</p>
+            {patient.appointmentType && (
+              <p className="text-sm text-gray-600">
+                Tipo: {patient.appointmentType === 'consulta' ? 'Consulta' :
+                       patient.appointmentType === 'retorno' ? 'Retorno' :
+                       patient.appointmentType === 'exame' ? 'Exame' :
+                       patient.appointmentType === 'pagamento_honorarios' ? 'Pagamento de Honorários' :
+                       patient.appointmentType}
+              </p>
+            )}
+          </div>
+
+          <p className="text-sm text-red-600 font-medium">
+            ⚠️ Esta ação não pode ser desfeita.
+          </p>
+        </div>
+
+        <div className="flex gap-3 pt-4 border-t">
+          <Button 
+            onClick={confirmDeleteAppointment} 
+            disabled={loading}
+            variant="destructive"
+            className="flex-1"
+          >
+            {loading ? 'Removendo...' : 'Sim, Remover'}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowDeleteConfirm(false)}
+            disabled={loading}
+            className="flex-1"
+          >
+            Cancelar
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Modal de Detalhes da Consulta */}
+    <Dialog open={showConsultationDetails} onOpenChange={setShowConsultationDetails}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Detalhes da Consulta</DialogTitle>
+          <DialogDescription>
+            Informações da consulta de {patient.name}
+          </DialogDescription>
+        </DialogHeader>
+
+        {selectedConsultation && (
+          <div className="space-y-4">
+            {/* Informações Básicas */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600">Data e Horário</Label>
+                <p className="text-sm text-gray-900 mt-1">
+                  {new Date(selectedConsultation.consultation_date).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-600">Médico</Label>
+                <p className="text-sm text-gray-900 mt-1">{selectedConsultation.doctor_name}</p>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-600">Status</Label>
+              <div className="mt-1">
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold inline-block ${getStatusColor(selectedConsultation.status)}`}>
+                  {translateStatus(selectedConsultation.status)}
+                </span>
+              </div>
+            </div>
+
+            {/* Valor e Pagamento */}
+            {(selectedConsultation.amount !== null && selectedConsultation.amount !== undefined) || selectedConsultation.payment_received !== null ? (
+              <div className="grid grid-cols-2 gap-4">
+                {selectedConsultation.amount !== null && selectedConsultation.amount !== undefined && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">Valor Pago</Label>
+                    <p className="text-sm text-gray-900 mt-1">
+                      R$ {selectedConsultation.amount.toFixed(2).replace('.', ',')}
+                    </p>
+                  </div>
+                )}
+                {selectedConsultation.payment_received !== null && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">Pagamento</Label>
+                    <p className="text-sm text-gray-900 mt-1">
+                      {selectedConsultation.payment_received ? 'Realizado' : 'Pendente'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            {/* Diagnóstico */}
+            {selectedConsultation.diagnosis && (
+              <div>
+                <Label className="text-sm font-medium text-gray-600">Diagnóstico</Label>
+                <p className="text-sm text-gray-900 mt-1">{selectedConsultation.diagnosis}</p>
+              </div>
+            )}
+
+            {/* Anamnese */}
+            {selectedConsultation.anamnesis && isDoctor && (
+              <div>
+                <Label className="text-sm font-medium text-gray-600">Anamnese</Label>
+                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.anamnesis}</p>
+              </div>
+            )}
+
+            {/* Prescrição */}
+            {selectedConsultation.prescription && isDoctor && (
+              <div>
+                <Label className="text-sm font-medium text-gray-600">Prescrição</Label>
+                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.prescription}</p>
+              </div>
+            )}
+
+            {/* Observações */}
+            {selectedConsultation.observations && (
+              <div>
+                <Label className="text-sm font-medium text-gray-600">Observações</Label>
+                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.observations}</p>
+              </div>
+            )}
+
+            {/* Botão para Acessar Prontuário Completo (Só para Médicos) */}
+          {isDoctor && onOpenConsultation && (
+            <div className="pt-4 border-t">
+              <Button
+                  onClick={() => {
+                    setShowConsultationDetails(false);
+                    if (onOpenConsultation) {
+                      onOpenConsultation();
+                    }
+                  }}
+                className="w-full bg-medical-primary hover:bg-medical-primary/90"
+              >
+                <Stethoscope className="h-4 w-4 mr-2" />
+                  Acessar Prontuário Completo
+              </Button>
+            </div>
+          )}
+
+            {/* Botão Fechar */}
+            <div className="pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setShowConsultationDetails(false)}
+                className="w-full"
+              >
+                Fechar
+              </Button>
+            </div>
+        </div>
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 

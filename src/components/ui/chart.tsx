@@ -74,6 +74,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // SECURITY: CSS content is generated from safe theme configuration, safe for dangerouslySetInnerHTML
   return (
     <style
       dangerouslySetInnerHTML={{

@@ -31,3 +31,8 @@ dist-ssr
 
 # Configurações sensíveis
 CONFIGURACAO_TWILIO.md
+
+# Build e releases (arquivos grandes)
+release/
+dist/
+build/

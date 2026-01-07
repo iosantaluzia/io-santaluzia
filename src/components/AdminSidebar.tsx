@@ -29,7 +29,6 @@ const allSidebarItems = [
   { title: "Visão Geral", url: "#overview", icon: LayoutDashboard, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Agendamentos", url: "#agendamentos", icon: Calendar, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Pacientes", url: "#pacientes", icon: Users, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Consultas", url: "#consultas", icon: Stethoscope, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Exames", url: "#exames", icon: FileText, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor', 'secretary'] },

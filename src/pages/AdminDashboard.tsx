@@ -21,8 +21,12 @@ import {
 import { LoginForm } from '@/components/LoginForm';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { LazyComponents } from '@/components/LazyComponents';
+<<<<<<< Updated upstream
 import { DownloadExecutableButton } from '@/components/DownloadExecutableButton';
 import { FloatingChat } from '@/components/FloatingChat';
+=======
+import { SyncStatusButton } from '@/components/SyncStatusButton';
+>>>>>>> Stashed changes
 import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
@@ -31,6 +35,7 @@ const AdminDashboard = () => {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [selectedPatientName, setSelectedPatientName] = useState<string>('');
+  const [patientToOpenConsultation, setPatientToOpenConsultation] = useState<{ patientId: string; consultationId?: string } | null>(null);
 
   // Show timeout message after 6 seconds of loading
   useEffect(() => {
@@ -138,7 +143,6 @@ const AdminDashboard = () => {
       overview: 'Visão Geral',
       agendamentos: 'Agendamentos',
       pacientes: 'Pacientes',
-      consultas: 'Consultas',
       exames: 'Exames',
       estoque: 'Estoque',
       financeiro: 'Financeiro',
@@ -169,14 +173,19 @@ const AdminDashboard = () => {
           return <LazyComponents.AgendamentosSection 
             onSectionChange={setActiveSection}
             onOpenPatientConsultation={(patientName) => {
-              setSelectedPatientName(patientName);
-              setActiveSection('consultas');
+              // Não navegar mais para consultas - funcionalidade integrada em Pacientes
+              setActiveSection('pacientes');
+            }}
+            onOpenConsultationForPatient={(patientId, consultationId) => {
+              setPatientToOpenConsultation({ patientId, consultationId });
+              setActiveSection('pacientes');
             }}
           />;
         case 'pacientes':
-          return <LazyComponents.PacientesSection />;
-        case 'consultas':
-          return <LazyComponents.ConsultasSection initialPatientName={selectedPatientName} />;
+          return <LazyComponents.PacientesSection 
+            patientToOpenConsultation={patientToOpenConsultation}
+            onConsultationOpened={() => setPatientToOpenConsultation(null)}
+          />;
         case 'exames':
           return <LazyComponents.ExamesSection />;
         case 'estoque':
@@ -247,7 +256,7 @@ const AdminDashboard = () => {
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-bege-principal focus:border-bege-principal"
                 />
               </div>
-              <DownloadExecutableButton />
+              <SyncStatusButton />
               <button className="p-2 text-gray-600 hover:text-cinza-escuro relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>

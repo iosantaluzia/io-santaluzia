@@ -165,7 +165,7 @@ export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
         {/* Conteúdo das abas */}
         <div className="p-6">
           {activeTab === 'prontuario' && (
-            <div className="space-y-6">
+            <div className="space-y-6 w-full overflow-x-hidden">
               <PatientMedicalHistory patient={patient} />
               <PatientConsultations patientId={patient.id} />
             </div>

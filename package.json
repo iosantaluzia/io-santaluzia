@@ -119,12 +119,13 @@
     "win": {
       "target": [
         {
-          "target": "dir",
+          "target": "nsis",
           "arch": ["x64"]
         }
       ],
-      "icon": "public/favicon.ico",
-      "electronLanguages": ["pt-BR", "en-US"]
+      "icon": "public/uploads/circlebg.png",
+      "electronLanguages": ["pt-BR", "en-US"],
+      "forceCodeSigning": false
     },
     "nsis": {
       "oneClick": false,

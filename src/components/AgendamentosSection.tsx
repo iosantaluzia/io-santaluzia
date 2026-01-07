@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface AgendamentosSectionProps {
   onSectionChange?: (section: string) => void;
   onOpenPatientConsultation?: (patientName: string) => void;
+  onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
 }
 
 interface AppointmentSlot {
@@ -26,6 +27,7 @@ interface AppointmentSlot {
   patientId?: string;
   appointmentDate?: string;
   appointmentType?: string;
+  consultationId?: string;
 }
 
 const appointmentTypeLabels: { [key: string]: string } = {
@@ -35,7 +37,56 @@ const appointmentTypeLabels: { [key: string]: string } = {
   'pagamento_honorarios': 'Pagamento de Honorários'
 };
 
-export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation }: AgendamentosSectionProps) {
+// Função para traduzir status para português
+const translateStatus = (status: string | null | undefined): string => {
+  if (!status) return 'Agendado';
+  
+  const statusMap: { [key: string]: string } = {
+    'scheduled': 'Agendado',
+    'pending': 'Aguardando Pagamento',
+    'in_progress': 'Em atendimento',
+    'in_attendance': 'Em atendimento',
+    'completed': 'Realizado',
+    'confirmed': 'Confirmado',
+    'cancelled': 'Cancelado',
+    'agendado': 'Agendado',
+    'aguardando_pagamento': 'Aguardando Pagamento',
+    'em_atendimento': 'Em atendimento',
+    'realizado': 'Realizado',
+    'Confirmado': 'Confirmado',
+    'Pendente': 'Aguardando Pagamento'
+  };
+  
+  return statusMap[status.toLowerCase()] || status;
+};
+
+// Função para obter cor do status
+const getStatusColor = (status: string | null | undefined): string => {
+  if (!status) return 'bg-blue-100 text-blue-800';
+  
+  const statusLower = status.toLowerCase();
+  if (statusLower === 'scheduled' || statusLower === 'agendado' || statusLower === 'confirmado') {
+    return 'bg-blue-100 text-blue-800';
+  }
+  if (statusLower === 'pending' || statusLower === 'aguardando_pagamento' || statusLower === 'aguardando pagamento' || statusLower === 'pendente') {
+    return 'bg-yellow-100 text-yellow-800';
+  }
+  if (statusLower === 'in_progress' || statusLower === 'in_attendance' || statusLower === 'em_atendimento' || statusLower === 'em atendimento') {
+    return 'bg-purple-100 text-purple-800';
+  }
+  if (statusLower === 'completed' || statusLower === 'realizado') {
+    return 'bg-green-100 text-green-800';
+  }
+  if (statusLower === 'confirmed' || statusLower === 'confirmado') {
+    return 'bg-green-100 text-green-800';
+  }
+  if (statusLower === 'cancelled' || statusLower === 'cancelado') {
+    return 'bg-red-100 text-red-800';
+  }
+  return 'bg-gray-100 text-gray-800';
+};
+
+export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation, onOpenConsultationForPatient }: AgendamentosSectionProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'all' | 'matheus' | 'fabiola'>('all');
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
@@ -46,63 +97,11 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const [loading, setLoading] = useState(false);
 
   // Dados estáticos de fallback (usados quando não há dados no banco)
+  // NOTA: Dados fake removidos para Dr. Matheus - apenas dados reais serão exibidos
   const defaultAppointmentsByDate: { [key: string]: { matheus: AppointmentSlot[], fabiola: AppointmentSlot[] } } = {
-    // Exemplo: agendamentos para hoje
+    // Exemplo: agendamentos para hoje (apenas Dra. Fabíola)
     [new Date().toISOString().split('T')[0]]: {
-      matheus: [
-        { 
-          time: '09:00', 
-          name: 'Ana Silva', 
-          status: 'Confirmado',
-          cpf: '123.456.789-00',
-          phone: '(66) 99999-1234',
-          email: 'ana.silva@email.com',
-          address: 'Rua das Flores, 123 - Centro',
-          birthDate: '15/05/1985',
-          observations: 'Paciente com histórico de miopia',
-          appointmentType: 'consulta'
-        },
-        { 
-          time: '10:00', 
-          name: 'Bruno Costa', 
-          status: 'Confirmado',
-          cpf: '234.567.890-11',
-          phone: '(66) 99888-5678',
-          email: 'bruno.costa@email.com',
-          address: 'Av. Principal, 456 - Jardim',
-          birthDate: '20/08/1990',
-          observations: 'Retorno pós-cirurgia de catarata',
-          appointmentType: 'retorno'
-        },
-        { 
-          time: '11:30', 
-          name: 'Carla Dias', 
-          status: 'Pendente',
-          cpf: '345.678.901-22',
-          phone: '(66) 99777-9012',
-          email: 'carla.dias@email.com',
-          birthDate: '10/03/1978',
-          appointmentType: 'exame'
-        },
-        { 
-          time: '14:00', 
-          name: 'Daniel Rocha', 
-          status: 'Confirmado',
-          cpf: '456.789.012-33',
-          phone: '(66) 99666-3456',
-          birthDate: '25/11/1992',
-          appointmentType: 'consulta'
-        },
-        { 
-          time: '15:00', 
-          name: 'Elisa Ferreira', 
-          status: 'Cancelado',
-          cpf: '567.890.123-44',
-          phone: '(66) 99555-7890',
-          birthDate: '08/07/1988',
-          appointmentType: 'retorno'
-        },
-      ],
+      matheus: [], // Sem dados fake para Dr. Matheus
       fabiola: [
         { 
           time: '09:30', 
@@ -147,38 +146,19 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     }
   };
 
-  // Adicionar mais dados fake para outras datas
+  // Adicionar mais dados fake para outras datas (apenas Dra. Fabíola)
   const addFakeAppointments = () => {
     const today = new Date();
     const dates: { [key: string]: { matheus: AppointmentSlot[], fabiola: AppointmentSlot[] } } = {};
     
-    // Adicionar agendamentos para os próximos 7 dias
+    // Adicionar agendamentos para os próximos 7 dias (apenas Dra. Fabíola)
     for (let i = 1; i <= 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       const dateKey = date.toISOString().split('T')[0];
       
       dates[dateKey] = {
-        matheus: i % 2 === 0 ? [
-          { 
-            time: '09:00', 
-            name: `Paciente ${i}A`, 
-            status: 'Confirmado',
-            cpf: `111.222.333-${String(i).padStart(2, '0')}`,
-            phone: `(66) 99999-${String(i).padStart(4, '0')}`,
-            birthDate: '01/01/1990',
-            appointmentType: 'consulta'
-          },
-          { 
-            time: '14:00', 
-            name: `Paciente ${i}B`, 
-            status: 'Confirmado',
-            cpf: `222.333.444-${String(i).padStart(2, '0')}`,
-            phone: `(66) 98888-${String(i).padStart(4, '0')}`,
-            birthDate: '01/01/1990',
-            appointmentType: 'retorno'
-          }
-        ] : [],
+        matheus: [], // Sem dados fake para Dr. Matheus
         fabiola: i % 3 === 0 ? [
           { 
             time: '10:00', 
@@ -193,24 +173,14 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       };
     }
     
-    // Adicionar alguns agendamentos para datas passadas também
+    // Adicionar alguns agendamentos para datas passadas também (apenas Dra. Fabíola)
     for (let i = 1; i <= 3; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       const dateKey = date.toISOString().split('T')[0];
       
       dates[dateKey] = {
-        matheus: [
-          { 
-            time: '11:00', 
-            name: `Paciente Passado ${i}`, 
-            status: 'Confirmado',
-            cpf: `444.555.666-${String(i).padStart(2, '0')}`,
-            phone: `(66) 96666-${String(i).padStart(4, '0')}`,
-            birthDate: '01/01/1990',
-            appointmentType: 'consulta'
-          }
-        ],
+        matheus: [], // Sem dados fake para Dr. Matheus
         fabiola: []
       };
     }
@@ -221,14 +191,14 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const fakeAppointments = addFakeAppointments();
   Object.assign(defaultAppointmentsByDate, fakeAppointments);
 
-  // Função para usar dados estáticos de fallback
+  // Função para usar dados estáticos de fallback (apenas Dra. Fabíola)
   const useFallbackData = useCallback((date: Date) => {
     const dateKey = date.toISOString().split('T')[0];
     const fallbackData = defaultAppointmentsByDate[dateKey] || { matheus: [], fabiola: [] };
     
-    // Sempre usar os dados da data específica, mesmo que vazios
-    // Isso garante que não mostremos dados de outras datas
-    setTimeSlotsMatheus(fallbackData.matheus || []);
+    // Dr. Matheus: sempre usar apenas dados reais do banco (sem fallback)
+    setTimeSlotsMatheus([]);
+    // Dra. Fabíola: usar dados fake se disponíveis
     setTimeSlotsFabiola(fallbackData.fabiola || []);
   }, []);
 
@@ -243,7 +213,10 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
+      console.log('Buscando agendamentos para:', date.toLocaleDateString('pt-BR'));
+
       // Buscar consultas/agendamentos do banco de dados
+      // Adicionar timestamp para evitar cache
       const { data: consultations, error } = await supabase
         .from('consultations')
         .select(`
@@ -262,16 +235,26 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
         .lte('consultation_date', endOfDay.toISOString())
         .order('consultation_date', { ascending: true });
 
+      console.log('Consultas encontradas:', consultations?.length || 0);
+      if (consultations && consultations.length > 0) {
+        console.log('IDs das consultas encontradas:', consultations.map(c => c.id));
+      }
+
       if (error) {
         console.error('Erro ao buscar agendamentos:', error);
-        // Usar dados estáticos em caso de erro
+        // Em caso de erro: Dr. Matheus sem dados, Dra. Fabíola pode usar fallback
+        setTimeSlotsMatheus([]);
         useFallbackData(date);
         return;
       }
 
       if (!consultations || consultations.length === 0) {
-        // Se não houver dados no banco, usar dados estáticos
-        useFallbackData(date);
+        // Se não houver dados no banco: limpar tudo
+        console.log('Nenhuma consulta encontrada, limpando slots');
+        setTimeSlotsMatheus([]);
+        setTimeSlotsFabiola([]);
+        // Não usar fallback após remoção - apenas limpar
+        setLoading(false);
         return;
       }
 
@@ -291,7 +274,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
         const slot: AppointmentSlot = {
           time,
           name: patient?.name || 'Paciente',
-          status: consultation.status || 'Confirmado',
+          status: consultation.status || 'scheduled',
           cpf: patient?.cpf || '',
           phone: patient?.phone || '',
           email: patient?.email || '',
@@ -302,7 +285,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           observations: consultation.observations || '',
           patientId: consultation.patient_id,
           appointmentDate: consultation.consultation_date,
-          appointmentType: consultation.appointment_type || 'consulta'
+          appointmentType: consultation.appointment_type || 'consulta',
+          consultationId: consultation.id
         };
 
         // Filtrar por médico
@@ -318,11 +302,23 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       matheusSlots.sort((a, b) => a.time.localeCompare(b.time));
       fabiolaSlots.sort((a, b) => a.time.localeCompare(b.time));
 
+      console.log('Slots Matheus:', matheusSlots.length, 'Slots Fabiola:', fabiolaSlots.length);
+
+      // Limpar estados primeiro para garantir atualização
+      setTimeSlotsMatheus([]);
+      setTimeSlotsFabiola([]);
+      
+      // Aguardar um tick para garantir que o estado foi limpo
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Atualizar com novos dados
       setTimeSlotsMatheus(matheusSlots);
       setTimeSlotsFabiola(fabiolaSlots);
 
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
+      // Em caso de erro: Dr. Matheus sem dados, Dra. Fabíola pode usar fallback
+      setTimeSlotsMatheus([]);
       useFallbackData(date);
     } finally {
       setLoading(false);
@@ -386,20 +382,20 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     const selectedDateStr = selectedDate.toDateString();
     if (dateStr === selectedDateStr) {
       return {
-        hasMatheus: timeSlotsMatheus.length > 0,
+        hasMatheus: timeSlotsMatheus.length > 0, // Apenas dados reais do banco
         hasFabiola: timeSlotsFabiola.length > 0,
         hasAny: (timeSlotsMatheus.length > 0) || (timeSlotsFabiola.length > 0)
       };
     }
     
-    // Verificar nos dados estáticos
+    // Verificar nos dados estáticos (apenas Dra. Fabíola)
     const dateKey = date.toISOString().split('T')[0];
     const appointments = defaultAppointmentsByDate[dateKey];
     if (appointments) {
       return {
-        hasMatheus: (appointments.matheus?.length > 0) || false,
+        hasMatheus: false, // Dr. Matheus não usa dados fake
         hasFabiola: (appointments.fabiola?.length > 0) || false,
-        hasAny: ((appointments.matheus?.length > 0) || (appointments.fabiola?.length > 0)) || false
+        hasAny: (appointments.fabiola?.length > 0) || false
       };
     }
     
@@ -627,11 +623,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                           </p>
                         )}
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                        ${slot.status === 'Confirmado' ? 'bg-green-100 text-green-800' :
-                          slot.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'}`}>
-                        {slot.status}
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
+                        {translateStatus(slot.status)}
                       </span>
                     </div>
                   ))
@@ -674,11 +667,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                           </p>
                         )}
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                        ${slot.status === 'Confirmado' ? 'bg-green-100 text-green-800' :
-                          slot.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'}`}>
-                        {slot.status}
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
+                        {translateStatus(slot.status)}
                       </span>
                     </div>
                   ))
@@ -706,10 +696,14 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           }}
           patient={selectedPatient}
           onOpenConsultation={handleOpenConsultation}
-          onPatientUpdate={() => {
+          onPatientUpdate={async () => {
             // Recarregar agendamentos quando dados do paciente forem atualizados
-            fetchAppointments(selectedDate);
+            console.log('onPatientUpdate chamado, recarregando agendamentos...');
+            await fetchAppointments(selectedDate);
+            console.log('Agendamentos recarregados');
           }}
+          onSectionChange={onSectionChange}
+          onOpenConsultationForPatient={onOpenConsultationForPatient}
         />
       )}
     </div>

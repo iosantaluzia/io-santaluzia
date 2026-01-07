@@ -57,6 +57,7 @@ const FAQ = () => {
 
   return (
     <section className="py-20 bg-medical-muted">
+      {/* SECURITY: JSON.stringify automatically escapes HTML, safe for dangerouslySetInnerHTML */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -3,7 +3,6 @@ import React, { lazy, Suspense } from 'react';
 
 const AgendamentosSectionLazy = lazy(() => import('./AgendamentosSection').then(module => ({ default: module.AgendamentosSection })));
 const PacientesSectionLazy = lazy(() => import('./PacientesSection').then(module => ({ default: module.PacientesSection })));
-const ConsultasSectionLazy = lazy(() => import('./ConsultasSection').then(module => ({ default: module.ConsultasSection })));
 const ExamesSectionLazy = lazy(() => import('./ExamesSection').then(module => ({ default: module.ExamesSection })));
 const EstoqueSectionLazy = lazy(() => import('./EstoqueSection').then(module => ({ default: module.EstoqueSection })));
 const FinanceiroSectionLazy = lazy(() => import('./FinanceiroSection').then(module => ({ default: module.FinanceiroSection })));
@@ -36,28 +35,34 @@ const ErrorFallback = ({ error, retry }: { error: Error; retry?: () => void }) =
 export const LazyComponents = {
   AgendamentosSection: ({ 
     onSectionChange, 
-    onOpenPatientConsultation 
+    onOpenPatientConsultation,
+    onOpenConsultationForPatient
   }: { 
     onSectionChange?: (section: string) => void;
     onOpenPatientConsultation?: (patientName: string) => void;
+    onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
   }) => (
     <Suspense fallback={<LoadingSpinner />}>
       <AgendamentosSectionLazy 
         onSectionChange={onSectionChange}
         onOpenPatientConsultation={onOpenPatientConsultation}
+        onOpenConsultationForPatient={onOpenConsultationForPatient}
       />
     </Suspense>
   ),
   
-  PacientesSection: () => (
+  PacientesSection: ({ 
+    patientToOpenConsultation, 
+    onConsultationOpened 
+  }: { 
+    patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
+    onConsultationOpened?: () => void;
+  }) => (
     <Suspense fallback={<LoadingSpinner />}>
-      <PacientesSectionLazy />
-    </Suspense>
-  ),
-  
-  ConsultasSection: ({ initialPatientName }: { initialPatientName?: string }) => (
-    <Suspense fallback={<LoadingSpinner />}>
-      <ConsultasSectionLazy initialPatientName={initialPatientName} />
+      <PacientesSectionLazy 
+        patientToOpenConsultation={patientToOpenConsultation}
+        onConsultationOpened={onConsultationOpened}
+      />
     </Suspense>
   ),
   

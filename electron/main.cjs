@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const isDev = require('electron-is-dev');
 
 // Tratamento de erros não capturados
@@ -36,20 +37,51 @@ function createWindow() {
   // Carregar aplicação
   if (isDev) {
     win.loadURL('http://localhost:8080/#/adminio');
-    // DevTools pode ser aberto manualmente com Ctrl+Shift+I se necessário
-    // win.webContents.openDevTools(); // Removido - não abre automaticamente
   } else {
+    // Em produção, o dist está dentro de resources/app.asar
+    // O __dirname aponta para resources/app.asar ou resources/app.asar.unpacked/electron
     const indexPath = path.join(__dirname, '../dist/index.html');
+    console.log('=== PRODUCTION MODE ===');
+    console.log('__dirname:', __dirname);
     console.log('Loading file from:', indexPath);
-    // Usar loadURL com file:// para garantir que funciona
-    const fileUrl = `file://${indexPath.replace(/\\/g, '/')}#/adminio`;
-    console.log('Loading URL:', fileUrl);
-    win.loadURL(fileUrl).catch((error) => {
-      console.error('Error loading URL:', error);
-      // Fallback: tentar loadFile sem hash
-      win.loadFile(indexPath).catch((err) => {
-        console.error('Error loading file:', err);
-      });
+    console.log('File exists:', fs.existsSync(indexPath));
+    
+    // Verificar caminhos alternativos
+    const altPaths = [
+      path.join(__dirname, '../dist/index.html'),
+      path.join(process.resourcesPath, 'app.asar/dist/index.html'),
+      path.join(process.resourcesPath, 'app/dist/index.html'),
+      path.join(app.getAppPath(), 'dist/index.html')
+    ];
+    
+    console.log('Alternative paths:');
+    altPaths.forEach((altPath, i) => {
+      console.log(`  ${i + 1}. ${altPath} - exists: ${fs.existsSync(altPath)}`);
+    });
+    
+    // Tentar carregar com loadFile primeiro (mais confiável)
+    win.loadFile(indexPath).then(() => {
+      console.log('File loaded successfully');
+      // Após carregar, navegar para a rota correta
+      setTimeout(() => {
+        win.webContents.executeJavaScript(`window.location.hash = '#/adminio'`);
+      }, 500);
+    }).catch((error) => {
+      console.error('Error loading file:', error);
+      // Tentar caminhos alternativos
+      for (const altPath of altPaths) {
+        if (fs.existsSync(altPath)) {
+          console.log(`Trying alternative path: ${altPath}`);
+          win.loadFile(altPath).then(() => {
+            setTimeout(() => {
+              win.webContents.executeJavaScript(`window.location.hash = '#/adminio'`);
+            }, 500);
+          }).catch((err) => {
+            console.error(`Error loading ${altPath}:`, err);
+          });
+          break;
+        }
+      }
     });
   }
 
@@ -98,4 +130,3 @@ app.on('web-contents-created', (event, contents) => {
     event.preventDefault();
   });
 });
-

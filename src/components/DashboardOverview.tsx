@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { WaitlistModal } from './WaitlistModal';
 import { UsefulCodesModal } from './UsefulCodesModal';
+import { AppointmentForm } from './AppointmentForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +52,7 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
   const [previewUrl, setPreviewUrl] = useState('');
   const [showWaitlist, setShowWaitlist] = useState(false);
   const [showUsefulCodes, setShowUsefulCodes] = useState(false);
+  const [showAppointmentForm, setShowAppointmentForm] = useState(false);
 
   const defaultCards: CardData[] = [
     {
@@ -178,7 +180,7 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
             {/* Botões de Ação Rápida - Topo */}
             <div className="flex gap-2">
               <button
-                onClick={() => onSectionChange('agendamentos')}
+                onClick={() => setShowAppointmentForm(true)}
                 className="bg-gradient-to-b from-white to-gray-50 text-cinza-escuro h-8 relative inline-flex items-center px-3 py-1.5 group text-sm font-medium leading-5 rounded-md shadow-[0_0_0_1px_rgba(0,0,0,0.1)_inset,0_0.5px_0.5px_rgba(0,0,0,0.05)_inset,0_-0.5px_0.5px_rgba(0,0,0,0.05)_inset,0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bege-principal/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 <Plus className="size-3.5 mr-1.5" /> Novo Agendamento
@@ -419,6 +421,16 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
       <UsefulCodesModal
         isOpen={showUsefulCodes}
         onClose={() => setShowUsefulCodes(false)}
+      />
+
+      <AppointmentForm
+        isOpen={showAppointmentForm}
+        onClose={() => {
+          setShowAppointmentForm(false);
+          // Opcional: mudar para a seção de agendamentos após criar
+          // onSectionChange('agendamentos');
+        }}
+        selectedDate={new Date()}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface AppUser {
   id: string;
@@ -146,7 +147,7 @@ export function useAuth() {
       const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (error) {
-        console.error('Error fetching app user:', error);
+        logger.error('Error fetching app user:', error);
         appUserCache.current[authUserId] = null;
         setAuthState(prev => ({
           ...prev,
@@ -177,7 +178,7 @@ export function useAuth() {
         error: null
       }));
     } catch (error) {
-      console.error('Error in fetchAppUser:', error);
+      logger.error('Error in fetchAppUser:', error);
       
       appUserCache.current[authUserId] = null;
       
@@ -201,7 +202,9 @@ export function useAuth() {
 
   const signInWithUsername = async (username: string, password: string) => {
     try {
-      // Mapear username para email - INCLUINDO o usuário financeiro
+      // SECURITY NOTE: Email mapping is hardcoded but non-sensitive
+      // TODO: Consider moving this mapping to database for better maintainability
+      // This mapping is safe as it only contains public email addresses, not passwords or secrets
       const emailMap: Record<string, string> = {
         'matheus': 'matheus@iosantaluzia.com',
         'fabiola': 'fabiola@iosantaluzia.com',
@@ -222,7 +225,7 @@ export function useAuth() {
       });
 
       if (error) {
-        console.error('Login error:', error);
+        logger.error('Login error:', error);
         return { data, error };
       }
 
@@ -235,14 +238,14 @@ export function useAuth() {
               .update({ last_login: new Date().toISOString() })
               .eq('auth_user_id', data.user.id);
           } catch (updateError) {
-            console.log('Failed to update last login:', updateError);
+            logger.log('Failed to update last login:', updateError);
           }
         }, 100);
       }
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error in signInWithUsername:', error);
+      logger.error('Error in signInWithUsername:', error);
       return { data: null, error: { message: 'Erro inesperado' } };
     }
   };

@@ -25,6 +25,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useEmails, type Email, type EmailDraft } from '@/hooks/useEmails';
 import { toast } from 'sonner';
+import { sanitizeEmailHtml } from '@/utils/sanitizeHtml';
 
 export function EmailSection() {
   const { 
@@ -397,7 +398,7 @@ export function EmailSection() {
             <ScrollArea className="flex-1 p-4">
               <div className="prose max-w-none">
                 {selectedEmail.content_html ? (
-                  <div dangerouslySetInnerHTML={{ __html: selectedEmail.content_html }} />
+                  <div dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(selectedEmail.content_html) }} />
                 ) : (
                   <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
                     {selectedEmail.content_text}

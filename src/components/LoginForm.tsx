@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 export function LoginForm() {
   const [username, setUsername] = useState('');
@@ -25,7 +26,7 @@ export function LoginForm() {
       const { error } = await signInWithUsername(username, password);
       
       if (error) {
-        console.error('Login error:', error);
+        logger.error('Login error:', error);
         if (error.message.includes('Invalid login credentials')) {
           if (username.toLowerCase() === 'financeiro') {
             toast.error('Credenciais inválidas. O usuário financeiro pode precisar ter sua conta criada. Acesse "Gerenciar Usuários" no dashboard para configurar.');
@@ -41,7 +42,7 @@ export function LoginForm() {
         toast.success('Login realizado com sucesso!');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login error:', error);
       toast.error('Erro inesperado no login');
     } finally {
       setIsLoading(false);
