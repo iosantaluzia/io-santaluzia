@@ -95,6 +95,17 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const [timeSlotsMatheus, setTimeSlotsMatheus] = useState<AppointmentSlot[]>([]);
   const [timeSlotsFabiola, setTimeSlotsFabiola] = useState<AppointmentSlot[]>([]);
   const [loading, setLoading] = useState(false);
+  const [initialPatientData, setInitialPatientData] = useState<{
+    name?: string;
+    cpf?: string;
+    date_of_birth?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    cep?: string;
+    city?: string;
+  } | undefined>(undefined);
+  const [initialAppointmentType, setInitialAppointmentType] = useState<string | undefined>(undefined);
 
   // Dados estáticos de fallback (usados quando não há dados no banco)
   // NOTA: Dados fake removidos para Dr. Matheus - apenas dados reais serão exibidos
@@ -683,8 +694,14 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
       <AppointmentForm 
         isOpen={showAppointmentForm}
-        onClose={() => setShowAppointmentForm(false)}
+        onClose={() => {
+          setShowAppointmentForm(false);
+          setInitialPatientData(undefined);
+          setInitialAppointmentType(undefined);
+        }}
         selectedDate={selectedDate}
+        initialPatientData={initialPatientData}
+        initialAppointmentType={initialAppointmentType}
       />
 
       {selectedPatient && (
@@ -704,6 +721,18 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           }}
           onSectionChange={onSectionChange}
           onOpenConsultationForPatient={onOpenConsultationForPatient}
+          onScheduleReturn={(patientData) => {
+            // Fechar modal de detalhes
+            setShowPatientDetails(false);
+            setSelectedPatient(null);
+            
+            // Definir dados iniciais do paciente e tipo de agendamento
+            setInitialPatientData(patientData);
+            setInitialAppointmentType('retorno');
+            
+            // Abrir formulário de agendamento
+            setShowAppointmentForm(true);
+          }}
         />
       )}
     </div>

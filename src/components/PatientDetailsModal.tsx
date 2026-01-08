@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User, Phone, Mail, MapPin, Calendar, FileText, Stethoscope, Eye, Clock, Edit, Save, X, Settings, CalendarIcon, MessageCircle, Play } from 'lucide-react';
+import { User, Phone, Mail, MapPin, Calendar, FileText, Stethoscope, Eye, Clock, Edit, Save, X, Settings, CalendarIcon, MessageCircle, Play, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -40,6 +40,16 @@ interface PatientDetailsModalProps {
   onPatientUpdate?: () => void;
   onSectionChange?: (section: string) => void;
   onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
+  onScheduleReturn?: (patientData: {
+    name?: string;
+    cpf?: string;
+    date_of_birth?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    cep?: string;
+    city?: string;
+  }) => void;
 }
 
 interface Consultation {
@@ -256,7 +266,7 @@ const fakeHistoryData: { [key: string]: { consultations: Consultation[], exams: 
   }
 };
 
-export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultation, onPatientUpdate, onSectionChange, onOpenConsultationForPatient }: PatientDetailsModalProps) {
+export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultation, onPatientUpdate, onSectionChange, onOpenConsultationForPatient, onScheduleReturn }: PatientDetailsModalProps) {
   const { appUser } = useAuth();
   const isDoctor = appUser?.role === 'doctor' || appUser?.role === 'admin';
   const isSecretary = appUser?.role === 'secretary';
@@ -390,6 +400,33 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
       onOpenConsultation();
       toast.info('Navegue para a seção de Pacientes e abra a consulta manualmente');
     }
+  };
+
+  // Função para agendar retorno do paciente
+  const handleScheduleReturn = () => {
+    if (!onScheduleReturn) {
+      toast.error('Função de agendamento não disponível');
+      return;
+    }
+
+    // Preparar dados do paciente para o formulário de agendamento
+    const patientData = {
+      name: patient.name,
+      cpf: patient.cpf,
+      date_of_birth: patient.birthDate,
+      phone: patient.phone,
+      email: patient.email,
+      address: patient.address,
+      cep: undefined, // Não temos CEP no modal atual
+      city: undefined // Não temos cidade no modal atual
+    };
+
+    // Fechar o modal de detalhes
+    onClose();
+
+    // Chamar callback para abrir formulário de agendamento com dados pré-preenchidos
+    onScheduleReturn(patientData);
+    toast.success('Abrindo formulário de agendamento de retorno');
   };
 
   // Função para obter cor do status
@@ -1356,6 +1393,18 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                 >
                   <Play className="h-3 w-3 mr-1" />
                   {canEditCurrentConsultation() ? 'Iniciar Consulta' : 'Consulta não pode ser editada (após 12h)'}
+                </Button>
+              )}
+              {/* Botão "Agendar Retorno" - disponível para pacientes já cadastrados */}
+              {patient.patientId && onScheduleReturn && (
+                <Button
+                  size="sm"
+                  onClick={handleScheduleReturn}
+                  variant="outline"
+                  className="h-7 px-3 text-xs border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700"
+                >
+                  <RotateCcw className="h-3 w-3 mr-1" />
+                  Agendar Retorno
                 </Button>
               )}
             </div>

@@ -24,9 +24,20 @@ interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: Date;
+  initialPatientData?: {
+    name?: string;
+    cpf?: string;
+    date_of_birth?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    cep?: string;
+    city?: string;
+  };
+  initialAppointmentType?: string;
 }
 
-export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFormProps) {
+export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientData, initialAppointmentType }: AppointmentFormProps) {
   const { appUser } = useAuth();
   const [appointmentDate, setAppointmentDate] = useState<Date>(selectedDate);
   
@@ -53,6 +64,42 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
     payment_received: false,
     notes: ''
   });
+
+  // Pré-preencher dados quando initialPatientData ou initialAppointmentType mudarem
+  useEffect(() => {
+    if (isOpen && initialPatientData) {
+      setFormData(prev => ({
+        ...prev,
+        name: initialPatientData.name || prev.name,
+        cpf: initialPatientData.cpf || prev.cpf,
+        date_of_birth: initialPatientData.date_of_birth || prev.date_of_birth,
+        phone: initialPatientData.phone || prev.phone,
+        email: initialPatientData.email || prev.email,
+        address: initialPatientData.address || prev.address,
+        cep: initialPatientData.cep || prev.cep,
+        city: initialPatientData.city || prev.city,
+        appointmentType: initialAppointmentType || prev.appointmentType
+      }));
+    } else if (isOpen && !initialPatientData) {
+      // Limpar formulário quando não há dados iniciais
+      setFormData({
+        name: '',
+        cpf: '',
+        date_of_birth: '',
+        phone: '',
+        email: '',
+        address: '',
+        cep: '',
+        city: '',
+        doctor: '',
+        time: '',
+        appointmentType: '',
+        amount: '',
+        payment_received: false,
+        notes: ''
+      });
+    }
+  }, [isOpen, initialPatientData, initialAppointmentType]);
 
   const availableTimes = [
     '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
