@@ -144,6 +144,9 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
         }
       }
 
+      // Timestamp de salvamento
+      const savedAt = new Date().toISOString();
+
       // Se encontrou uma consulta existente, atualizar ao invés de criar nova
       if (consultationId) {
         const { error } = await supabase
@@ -153,7 +156,8 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             consultation_date: consultationDate,
             anamnesis: consultationText || null,
             status: 'completed',
-            updated_at: new Date().toISOString()
+            saved_at: savedAt,
+            updated_at: savedAt
           })
           .eq('id', consultationId);
 
@@ -174,6 +178,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             consultation_date: consultationDate,
             anamnesis: consultationText || null,
             status: 'completed',
+            saved_at: savedAt,
             created_by: appUser?.username || 'sistema'
           });
 

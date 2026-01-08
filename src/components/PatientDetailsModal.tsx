@@ -344,10 +344,31 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
   };
 
   // Função para iniciar consulta do agendamento atual
-  const handleStartCurrentConsultation = () => {
+  const handleStartCurrentConsultation = async () => {
     if (!patient.patientId) {
       toast.error('ID do paciente não encontrado');
       return;
+    }
+    
+    // Se houver consultationId, registrar o início do atendimento
+    if (patient.consultationId) {
+      try {
+        const { error } = await supabase
+          .from('consultations')
+          .update({
+            started_at: new Date().toISOString(),
+            status: 'in_progress'
+          })
+          .eq('id', patient.consultationId);
+
+        if (error) {
+          console.error('Erro ao registrar início da consulta:', error);
+          // Não bloquear o fluxo, apenas logar o erro
+        }
+      } catch (error) {
+        console.error('Erro ao registrar início da consulta:', error);
+        // Não bloquear o fluxo, apenas logar o erro
+      }
     }
     
     // Fechar o modal de detalhes do paciente
