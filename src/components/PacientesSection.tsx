@@ -52,29 +52,60 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
 
   // Efeito para abrir automaticamente a consulta quando patientToOpenConsultation for fornecido
   useEffect(() => {
-    if (patientToOpenConsultation?.patientId && patients.length > 0) {
-      const patient = patients.find(p => p.id === patientToOpenConsultation.patientId);
+    const openConsultation = async () => {
+      if (!patientToOpenConsultation?.patientId) return;
+
+      // Primeiro, tentar encontrar o paciente na lista atual
+      let patient = patients.find(p => p.id === patientToOpenConsultation.patientId);
+      
+      // Se não encontrou na lista, buscar diretamente do banco
+      if (!patient) {
+        try {
+          const { data, error } = await supabase
+            .from('patients')
+            .select('*')
+            .eq('id', patientToOpenConsultation.patientId)
+            .single();
+          
+          if (error) {
+            console.error('Erro ao buscar paciente:', error);
+            toast.error('Erro ao carregar dados do paciente');
+            return;
+          }
+          
+          if (data) {
+            patient = data;
+            // Adicionar o paciente à lista se não estiver lá
+            if (!patients.find(p => p.id === patient.id)) {
+              setPatients(prev => [...prev, patient]);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar paciente:', error);
+          toast.error('Erro ao carregar dados do paciente');
+          return;
+        }
+      }
+      
       if (patient) {
         setSelectedPatient(patient);
+        setPatientSubSection('prontuarios'); // Garantir que estamos na subseção correta
         
         // Se houver consultationId, buscar a consulta existente
         if (patientToOpenConsultation.consultationId) {
-          const fetchConsultation = async () => {
-            try {
-              const { data, error } = await supabase
-                .from('consultations')
-                .select('*')
-                .eq('id', patientToOpenConsultation.consultationId)
-                .single();
-              
-              if (!error && data) {
-                setExistingConsultation(data);
-              }
-            } catch (error) {
-              console.error('Erro ao buscar consulta:', error);
+          try {
+            const { data, error } = await supabase
+              .from('consultations')
+              .select('*')
+              .eq('id', patientToOpenConsultation.consultationId)
+              .single();
+            
+            if (!error && data) {
+              setExistingConsultation(data);
             }
-          };
-          fetchConsultation();
+          } catch (error) {
+            console.error('Erro ao buscar consulta:', error);
+          }
         } else {
           setExistingConsultation(null);
         }
@@ -84,7 +115,9 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
           onConsultationOpened();
         }
       }
-    }
+    };
+
+    openConsultation();
   }, [patientToOpenConsultation, patients, onConsultationOpened]);
 
   const fetchPatients = async () => {
