@@ -27,7 +27,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const AdminDashboard = () => {
   const { isAuthenticated, appUser, signOut, loading, error, retry, user } = useAuth();
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('agendamentos');
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [selectedPatientName, setSelectedPatientName] = useState<string>('');
