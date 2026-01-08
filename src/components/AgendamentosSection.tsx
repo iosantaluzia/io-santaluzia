@@ -1,8 +1,9 @@
 // Componente de Agendamentos - Última atualização: 2025-10-20
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronRight, Columns, PanelLeft, Plus } from 'lucide-react';
+import { ChevronRight, Columns, PanelLeft, Plus, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AppointmentForm } from './AppointmentForm';
 import { PatientDetailsModal } from './PatientDetailsModal';
 import { toast } from 'sonner';
@@ -43,18 +44,22 @@ const translateStatus = (status: string | null | undefined): string => {
   
   const statusMap: { [key: string]: string } = {
     'scheduled': 'Agendado',
-    'pending': 'Aguardando Pagamento',
+    'pending': 'Aguardando',
     'in_progress': 'Em atendimento',
     'in_attendance': 'Em atendimento',
     'completed': 'Realizado',
     'confirmed': 'Confirmado',
     'cancelled': 'Cancelado',
+    'rescheduled': 'Remarcado',
     'agendado': 'Agendado',
-    'aguardando_pagamento': 'Aguardando Pagamento',
+    'aguardando_pagamento': 'Aguardando',
+    'aguardando': 'Aguardando',
     'em_atendimento': 'Em atendimento',
     'realizado': 'Realizado',
+    'cancelado': 'Cancelado',
+    'remarcado': 'Remarcado',
     'Confirmado': 'Confirmado',
-    'Pendente': 'Aguardando Pagamento'
+    'Pendente': 'Aguardando'
   };
   
   return statusMap[status.toLowerCase()] || status;
@@ -83,6 +88,9 @@ const getStatusColor = (status: string | null | undefined): string => {
   if (statusLower === 'cancelled' || statusLower === 'cancelado') {
     return 'bg-red-100 text-red-800';
   }
+  if (statusLower === 'rescheduled' || statusLower === 'remarcado') {
+    return 'bg-blue-100 text-blue-800';
+  }
   return 'bg-gray-100 text-gray-800';
 };
 
@@ -95,6 +103,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const [timeSlotsMatheus, setTimeSlotsMatheus] = useState<AppointmentSlot[]>([]);
   const [timeSlotsFabiola, setTimeSlotsFabiola] = useState<AppointmentSlot[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openStatusPopover, setOpenStatusPopover] = useState<string | null>(null);
+  const [monthAppointments, setMonthAppointments] = useState<{ [dateKey: string]: { hasMatheus: boolean; hasFabiola: boolean } }>({});
   const [initialPatientData, setInitialPatientData] = useState<{
     name?: string;
     cpf?: string;
@@ -346,6 +356,66 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     fetchAppointments(selectedDate);
   }, [selectedDate, fetchAppointments]);
 
+  // Buscar agendamentos do mês inteiro para marcar o calendário
+  const fetchMonthAppointments = useCallback(async (date: Date) => {
+    try {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const startOfMonth = new Date(year, month, 1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const endOfMonth = new Date(year, month + 1, 0);
+      endOfMonth.setHours(23, 59, 59, 999);
+
+      const { data: consultations, error } = await supabase
+        .from('consultations')
+        .select('consultation_date, doctor_name')
+        .gte('consultation_date', startOfMonth.toISOString())
+        .lte('consultation_date', endOfMonth.toISOString())
+        .order('consultation_date', { ascending: true });
+
+      if (error) {
+        console.error('Erro ao buscar agendamentos do mês:', error);
+        return;
+      }
+
+      // Agrupar por data
+      const appointmentsByDate: { [dateKey: string]: { hasMatheus: boolean; hasFabiola: boolean } } = {};
+
+      if (consultations) {
+        consultations.forEach((consultation: any) => {
+          const consultationDate = new Date(consultation.consultation_date);
+          // Usar a mesma lógica de formatação de data para garantir consistência com o timezone local
+          const year = consultationDate.getFullYear();
+          const month = String(consultationDate.getMonth() + 1).padStart(2, '0');
+          const day = String(consultationDate.getDate()).padStart(2, '0');
+          const dateKey = `${year}-${month}-${day}`;
+          
+          if (!appointmentsByDate[dateKey]) {
+            appointmentsByDate[dateKey] = { hasMatheus: false, hasFabiola: false };
+          }
+
+          const doctorName = consultation.doctor_name?.toLowerCase() || '';
+          if (doctorName.includes('matheus')) {
+            appointmentsByDate[dateKey].hasMatheus = true;
+          } else if (doctorName.includes('fabiola') || doctorName.includes('fabíola')) {
+            appointmentsByDate[dateKey].hasFabiola = true;
+          }
+        });
+      }
+
+      setMonthAppointments(appointmentsByDate);
+    } catch (error) {
+      console.error('Erro ao buscar agendamentos do mês:', error);
+    }
+  }, []);
+
+  // Buscar agendamentos do mês quando o mês mudar
+  useEffect(() => {
+    const monthYear = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
+    fetchMonthAppointments(selectedDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate.getFullYear(), selectedDate.getMonth(), fetchMonthAppointments]);
+
   const handlePatientClick = (patient: any) => {
     setSelectedPatient(patient);
     setShowPatientDetails(true);
@@ -356,6 +426,42 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     if (onOpenPatientConsultation && selectedPatient) {
       onOpenPatientConsultation(selectedPatient.name);
       toast.success(`Abrindo prontuário de ${selectedPatient.name}`);
+    }
+  };
+
+  // Função para atualizar o status de uma consulta
+  const handleUpdateStatus = async (consultationId: string, newStatus: string) => {
+    try {
+      // Mapear status em português para valores do banco
+      const statusMap: { [key: string]: string } = {
+        'Aguardando': 'pending',
+        'Cancelado': 'cancelled',
+        'Remarcado': 'scheduled', // Remarcado volta para agendado
+        'Realizado': 'completed'
+      };
+
+      const dbStatus = statusMap[newStatus] || newStatus.toLowerCase();
+
+      const { error } = await supabase
+        .from('consultations')
+        .update({ status: dbStatus })
+        .eq('id', consultationId);
+
+      if (error) {
+        console.error('Erro ao atualizar status:', error);
+        toast.error('Erro ao atualizar status da consulta');
+        return;
+      }
+
+      toast.success(`Status alterado para "${newStatus}"`);
+      setOpenStatusPopover(null);
+      
+      // Recarregar agendamentos do dia e do mês
+      await fetchAppointments(selectedDate);
+      await fetchMonthAppointments(selectedDate);
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      toast.error('Erro ao atualizar status da consulta');
     }
   };
 
@@ -388,7 +494,21 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const getAppointmentsInfo = useCallback((date: Date | null): { hasMatheus: boolean; hasFabiola: boolean; hasAny: boolean } => {
     if (!date) return { hasMatheus: false, hasFabiola: false, hasAny: false };
     
-    // Verificar primeiro nos dados carregados do banco (para a data selecionada)
+   // Verificar primeiro nos dados do mês carregados do banco
+    // Usar a mesma lógica de formatação de data para garantir consistência com o timezone local
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
+    if (monthAppointments[dateKey]) {
+      return {
+        hasMatheus: monthAppointments[dateKey].hasMatheus,
+        hasFabiola: monthAppointments[dateKey].hasFabiola,
+        hasAny: monthAppointments[dateKey].hasMatheus || monthAppointments[dateKey].hasFabiola
+      };
+    }
+    
+    // Verificar nos dados carregados do banco (para a data selecionada)
     const dateStr = date.toDateString();
     const selectedDateStr = selectedDate.toDateString();
     if (dateStr === selectedDateStr) {
@@ -400,7 +520,6 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     }
     
     // Verificar nos dados estáticos (apenas Dra. Fabíola)
-    const dateKey = date.toISOString().split('T')[0];
     const appointments = defaultAppointmentsByDate[dateKey];
     if (appointments) {
       return {
@@ -411,7 +530,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     }
     
     return { hasMatheus: false, hasFabiola: false, hasAny: false };
-  }, [selectedDate, timeSlotsMatheus, timeSlotsFabiola]);
+  }, [selectedDate, timeSlotsMatheus, timeSlotsFabiola, monthAppointments]);
 
   // Função para verificar se uma data tem consultas e retornar a cor (sempre vermelho quando há consultas)
   const getCalendarColor = (date: Date | null): string => {
@@ -557,8 +676,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                   onClick={() => day && setSelectedDate(day)}
                   className={`p-2 rounded-full text-sm relative flex flex-col items-center justify-center
                     ${day ? 'hover:bg-gray-100' : 'cursor-default'}
-                    ${isToday ? 'bg-bege-principal text-white font-semibold' : ''}
-                    ${isSelected ? 'bg-marrom-acentuado text-white font-semibold' : ''}
+                    ${isToday ? 'bg-marrom-acentuado text-white font-semibold' : ''}
+                    ${isSelected ? 'bg-medical-primary text-white font-semibold' : ''}
                     ${textColor}
                   `}
                   disabled={!day}
@@ -572,6 +691,9 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                   {shouldShowDot(day) && !isToday && !isSelected && (
                     <span className="absolute bottom-1 w-1.5 h-1.5 bg-marrom-acentuado rounded-full"></span>
                   )}
+                  {shouldShowDot(day) && (isSelected || isToday) && (
+                    <span className="absolute bottom-1 w-1.5 h-1.5 bg-white rounded-full"></span>
+                  )}
                 </button>
               );
             })}
@@ -582,9 +704,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
             </p>
             <Button 
               onClick={() => setSelectedDate(new Date())}
-              variant="ghost" 
               size="sm"
-              className="h-6 text-xs text-gray-600 hover:text-bege-principal border border-black bg-transparent hover:bg-transparent"
+              className="h-6 text-xs bg-medical-primary hover:bg-marrom-acentuado text-white hover:text-white"
             >
               Hoje
             </Button>
@@ -593,7 +714,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           {/* Novo botão para criar agendamento */}
           <Button 
             onClick={() => setShowAppointmentForm(true)}
-            className="mt-4 bg-bege-principal hover:bg-marrom-acentuado"
+            className="mt-4 bg-medical-primary hover:bg-marrom-acentuado"
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Agendamento
@@ -634,9 +755,62 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                           </p>
                         )}
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
-                        {translateStatus(slot.status)}
-                      </span>
+                      {slot.consultationId ? (
+                        <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)}>
+                          <PopoverTrigger asChild>
+                            <span 
+                              className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 transition-all duration-200 hover:scale-105 ${getStatusColor(slot.status)} group`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenStatusPopover(openStatusPopover === slot.consultationId ? null : slot.consultationId!);
+                              }}
+                            >
+                              <span className="transition-all duration-200">{translateStatus(slot.status)}</span>
+                              <ChevronDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                            </span>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56 p-2" onClick={(e) => e.stopPropagation()}>
+                            <div className="space-y-2">
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Aguardando')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('pending')}`}>
+                                  Aguardando
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Cancelado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('cancelled')}`}>
+                                  Cancelado
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Remarcado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('scheduled')}`}>
+                                  Remarcado
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Realizado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('completed')}`}>
+                                  Realizado
+                                </span>
+                              </button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
+                          {translateStatus(slot.status)}
+                        </span>
+                      )}
                     </div>
                   ))
                 ) : (
@@ -678,9 +852,62 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                           </p>
                         )}
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
-                        {translateStatus(slot.status)}
-                      </span>
+                      {slot.consultationId ? (
+                        <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)}>
+                          <PopoverTrigger asChild>
+                            <span 
+                              className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 transition-all duration-200 hover:scale-105 ${getStatusColor(slot.status)} group`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenStatusPopover(openStatusPopover === slot.consultationId ? null : slot.consultationId!);
+                              }}
+                            >
+                              <span className="transition-all duration-200">{translateStatus(slot.status)}</span>
+                              <ChevronDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                            </span>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56 p-2" onClick={(e) => e.stopPropagation()}>
+                            <div className="space-y-2">
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Aguardando')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('pending')}`}>
+                                  Aguardando
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Cancelado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('cancelled')}`}>
+                                  Cancelado
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Remarcado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('scheduled')}`}>
+                                  Remarcado
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Realizado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('completed')}`}>
+                                  Realizado
+                                </span>
+                              </button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
+                          {translateStatus(slot.status)}
+                        </span>
+                      )}
                     </div>
                   ))
                 ) : (

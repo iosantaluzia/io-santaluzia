@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { appointmentFormSchema } from '@/utils/validationSchemas';
 import { logger } from '@/utils/logger';
@@ -62,6 +63,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
     appointmentType: '',
     amount: '',
     payment_received: false,
+    payment_method: '',
     notes: ''
   });
 
@@ -96,6 +98,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         appointmentType: '',
         amount: '',
         payment_received: false,
+        payment_method: '',
         notes: ''
       });
     }
@@ -284,6 +287,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         appointmentType: '',
         amount: '',
         payment_received: false,
+        payment_method: '',
         notes: ''
       });
       
@@ -436,9 +440,75 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                           handleInputChange('amount', formatted);
                         }}
                         placeholder="0,00"
-                        className="h-8 text-xs pl-7"
+                        className="h-8 text-xs pl-7 pr-24"
                         inputMode="numeric"
                       />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <span className="text-xs truncate max-w-[120px]">
+                              {formData.payment_method || 'Meio de Pagamento'}
+                            </span>
+                            <ChevronDown className="h-3 w-3 flex-shrink-0" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-48 p-1" align="end" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex flex-col">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleInputChange('payment_method', 'Dinheiro');
+                              }}
+                              className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                            >
+                              Dinheiro
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleInputChange('payment_method', 'Pix');
+                              }}
+                              className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                            >
+                              Pix
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleInputChange('payment_method', 'Cartão de Crédito');
+                              }}
+                              className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                            >
+                              Cartão de Crédito
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleInputChange('payment_method', 'Cheque');
+                              }}
+                              className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                            >
+                              Cheque
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleInputChange('payment_method', 'Débito');
+                              }}
+                              className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                            >
+                              Débito
+                            </button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="flex items-center gap-1.5 pb-0.5">
                       <Checkbox
@@ -518,7 +588,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
             {/* Colunas 9-12: Calendário fixo à direita */}
             <div className="col-span-4 flex flex-col gap-1.5">
               <Label className="text-xs font-medium text-gray-700 leading-tight">Data do Agendamento *</Label>
-              <div className="border rounded-lg p-1.5 bg-white flex-1 flex items-start justify-center min-h-[200px]">
+              <div className="border rounded-lg p-3 bg-white flex-1 flex items-start justify-center min-h-[320px]">
                 <Calendar
                   mode="single"
                   selected={appointmentDate}
@@ -527,7 +597,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                       setAppointmentDate(date);
                     }
                   }}
-                  className="scale-[0.85] origin-top"
+                  className="scale-100"
                   locale={ptBR}
                 />
               </div>

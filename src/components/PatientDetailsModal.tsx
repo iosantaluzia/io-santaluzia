@@ -1101,7 +1101,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                   <div className="flex items-start gap-3">
                     <User className="h-4 w-4 text-gray-600 mt-1" />
                     <div>
-                      <p className="font-semibold text-gray-700">{editingPatient.name || patient.name}</p>
+                      <p className="font-semibold text-marrom-acentuado">{editingPatient.name || patient.name}</p>
                       {(editingPatient.cpf || patient.cpf) && (
                         <p className="text-sm text-gray-600">CPF: {editingPatient.cpf || patient.cpf}</p>
                       )}
@@ -1292,7 +1292,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                           {consultations.map((consultation) => (
                             <div 
                               key={consultation.id} 
-                              className="bg-gray-50 p-3 rounded-md border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                              className="bg-marrom-acentuado/5 p-3 rounded-md border border-marrom-acentuado/20 cursor-pointer hover:bg-marrom-acentuado/10 transition-colors"
                               onClick={() => {
                                 setSelectedConsultation(consultation);
                                 setShowConsultationDetails(true);
@@ -1325,7 +1325,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                         </h4>
                         <div className="space-y-2">
                           {exams.map((exam) => (
-                            <div key={exam.id} className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                            <div key={exam.id} className="bg-marrom-acentuado/5 p-3 rounded-md border border-marrom-acentuado/20">
                               <div className="flex items-center justify-between mb-1">
                                 <p className="text-xs font-medium text-gray-700">
                                   {new Date(exam.exam_date).toLocaleDateString('pt-BR')}
@@ -1359,7 +1359,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
 
           {/* Informações do Agendamento - Só mostrar se houver dados de agendamento */}
           {(patient.consultationId || patient.time || patient.appointmentDate) && (
-          <div className="bg-gray-50 p-4 rounded-lg relative">
+          <div className="bg-marrom-acentuado/10 p-4 rounded-lg relative border border-marrom-acentuado/20">
             <div className="absolute top-3 right-3 flex gap-2">
               {patient.consultationId && (
                 <>
