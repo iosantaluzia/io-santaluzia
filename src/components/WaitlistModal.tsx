@@ -10,6 +10,7 @@ import { User, Phone, FileText, Clock, Calendar, Plus, X, Upload, Edit, Save } f
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { bulkInsertWaitlistPatients } from '@/utils/bulkInsertWaitlist';
+import { getDoctorDisplayName } from '@/utils/doctorNames';
 import {
   getLocalWaitlistEntries,
   addLocalWaitlistEntry,
@@ -434,7 +435,7 @@ export function WaitlistModal({ isOpen, onClose, onScheduleComplete }: WaitlistM
       const [hours, minutes] = selectedTime.split(':');
       consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      const doctorName = selectedDoctor === 'matheus' ? 'Dr. Matheus' : 'Dra. Fabíola';
+      const doctorName = getDoctorDisplayName(selectedDoctor);
 
       const { data: consultation, error: consultationError } = await supabase
         .from('consultations')

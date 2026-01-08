@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/logger';
 import { toast } from 'sonner';
 import { PatientConsultations } from './PatientConsultations';
+import { getDoctorFullName } from '@/utils/doctorNames';
 
 interface Patient {
   id: string;
@@ -109,31 +110,82 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
     setSaving(true);
 
     try {
-      // Obter nome do médico do appUser
-      const doctorName = appUser?.username || 'Médico';
+      // Obter nome completo do médico do appUser
+      const doctorName = getDoctorFullName(appUser?.username);
       
       // Usar data/hora atual
       const consultationDate = new Date().toISOString();
 
-      // Salvar todo o texto da consulta no campo anamnesis
-      const { error } = await supabase
-        .from('consultations')
-        .insert({
-          patient_id: patient.id,
-          doctor_name: doctorName,
-          consultation_date: consultationDate,
-          anamnesis: consultationText || null,
-          status: 'completed',
-          created_by: appUser?.username || 'sistema'
-        });
+      let consultationId: string | null = null;
 
-      if (error) {
-        logger.error('Erro ao salvar consulta:', error);
-        toast.error('Erro ao salvar consulta. Tente novamente.');
-        return;
+      // Se existe uma consulta existente fornecida, atualizar ela
+      if (existingConsultation?.id) {
+        consultationId = existingConsultation.id;
+      } else {
+        // Verificar se existe uma consulta agendada para este paciente hoje
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const { data: scheduledConsultation, error: findError } = await supabase
+          .from('consultations')
+          .select('id')
+          .eq('patient_id', patient.id)
+          .eq('status', 'scheduled')
+          .gte('consultation_date', today.toISOString())
+          .lt('consultation_date', tomorrow.toISOString())
+          .maybeSingle();
+
+        if (findError) {
+          logger.warn('Erro ao buscar consulta agendada:', findError);
+        } else if (scheduledConsultation?.id) {
+          consultationId = scheduledConsultation.id;
+        }
       }
 
-      toast.success('Consulta salva com sucesso!');
+      // Se encontrou uma consulta existente, atualizar ao invés de criar nova
+      if (consultationId) {
+        const { error } = await supabase
+          .from('consultations')
+          .update({
+            doctor_name: doctorName,
+            consultation_date: consultationDate,
+            anamnesis: consultationText || null,
+            status: 'completed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', consultationId);
+
+        if (error) {
+          logger.error('Erro ao atualizar consulta:', error);
+          toast.error('Erro ao atualizar consulta. Tente novamente.');
+          return;
+        }
+
+        toast.success('Consulta atualizada com sucesso!');
+      } else {
+        // Criar nova consulta apenas se não houver consulta existente
+        const { error } = await supabase
+          .from('consultations')
+          .insert({
+            patient_id: patient.id,
+            doctor_name: doctorName,
+            consultation_date: consultationDate,
+            anamnesis: consultationText || null,
+            status: 'completed',
+            created_by: appUser?.username || 'sistema'
+          });
+
+        if (error) {
+          logger.error('Erro ao salvar consulta:', error);
+          toast.error('Erro ao salvar consulta. Tente novamente.');
+          return;
+        }
+
+        toast.success('Consulta salva com sucesso!');
+      }
+
       // Limpar formulário
       setConsultationText('');
       onSaved();

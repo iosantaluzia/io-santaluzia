@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { formatCurrencyInput, getNumericValue } from '@/utils/currency';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
+import { getDoctorDisplayName } from '@/utils/doctorNames';
 
 interface PatientDetailsModalProps {
   isOpen: boolean;
@@ -851,12 +852,8 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
       const [hours, minutes] = editingAppointment.time.split(':');
       consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      // Mapear nome do médico
-      const doctorName = editingAppointment.doctor === 'matheus' 
-        ? 'Dr. Matheus' 
-        : editingAppointment.doctor === 'fabiola' 
-        ? 'Dra. Fabíola' 
-        : editingAppointment.doctor;
+      // Mapear nome do médico usando função utilitária
+      const doctorName = getDoctorDisplayName(editingAppointment.doctor);
 
       // Preparar dados para atualização
       const updateData: any = {

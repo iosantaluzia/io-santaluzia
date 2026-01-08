@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { formatCurrencyInput, getNumericValue } from '@/utils/currency';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
+import { getDoctorDisplayName } from '@/utils/doctorNames';
 
 interface AppointmentFormProps {
   isOpen: boolean;
@@ -179,12 +180,8 @@ export function AppointmentForm({ isOpen, onClose, selectedDate }: AppointmentFo
       const [hours, minutes] = validatedData.time.split(':');
       consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      // Mapear nome do médico
-      const doctorName = validatedData.doctor === 'matheus' 
-        ? 'Dr. Matheus' 
-        : validatedData.doctor === 'fabiola' 
-        ? 'Dra. Fabíola' 
-        : validatedData.doctor;
+      // Mapear nome do médico usando função utilitária
+      const doctorName = getDoctorDisplayName(validatedData.doctor);
 
       // Inserir sem amount primeiro (para contornar cache do PostgREST)
       // O amount será atualizado depois via função RPC ou update manual
