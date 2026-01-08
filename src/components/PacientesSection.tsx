@@ -474,13 +474,16 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                                     >
                                       Ver Detalhes
                                     </Button>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      onClick={() => setSelectedPatient(patient)}
-                                    >
-                                      Ver Prontuário
-                                    </Button>
+                                    {/* Secretários e financeiro não podem ver prontuários médicos */}
+                                    {(appUser?.role === 'admin' || appUser?.role === 'doctor') && (
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => setSelectedPatient(patient)}
+                                      >
+                                        Ver Prontuário
+                                      </Button>
+                                    )}
                                   </div>
                                 </td>
                               </tr>

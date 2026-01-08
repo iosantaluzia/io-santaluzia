@@ -72,9 +72,34 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
 
   // Carregar dados da consulta existente quando fornecido
   useEffect(() => {
-    if (existingConsultation?.anamnesis) {
-      setConsultationText(existingConsultation.anamnesis);
-    }
+    const loadExistingConsultation = async () => {
+      if (existingConsultation?.id && !existingConsultation.anamnesis) {
+        // Se apenas o ID foi fornecido, buscar os dados completos da consulta
+        try {
+          const { data, error } = await supabase
+            .from('consultations')
+            .select('*')
+            .eq('id', existingConsultation.id)
+            .single();
+
+          if (error) {
+            console.error('Erro ao carregar consulta:', error);
+            return;
+          }
+
+          if (data?.anamnesis) {
+            setConsultationText(data.anamnesis);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar consulta:', error);
+        }
+      } else if (existingConsultation?.anamnesis) {
+        // Se a anamnese já foi fornecida, usar diretamente
+        setConsultationText(existingConsultation.anamnesis);
+      }
+    };
+
+    loadExistingConsultation();
   }, [existingConsultation]);
 
   useEffect(() => {

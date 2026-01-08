@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User, Phone, Mail, MapPin, Calendar, FileText, Stethoscope, Eye, Clock, Edit, Save, X, Settings, CalendarIcon, MessageCircle, Play, RotateCcw } from 'lucide-react';
+import { User, Phone, Mail, MapPin, Calendar, FileText, Stethoscope, Eye, Clock, Edit, Save, X, Settings, CalendarIcon, MessageCircle, Play, RotateCcw, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -487,6 +487,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
     appointmentType: string;
     amount: string;
     payment_received: boolean;
+    payment_method: string;
     observations: string;
     status: string;
   }>({
@@ -496,9 +497,11 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
     appointmentType: '',
     amount: '',
     payment_received: false,
+    payment_method: '',
     observations: '',
     status: 'scheduled'
   });
+  const [paymentMethodPopoverOpen, setPaymentMethodPopoverOpen] = useState(false);
   const [savingAppointment, setSavingAppointment] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
@@ -882,9 +885,10 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
         date: consultationDate,
         time: time,
         doctor: doctorValue,
-        appointmentType: '', // Campo não existe na tabela, mantido apenas para compatibilidade do estado
+        appointmentType: (consultation as any).appointment_type || 'consulta',
         amount: consultation.amount ? consultation.amount.toFixed(2).replace('.', ',') : '',
         payment_received: consultation.payment_received || false,
+        payment_method: (consultation as any).payment_method || '',
         observations: consultation.observations || '',
         status: consultation.status || 'scheduled'
       });
@@ -919,8 +923,10 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
       const updateData: any = {
         doctor_name: doctorName,
         consultation_date: consultationDateTime.toISOString(),
+        appointment_type: editingAppointment.appointmentType || null,
         observations: editingAppointment.observations || null,
         payment_received: editingAppointment.payment_received || false,
+        payment_method: editingAppointment.payment_method || null,
         status: editingAppointment.status || 'scheduled'
       };
 
@@ -937,7 +943,8 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
 
       if (error) {
         console.error('Erro ao atualizar agendamento:', error);
-        toast.error('Erro ao atualizar agendamento: ' + (error.message || 'Erro desconhecido'));
+        console.error('Dados enviados:', updateData);
+        toast.error('Erro ao atualizar agendamento: ' + (error.message || JSON.stringify(error)));
         return;
       }
 
@@ -1413,7 +1420,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
               <span className="font-semibold text-gray-700">Agendamento:</span>
             </div>
             {patient.time && (
-              <p className="text-sm text-gray-600 ml-6">Horário: {patient.time}</p>
+            <p className="text-sm text-gray-600 ml-6">Horário: {patient.time}</p>
             )}
             {patient.appointmentDate && (
               <p className="text-sm text-gray-600 ml-6">
@@ -1504,21 +1511,41 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
             </div>
           </div>
 
-          {/* Médico */}
-          <div>
-            <Label className="text-sm font-medium">Médico *</Label>
-            <Select 
-              value={editingAppointment.doctor} 
-              onValueChange={(value) => setEditingAppointment({ ...editingAppointment, doctor: value })}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Selecione o médico" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="matheus">Dr. Matheus</SelectItem>
-                <SelectItem value="fabiola">Dra. Fabíola</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Médico e Tipo de Agendamento */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium">Médico *</Label>
+              <Select 
+                value={editingAppointment.doctor} 
+                onValueChange={(value) => setEditingAppointment({ ...editingAppointment, doctor: value })}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Selecione o médico" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="matheus">Dr. Matheus</SelectItem>
+                  <SelectItem value="fabiola">Dra. Fabíola</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">Tipo de Agendamento</Label>
+              <Select 
+                value={editingAppointment.appointmentType} 
+                onValueChange={(value) => setEditingAppointment({ ...editingAppointment, appointmentType: value })}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="consulta">Consulta</SelectItem>
+                  <SelectItem value="retorno">Retorno</SelectItem>
+                  <SelectItem value="exame">Exame</SelectItem>
+                  <SelectItem value="pagamento_honorarios">Pagamento de Honorários</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Valor e Status de Pagamento */}
@@ -1535,9 +1562,69 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                     setEditingAppointment({ ...editingAppointment, amount: formatted });
                   }}
                   placeholder="0,00"
-                  className="pl-10 h-10"
+                  className="pl-10 pr-24 h-10"
                   inputMode="numeric"
                 />
+                <Popover open={paymentMethodPopoverOpen} onOpenChange={setPaymentMethodPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 z-10"
+                    >
+                      <span className="text-xs">
+                        {editingAppointment.payment_method || 'Meio de Pagamento'}
+                      </span>
+                      <ChevronDown className="h-3 w-3 flex-shrink-0" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-1 z-50" align="end">
+                    <button
+                      onClick={() => {
+                        setEditingAppointment({ ...editingAppointment, payment_method: 'Dinheiro' });
+                        setPaymentMethodPopoverOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                    >
+                      Dinheiro
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingAppointment({ ...editingAppointment, payment_method: 'Pix' });
+                        setPaymentMethodPopoverOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                    >
+                      Pix
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingAppointment({ ...editingAppointment, payment_method: 'Cartão de Crédito' });
+                        setPaymentMethodPopoverOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                    >
+                      Cartão de Crédito
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingAppointment({ ...editingAppointment, payment_method: 'Cheque' });
+                        setPaymentMethodPopoverOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                    >
+                      Cheque
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingAppointment({ ...editingAppointment, payment_method: 'Débito' });
+                        setPaymentMethodPopoverOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                    >
+                      Débito
+                    </button>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -1747,45 +1834,74 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
               </div>
             )}
 
-            {/* Anamnese */}
-            {selectedConsultation.anamnesis && isDoctor && (
-              <div>
-                <Label className="text-sm font-medium text-gray-600">Anamnese</Label>
-                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.anamnesis}</p>
+            {/* Seção de Anamnese, Prescrição e Observações com Scroll Fixo */}
+            {(selectedConsultation.anamnesis || selectedConsultation.prescription || selectedConsultation.observations) && (
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <Label className="text-sm font-medium text-gray-600 mb-3 block">Detalhes da Consulta</Label>
+                <ScrollArea className="max-h-[300px] pr-4">
+                  <div className="space-y-4">
+                    {/* Anamnese */}
+                    {selectedConsultation.anamnesis && isDoctor && (
+                      <div>
+                        <Label className="text-xs font-medium text-gray-500 uppercase">Anamnese</Label>
+                        <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.anamnesis}</p>
+                      </div>
+                    )}
+
+                    {/* Prescrição */}
+                    {selectedConsultation.prescription && isDoctor && (
+                      <div>
+                        <Label className="text-xs font-medium text-gray-500 uppercase">Prescrição</Label>
+                        <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.prescription}</p>
+                      </div>
+                    )}
+
+                    {/* Observações */}
+                    {selectedConsultation.observations && (
+                      <div>
+                        <Label className="text-xs font-medium text-gray-500 uppercase">Observações</Label>
+                        <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.observations}</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
               </div>
             )}
 
-            {/* Prescrição */}
-            {selectedConsultation.prescription && isDoctor && (
-              <div>
-                <Label className="text-sm font-medium text-gray-600">Prescrição</Label>
-                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.prescription}</p>
-              </div>
-            )}
-
-            {/* Observações */}
-            {selectedConsultation.observations && (
-              <div>
-                <Label className="text-sm font-medium text-gray-600">Observações</Label>
-                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selectedConsultation.observations}</p>
-              </div>
-            )}
-
-            {/* Botão para Acessar Prontuário Completo (Só para Médicos) */}
-          {isDoctor && onOpenConsultation && (
+            {/* Botão para Abrir Consulta Completa */}
+            {isDoctor && onOpenConsultationForPatient && patientId && selectedConsultation && (
             <div className="pt-4 border-t">
               <Button
+                  onClick={() => {
+                    setShowConsultationDetails(false);
+                    onOpenConsultationForPatient(patientId, selectedConsultation.id);
+                    if (onSectionChange) {
+                      onSectionChange('pacientes');
+                    }
+                  }}
+                className="w-full bg-medical-primary hover:bg-medical-primary/90"
+              >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Abrir Consulta Completa
+              </Button>
+            </div>
+          )}
+
+            {/* Botão para Acessar Prontuário Completo (Fallback) */}
+            {isDoctor && !onOpenConsultationForPatient && onOpenConsultation && (
+            <div className="pt-4 border-t">
+                <Button
                   onClick={() => {
                     setShowConsultationDetails(false);
                     if (onOpenConsultation) {
                       onOpenConsultation();
                     }
                   }}
-                className="w-full bg-medical-primary hover:bg-medical-primary/90"
-              >
-                <Stethoscope className="h-4 w-4 mr-2" />
+                  className="w-full bg-medical-primary hover:bg-medical-primary/90"
+                >
+                  <Stethoscope className="h-4 w-4 mr-2" />
                   Acessar Prontuário Completo
-              </Button>
+                </Button>
             </div>
           )}
 
@@ -1798,7 +1914,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
               >
                 Fechar
               </Button>
-            </div>
+        </div>
         </div>
         )}
       </DialogContent>

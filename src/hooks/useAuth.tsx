@@ -208,9 +208,7 @@ export function useAuth() {
       const emailMap: Record<string, string> = {
         'matheus': 'matheus@iosantaluzia.com',
         'fabiola': 'fabiola@iosantaluzia.com',
-        'thauanne': 'thauanne@iosantaluzia.com',
-        'beatriz': 'beatriz@iosantaluzia.com',
-        'iosantaluzia': 'iosantaluzia@iosantaluzia.com',
+        'secretaria': 'secretaria@iosantaluzia.com',
         'financeiro': 'financeiro@iosantaluzia.com'
       };
 

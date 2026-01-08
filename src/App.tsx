@@ -1,5 +1,4 @@
 
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,32 +19,12 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Admin from "./pages/Admin";
 import PatientPortal from "./pages/PatientPortal";
 import OftalmologistaSinop from "./pages/OftalmologistaSinop";
-import { offlineStorage } from "@/utils/offlineStorage";
-import { syncService } from "@/utils/syncService";
 
 const queryClient = new QueryClient();
-
-// Componente para inicializar serviços offline
-const OfflineInitializer = () => {
-  useEffect(() => {
-    // Inicializar storage offline
-    offlineStorage.init().catch(console.error);
-    
-    // Verificar conexão e sincronizar se necessário
-    syncService.checkConnection().then(isOnline => {
-      if (isOnline) {
-        syncService.sync();
-      }
-    });
-  }, []);
-  
-  return null;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <OfflineInitializer />
       <Toaster />
       <Sonner />
       <BrowserRouter>

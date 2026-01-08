@@ -8,6 +8,7 @@ import { AppointmentForm } from './AppointmentForm';
 import { PatientDetailsModal } from './PatientDetailsModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AgendamentosSectionProps {
   onSectionChange?: (section: string) => void;
@@ -95,8 +96,34 @@ const getStatusColor = (status: string | null | undefined): string => {
 };
 
 export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation, onOpenConsultationForPatient }: AgendamentosSectionProps) {
+  const { appUser } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'all' | 'matheus' | 'fabiola'>('all');
+  
+  // Médicos veem automaticamente apenas sua própria agenda
+  const getInitialViewMode = (): 'all' | 'matheus' | 'fabiola' => {
+    if (appUser?.role === 'doctor') {
+      const username = appUser.username?.toLowerCase();
+      if (username === 'matheus') return 'matheus';
+      if (username === 'fabiola') return 'fabiola';
+    }
+    return 'all';
+  };
+  
+  const [viewMode, setViewMode] = useState<'all' | 'matheus' | 'fabiola'>(getInitialViewMode());
+  
+  // Atualizar viewMode quando appUser mudar
+  useEffect(() => {
+    if (appUser?.role === 'doctor') {
+      const username = appUser.username?.toLowerCase();
+      if (username === 'matheus') {
+        setViewMode('matheus');
+      } else if (username === 'fabiola') {
+        setViewMode('fabiola');
+      }
+    } else {
+      setViewMode('all');
+    }
+  }, [appUser]);
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [showPatientDetails, setShowPatientDetails] = useState(false);
@@ -237,8 +264,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       console.log('Buscando agendamentos para:', date.toLocaleDateString('pt-BR'));
 
       // Buscar consultas/agendamentos do banco de dados
-      // Adicionar timestamp para evitar cache
-      const { data: consultations, error } = await supabase
+      // Médicos veem apenas suas próprias consultas (RLS já filtra, mas adicionamos filtro adicional no frontend)
+      let query = supabase
         .from('consultations')
         .select(`
           *,
@@ -253,8 +280,19 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           )
         `)
         .gte('consultation_date', startOfDay.toISOString())
-        .lte('consultation_date', endOfDay.toISOString())
-        .order('consultation_date', { ascending: true });
+        .lte('consultation_date', endOfDay.toISOString());
+      
+      // Filtrar por médico se for médico
+      if (appUser?.role === 'doctor') {
+        const username = appUser.username?.toLowerCase();
+        if (username === 'matheus') {
+          query = query.or('doctor_name.ilike.%matheus%');
+        } else if (username === 'fabiola') {
+          query = query.or('doctor_name.ilike.%fabiola%,doctor_name.ilike.%fabíola%');
+        }
+      }
+      
+      const { data: consultations, error } = await query.order('consultation_date', { ascending: true });
 
       console.log('Consultas encontradas:', consultations?.length || 0);
       if (consultations && consultations.length > 0) {
@@ -366,12 +404,24 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       const endOfMonth = new Date(year, month + 1, 0);
       endOfMonth.setHours(23, 59, 59, 999);
 
-      const { data: consultations, error } = await supabase
+      // Buscar agendamentos do mês - médicos veem apenas os seus
+      let query = supabase
         .from('consultations')
         .select('consultation_date, doctor_name')
         .gte('consultation_date', startOfMonth.toISOString())
-        .lte('consultation_date', endOfMonth.toISOString())
-        .order('consultation_date', { ascending: true });
+        .lte('consultation_date', endOfMonth.toISOString());
+      
+      // Filtrar por médico se for médico
+      if (appUser?.role === 'doctor') {
+        const username = appUser.username?.toLowerCase();
+        if (username === 'matheus') {
+          query = query.or('doctor_name.ilike.%matheus%');
+        } else if (username === 'fabiola') {
+          query = query.or('doctor_name.ilike.%fabiola%,doctor_name.ilike.%fabíola%');
+        }
+      }
+      
+      const { data: consultations, error } = await query.order('consultation_date', { ascending: true });
 
       if (error) {
         console.error('Erro ao buscar agendamentos do mês:', error);
@@ -607,27 +657,30 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-cinza-escuro">Agendamentos</h2>
-        <Button
-          onClick={() => {
-            if (viewMode === 'all') {
-              setViewMode('matheus');
-            } else if (viewMode === 'matheus') {
-              setViewMode('fabiola');
-            } else {
-              setViewMode('all');
-            }
-          }}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          {viewMode === 'all' && <Columns className="h-4 w-4" />}
-          {viewMode === 'matheus' && <PanelLeft className="h-4 w-4" />}
-          {viewMode === 'fabiola' && <PanelLeft className="h-4 w-4" />}
-          {viewMode === 'all' && 'Todas as Agendas'}
-          {viewMode === 'matheus' && 'Agenda Matheus'}
-          {viewMode === 'fabiola' && 'Agenda Fabiola'}
-        </Button>
+        {/* Médicos não podem alternar entre agendas - veem apenas a sua */}
+        {appUser?.role !== 'doctor' && (
+          <Button
+            onClick={() => {
+              if (viewMode === 'all') {
+                setViewMode('matheus');
+              } else if (viewMode === 'matheus') {
+                setViewMode('fabiola');
+              } else {
+                setViewMode('all');
+              }
+            }}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            {viewMode === 'all' && <Columns className="h-4 w-4" />}
+            {viewMode === 'matheus' && <PanelLeft className="h-4 w-4" />}
+            {viewMode === 'fabiola' && <PanelLeft className="h-4 w-4" />}
+            {viewMode === 'all' && 'Todas as Agendas'}
+            {viewMode === 'matheus' && 'Agenda Matheus'}
+            {viewMode === 'fabiola' && 'Agenda Fabiola'}
+          </Button>
+        )}
       </div>
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px] flex flex-col lg:flex-row gap-6">
         {/* Coluna do Calendário */}

@@ -4,6 +4,7 @@ import React, { lazy, Suspense } from 'react';
 const AgendamentosSectionLazy = lazy(() => import('./AgendamentosSection').then(module => ({ default: module.AgendamentosSection })));
 const PacientesSectionLazy = lazy(() => import('./PacientesSection').then(module => ({ default: module.PacientesSection })));
 const ExamesSectionLazy = lazy(() => import('./ExamesSection').then(module => ({ default: module.ExamesSection })));
+const DocumentsSectionLazy = lazy(() => import('./DocumentsSection').then(module => ({ default: module.DocumentsSection })));
 const EstoqueSectionLazy = lazy(() => import('./EstoqueSection').then(module => ({ default: module.EstoqueSection })));
 const FinanceiroSectionLazy = lazy(() => import('./FinanceiroSection').then(module => ({ default: module.FinanceiroSection })));
 const DashboardOverviewLazy = lazy(() => import('./DashboardOverview').then(module => ({ default: module.DashboardOverview })));
@@ -69,6 +70,12 @@ export const LazyComponents = {
   ExamesSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <ExamesSectionLazy />
+    </Suspense>
+  ),
+  
+  DocumentsSection: () => (
+    <Suspense fallback={<LoadingSpinner />}>
+      <DocumentsSectionLazy />
     </Suspense>
   ),
   

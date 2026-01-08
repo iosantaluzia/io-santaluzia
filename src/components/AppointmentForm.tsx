@@ -41,6 +41,7 @@ interface AppointmentFormProps {
 export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientData, initialAppointmentType }: AppointmentFormProps) {
   const { appUser } = useAuth();
   const [appointmentDate, setAppointmentDate] = useState<Date>(selectedDate);
+  const [paymentMethodPopoverOpen, setPaymentMethodPopoverOpen] = useState(false);
   
   // Atualizar data quando selectedDate mudar ou modal abrir
   useEffect(() => {
@@ -443,15 +444,11 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                         className="h-8 text-xs pl-7 pr-24"
                         inputMode="numeric"
                       />
-                      <Popover>
+                      <Popover open={paymentMethodPopoverOpen} onOpenChange={setPaymentMethodPopoverOpen}>
                         <PopoverTrigger asChild>
                           <button
                             type="button"
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 z-10"
                           >
                             <span className="text-xs truncate max-w-[120px]">
                               {formData.payment_method || 'Meio de Pagamento'}
@@ -459,12 +456,13 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                             <ChevronDown className="h-3 w-3 flex-shrink-0" />
                           </button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-48 p-1" align="end" onClick={(e) => e.stopPropagation()}>
+                        <PopoverContent className="w-48 p-1 z-50" align="end">
                           <div className="flex flex-col">
                             <button
                               type="button"
                               onClick={() => {
                                 handleInputChange('payment_method', 'Dinheiro');
+                                setPaymentMethodPopoverOpen(false);
                               }}
                               className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
                             >
@@ -474,6 +472,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                               type="button"
                               onClick={() => {
                                 handleInputChange('payment_method', 'Pix');
+                                setPaymentMethodPopoverOpen(false);
                               }}
                               className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
                             >
@@ -483,6 +482,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                               type="button"
                               onClick={() => {
                                 handleInputChange('payment_method', 'Cartão de Crédito');
+                                setPaymentMethodPopoverOpen(false);
                               }}
                               className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
                             >
@@ -492,6 +492,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                               type="button"
                               onClick={() => {
                                 handleInputChange('payment_method', 'Cheque');
+                                setPaymentMethodPopoverOpen(false);
                               }}
                               className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
                             >
@@ -501,6 +502,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                               type="button"
                               onClick={() => {
                                 handleInputChange('payment_method', 'Débito');
+                                setPaymentMethodPopoverOpen(false);
                               }}
                               className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
                             >

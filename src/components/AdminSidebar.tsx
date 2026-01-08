@@ -9,7 +9,8 @@ import {
   HandCoins,
   Stethoscope,
   Mail,
-  Menu
+  Menu,
+  FileCheck
 } from 'lucide-react';
 import {
   Sidebar,
@@ -30,6 +31,7 @@ const allSidebarItems = [
   { title: "Agendamentos", url: "#agendamentos", icon: Calendar, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Pacientes", url: "#pacientes", icon: Users, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Exames", url: "#exames", icon: FileText, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Documentos", url: "#documentos", icon: FileCheck, roles: ['admin', 'doctor'] }, // Apenas médicos e admins
   { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Email", url: "#email", icon: Mail, roles: ['admin'], allowedUsers: ['financeiro'] }, // Só para financeiro

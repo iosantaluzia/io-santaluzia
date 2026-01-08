@@ -50,13 +50,24 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Login</CardTitle>
-        <CardDescription>
-          Entre com suas credenciais para acessar o sistema
-        </CardDescription>
-      </CardHeader>
+    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+      {/* Logo acima do modal */}
+      <div className="mb-8">
+        <img 
+          src="/uploads/logoiosantaluzia-removebg-preview.png" 
+          alt="Instituto de Olhos Santa Luzia" 
+          className="h-20 w-auto md:h-28 md:w-auto object-contain"
+        />
+      </div>
+      
+      {/* Modal de Login centralizado */}
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardDescription>
+            Entre com suas credenciais para acessar o sistema
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -72,9 +83,6 @@ export function LoginForm() {
               disabled={isLoading}
               autoComplete="username"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Usuários disponíveis: matheus, fabiola, thauanne, beatriz, iosantaluzia, financeiro
-            </p>
           </div>
           
           <div>
@@ -102,5 +110,6 @@ export function LoginForm() {
         </form>
       </CardContent>
     </Card>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import { PatientMedicalHistory } from './PatientMedicalHistory';
 import { PatientConsultations } from './PatientConsultations';
 import { PatientExams } from './PatientExams';
 import { NewConsultationForm } from './NewConsultationForm';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Patient {
   id: string;
@@ -28,8 +29,19 @@ interface PatientDetailsProps {
 }
 
 export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
-  const [activeTab, setActiveTab] = useState('prontuario');
+  const { appUser } = useAuth();
+  // Secretários e financeiro não podem ver prontuários médicos
+  const canViewMedicalRecords = appUser?.role === 'admin' || appUser?.role === 'doctor';
+  const [activeTab, setActiveTab] = useState(canViewMedicalRecords ? 'prontuario' : 'cadastro');
   const [showNewConsultation, setShowNewConsultation] = useState(false);
+  const [selectedConsultationId, setSelectedConsultationId] = useState<string | null>(null);
+
+  // Garantir que a aba de Prontuário seja aberta quando o componente for montado e o usuário for médico/admin
+  useEffect(() => {
+    if (canViewMedicalRecords && activeTab !== 'prontuario') {
+      setActiveTab('prontuario');
+    }
+  }, [canViewMedicalRecords, activeTab]);
 
   const calculateAge = (birthDate: string) => {
     const today = new Date();
@@ -51,8 +63,12 @@ export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
     return (
       <NewConsultationForm
         patient={patient}
-        onBack={() => setShowNewConsultation(false)}
+        onBack={() => {
+          setShowNewConsultation(false);
+          setSelectedConsultationId(null);
+        }}
         onSaved={handleNewConsultationSaved}
+        existingConsultation={selectedConsultationId ? { id: selectedConsultationId } : null}
       />
     );
   }
@@ -67,17 +83,23 @@ export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
             Voltar
           </Button>
           <div>
-            <h2 className="text-2xl font-bold text-cinza-escuro">Prontuário do Paciente</h2>
-            <p className="text-gray-600">Histórico médico e consultas</p>
+            <h2 className="text-2xl font-bold text-cinza-escuro">
+              {canViewMedicalRecords ? 'Prontuário do Paciente' : 'Cadastro do Paciente'}
+            </h2>
+            <p className="text-gray-600">
+              {canViewMedicalRecords ? 'Histórico médico e consultas' : 'Informações de cadastro'}
+            </p>
           </div>
         </div>
-        <Button 
-          onClick={() => setShowNewConsultation(true)}
-          className="bg-bege-principal hover:bg-bege-principal/90 text-white flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Consulta
-        </Button>
+        {canViewMedicalRecords && (
+          <Button
+            onClick={() => setShowNewConsultation(true)}
+            className="bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Nova Consulta
+          </Button>
+        )}
       </div>
 
       {/* Informações do Paciente */}
@@ -129,52 +151,67 @@ export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
         </div>
       </div>
 
-      {/* Abas de navegação */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab('prontuario')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'prontuario'
-                  ? 'border-bege-principal text-bege-principal'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Prontuário
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('exames')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'exames'
-                  ? 'border-bege-principal text-bege-principal'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <TestTube className="h-4 w-4" />
-                Exames
-              </div>
-            </button>
-          </nav>
-        </div>
+      {/* Abas de navegação - apenas para médicos e admins */}
+      {canViewMedicalRecords ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('prontuario')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'prontuario'
+                    ? 'border-marrom-acentuado text-marrom-acentuado'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Prontuário
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('exames')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'exames'
+                    ? 'border-marrom-acentuado text-marrom-acentuado'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <TestTube className="h-4 w-4" />
+                  Exames
+                </div>
+              </button>
+            </nav>
+          </div>
 
-        {/* Conteúdo das abas */}
-        <div className="p-6">
-          {activeTab === 'prontuario' && (
-            <div className="space-y-6 w-full overflow-x-hidden">
-              <PatientMedicalHistory patient={patient} />
-              <PatientConsultations patientId={patient.id} />
-            </div>
-          )}
-          {activeTab === 'exames' && (
-            <PatientExams patientId={patient.id} />
-          )}
+          {/* Conteúdo das abas */}
+          <div className="p-6">
+            {activeTab === 'prontuario' && (
+              <div className="space-y-6 w-full overflow-x-hidden">
+                <PatientMedicalHistory patient={patient} />
+                <PatientConsultations 
+                  patientId={patient.id}
+                  onOpenConsultation={(consultationId) => {
+                    setSelectedConsultationId(consultationId);
+                    setShowNewConsultation(true);
+                  }}
+                />
+              </div>
+            )}
+            {activeTab === 'exames' && (
+              <PatientExams patientId={patient.id} />
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Secretários e financeiro veem apenas dados de cadastro */
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <p className="text-gray-600 text-sm">
+            Você tem acesso apenas aos dados de cadastro do paciente. Prontuários médicos são restritos a médicos e administradores.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

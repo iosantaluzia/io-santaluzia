@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           amount: number | null
           anamnesis: string | null
+          appointment_type: string | null
           biomicroscopy: string | null
           consultation_date: string
           created_at: string
@@ -66,6 +67,7 @@ export type Database = {
           ocular_pressure_od: string | null
           ocular_pressure_oe: string | null
           patient_id: string
+          payment_method: string | null
           payment_received: boolean | null
           physical_exam: string | null
           prescription: string | null
@@ -79,6 +81,7 @@ export type Database = {
         Insert: {
           amount?: number | null
           anamnesis?: string | null
+          appointment_type?: string | null
           biomicroscopy?: string | null
           consultation_date?: string
           created_at?: string
@@ -91,6 +94,7 @@ export type Database = {
           ocular_pressure_od?: string | null
           ocular_pressure_oe?: string | null
           patient_id: string
+          payment_method?: string | null
           payment_received?: boolean | null
           physical_exam?: string | null
           prescription?: string | null
@@ -104,6 +108,7 @@ export type Database = {
         Update: {
           amount?: number | null
           anamnesis?: string | null
+          appointment_type?: string | null
           biomicroscopy?: string | null
           consultation_date?: string
           created_at?: string
@@ -116,6 +121,7 @@ export type Database = {
           ocular_pressure_od?: string | null
           ocular_pressure_oe?: string | null
           patient_id?: string
+          payment_method?: string | null
           payment_received?: boolean | null
           physical_exam?: string | null
           prescription?: string | null
@@ -135,6 +141,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      document_templates: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       exam_files: {
         Row: {
@@ -589,6 +631,14 @@ export type Database = {
           p_status?: string
         }
         Returns: string
+      }
+      update_user_email: {
+        Args: { new_email: string; user_id: string }
+        Returns: boolean
+      }
+      update_user_password: {
+        Args: { new_password: string; user_id: string }
+        Returns: boolean
       }
       validate_cpf: { Args: { cpf: string }; Returns: boolean }
     }

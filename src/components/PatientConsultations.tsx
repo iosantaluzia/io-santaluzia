@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, User, FileText, Eye, AlertCircle, X, Edit, Save, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, FileText, Eye, AlertCircle, X, Edit, Save, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -34,9 +34,10 @@ interface Consultation {
 interface PatientConsultationsProps {
   patientId: string;
   onConsultationClick?: (consultation: Consultation) => void;
+  onOpenConsultation?: (consultationId: string) => void;
 }
 
-export function PatientConsultations({ patientId, onConsultationClick }: PatientConsultationsProps) {
+export function PatientConsultations({ patientId, onConsultationClick, onOpenConsultation }: PatientConsultationsProps) {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -371,20 +372,55 @@ export function PatientConsultations({ patientId, onConsultationClick }: Patient
                   </div>
                 </div>
                 
-                {consultation.anamnesis && (
-                  <p className="text-xs text-gray-600 line-clamp-4 mb-3">
-                    {consultation.anamnesis}
-                  </p>
-                )}
-                
-                {consultation.diagnosis && (
-                  <p className="text-xs text-gray-600 mb-3">
-                    <span className="font-medium">Diagnóstico:</span> {consultation.diagnosis}
-                  </p>
-                )}
+                {/* Verificar se é consulta futura sem anamnese */}
+                {(() => {
+                  const consultationDate = new Date(consultation.consultation_date);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  consultationDate.setHours(0, 0, 0, 0);
+                  const isFutureConsultation = consultationDate > today;
+                  const hasAnamnesis = consultation.anamnesis && consultation.anamnesis.trim() !== '';
+                  
+                  // Se for consulta futura e não tiver anamnese, mostrar "Retorno Aguardado"
+                  if (isFutureConsultation && !hasAnamnesis) {
+                    return (
+                      <p className="text-xs text-gray-500 italic mb-3">
+                        Retorno Aguardado
+                      </p>
+                    );
+                  }
+                  
+                  // Se tiver anamnese, mostrar normalmente
+                  if (hasAnamnesis) {
+                    return (
+                      <p className="text-xs text-gray-600 line-clamp-4 mb-3">
+                        {consultation.anamnesis}
+                      </p>
+                    );
+                  }
+                  
+                  // Se não for futura e não tiver anamnese, mostrar diagnóstico se existir
+                  if (consultation.diagnosis) {
+                    return (
+                      <p className="text-xs text-gray-600 mb-3">
+                        <span className="font-medium">Diagnóstico:</span> {consultation.diagnosis}
+                      </p>
+                    );
+                  }
+                  
+                  return null;
+                })()}
                 
                 <div className="flex items-center justify-end mt-auto">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleConsultationClick(consultation);
+                    }}
+                  >
                     <Eye className="h-3 w-3 mr-1" />
                     Ver
                   </Button>
@@ -409,8 +445,51 @@ export function PatientConsultations({ patientId, onConsultationClick }: Patient
       
       {/* Modal de Detalhes da Consulta */}
       <Dialog open={!!selectedConsultation} onOpenChange={(open) => !open && setSelectedConsultation(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0 relative">
+            {/* Botões de Navegação entre Consultas */}
+            {selectedConsultation && consultations.length > 1 && (() => {
+              const currentIndex = consultations.findIndex(c => c.id === selectedConsultation.id);
+              const hasPrevious = currentIndex > 0;
+              const hasNext = currentIndex < consultations.length - 1;
+              const previousConsultation = hasPrevious ? consultations[currentIndex - 1] : null;
+              const nextConsultation = hasNext ? consultations[currentIndex + 1] : null;
+
+              return (
+                <>
+                  {hasPrevious && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute -left-14 top-1/2 -translate-y-1/2 z-50 h-10 w-10 bg-white shadow-lg hover:bg-gray-50"
+                      onClick={() => {
+                        if (previousConsultation) {
+                          setSelectedConsultation(previousConsultation);
+                          setIsEditing(false);
+                        }
+                      }}
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                  )}
+                  {hasNext && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute -right-14 top-1/2 -translate-y-1/2 z-50 h-10 w-10 bg-white shadow-lg hover:bg-gray-50"
+                      onClick={() => {
+                        if (nextConsultation) {
+                          setSelectedConsultation(nextConsultation);
+                          setIsEditing(false);
+                        }
+                      }}
+                    >
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  )}
+                </>
+              );
+            })()}
             <div className="flex items-center justify-between">
               <div>
                 <DialogTitle className="text-xl font-semibold text-cinza-escuro">
@@ -438,6 +517,20 @@ export function PatientConsultations({ patientId, onConsultationClick }: Patient
                     </Button>
                   </>
                 )}
+                {isDoctor && onOpenConsultation && selectedConsultation && !isEditing && (
+                  <Button 
+                    size="sm"
+                    className="bg-medical-primary hover:bg-medical-primary/90 text-white"
+                    onClick={() => {
+                      setSelectedConsultation(null);
+                      setIsEditing(false);
+                      onOpenConsultation(selectedConsultation.id);
+                    }}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Abrir Consulta
+                  </Button>
+                )}
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedConsultation(null); setIsEditing(false); }}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -445,220 +538,167 @@ export function PatientConsultations({ patientId, onConsultationClick }: Patient
             </div>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 pr-4">
-            <div className="space-y-6">
-              {/* Informações Gerais */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-gray-700 mb-3">Informações Gerais</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs text-gray-600">Médico Responsável</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editingData.doctor_name || ''}
-                        onChange={(e) => setEditingData({ ...editingData, doctor_name: e.target.value })}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="text-sm font-medium mt-1">{selectedConsultation?.doctor_name}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-600">Data e Hora</Label>
-                    {isEditing ? (
-                      <Input
-                        type="datetime-local"
-                        value={editingData.consultation_date ? new Date(editingData.consultation_date).toISOString().slice(0, 16) : ''}
-                        onChange={(e) => setEditingData({ ...editingData, consultation_date: e.target.value })}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="text-sm mt-1">{new Date(selectedConsultation?.consultation_date || '').toLocaleString('pt-BR')}</p>
-                    )}
-                  </div>
-                  {selectedConsultation?.amount && (
+          <ScrollArea className="flex-1 px-6 py-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Coluna Esquerda - Campos maiores */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Informações Gerais */}
+                {selectedConsultation?.amount != null && selectedConsultation.amount > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-700 mb-3">Informações Gerais</h4>
                     <div>
                       <Label className="text-xs text-gray-600">Valor Pago</Label>
                       <p className="text-sm font-semibold text-green-600 mt-1">
                         R$ {selectedConsultation.amount.toFixed(2).replace('.', ',')}
                       </p>
                     </div>
+                  </div>
+                )}
+
+                {/* Anamnese */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">Anamnese</Label>
+                  {isEditing ? (
+                    <Textarea
+                      value={editingData.anamnesis || ''}
+                      onChange={(e) => setEditingData({ ...editingData, anamnesis: e.target.value })}
+                      placeholder="Histórico da queixa principal, sintomas relatados pelo paciente..."
+                      rows={5}
+                      className="bg-white"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[80px] max-h-[120px] overflow-y-auto whitespace-pre-wrap">
+                      {selectedConsultation?.anamnesis || 'Não informado'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Biomicroscopia */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">Biomicroscopia</Label>
+                  {isEditing ? (
+                    <Textarea
+                      value={editingData.biomicroscopy || ''}
+                      onChange={(e) => setEditingData({ ...editingData, biomicroscopy: e.target.value })}
+                      placeholder="Achados da biomicroscopia (lâmpada de fenda)..."
+                      rows={4}
+                      className="bg-white"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[60px] max-h-[100px] overflow-y-auto whitespace-pre-wrap">
+                      {selectedConsultation?.biomicroscopy || 'Não informado'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Fundo de Olho */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">Fundo de Olho</Label>
+                  {isEditing ? (
+                    <Textarea
+                      value={editingData.fundus_exam || ''}
+                      onChange={(e) => setEditingData({ ...editingData, fundus_exam: e.target.value })}
+                      placeholder="Achados do exame de fundo de olho..."
+                      rows={4}
+                      className="bg-white"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[60px] max-h-[100px] overflow-y-auto whitespace-pre-wrap">
+                      {selectedConsultation?.fundus_exam || 'Não informado'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Prescrição */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">Prescrição e Conduta</Label>
+                  {isEditing ? (
+                    <Textarea
+                      value={editingData.prescription || ''}
+                      onChange={(e) => setEditingData({ ...editingData, prescription: e.target.value })}
+                      placeholder="Prescrição médica..."
+                      rows={4}
+                      className="bg-white"
+                    />
+                  ) : (
+                    <div className="bg-green-50 p-3 rounded border border-green-200 text-sm text-gray-700 min-h-[60px] max-h-[100px] overflow-y-auto whitespace-pre-wrap">
+                      {selectedConsultation?.prescription || 'Não informado'}
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Anamnese */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-2 block">Anamnese</Label>
-                {isEditing ? (
-                  <Textarea
-                    value={editingData.anamnesis || ''}
-                    onChange={(e) => setEditingData({ ...editingData, anamnesis: e.target.value })}
-                    placeholder="Histórico da queixa principal, sintomas relatados pelo paciente..."
-                    rows={4}
-                    className="bg-white"
-                  />
-                ) : (
-                  <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[80px]">
-                    {selectedConsultation?.anamnesis || 'Não informado'}
-                  </div>
-                )}
-              </div>
-
-              {/* Acuidade Visual */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-3 block">Acuidade Visual</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs text-gray-600">Olho Direito (OD)</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editingData.visual_acuity_od || ''}
-                        onChange={(e) => setEditingData({ ...editingData, visual_acuity_od: e.target.value })}
-                        placeholder="Ex: 20/20, 20/40"
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="text-sm mt-1">{selectedConsultation?.visual_acuity_od || 'Não informado'}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-600">Olho Esquerdo (OE)</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editingData.visual_acuity_oe || ''}
-                        onChange={(e) => setEditingData({ ...editingData, visual_acuity_oe: e.target.value })}
-                        placeholder="Ex: 20/20, 20/40"
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="text-sm mt-1">{selectedConsultation?.visual_acuity_oe || 'Não informado'}</p>
-                    )}
+              {/* Coluna Direita - Seções menores */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Acuidade Visual */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <Label className="text-sm font-semibold text-gray-700 mb-3 block">Acuidade Visual</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-gray-600">OD</Label>
+                      {isEditing ? (
+                        <Input
+                          value={editingData.visual_acuity_od || ''}
+                          onChange={(e) => setEditingData({ ...editingData, visual_acuity_od: e.target.value })}
+                          placeholder="Ex: 20/20"
+                          className="mt-1 bg-white"
+                        />
+                      ) : (
+                        <p className="text-sm mt-1 font-medium">{selectedConsultation?.visual_acuity_od || 'Não informado'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">OE</Label>
+                      {isEditing ? (
+                        <Input
+                          value={editingData.visual_acuity_oe || ''}
+                          onChange={(e) => setEditingData({ ...editingData, visual_acuity_oe: e.target.value })}
+                          placeholder="Ex: 20/20"
+                          className="mt-1 bg-white"
+                        />
+                      ) : (
+                        <p className="text-sm mt-1 font-medium">{selectedConsultation?.visual_acuity_oe || 'Não informado'}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Pressão Intraocular (Tonometria) */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-3 block">Pressão Intraocular (Tonometria)</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs text-gray-600">Olho Direito (OD) - mmHg</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editingData.ocular_pressure_od || ''}
-                        onChange={(e) => setEditingData({ ...editingData, ocular_pressure_od: e.target.value })}
-                        placeholder="Ex: 14, 16"
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="text-sm mt-1">{selectedConsultation?.ocular_pressure_od ? `${selectedConsultation.ocular_pressure_od} mmHg` : 'Não informado'}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-600">Olho Esquerdo (OE) - mmHg</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editingData.ocular_pressure_oe || ''}
-                        onChange={(e) => setEditingData({ ...editingData, ocular_pressure_oe: e.target.value })}
-                        placeholder="Ex: 14, 16"
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="text-sm mt-1">{selectedConsultation?.ocular_pressure_oe ? `${selectedConsultation.ocular_pressure_oe} mmHg` : 'Não informado'}</p>
-                    )}
+                {/* Pressão Intraocular (Tonometria) */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <Label className="text-sm font-semibold text-gray-700 mb-3 block">Tonometria</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-gray-600">OD</Label>
+                      {isEditing ? (
+                        <Input
+                          value={editingData.ocular_pressure_od || ''}
+                          onChange={(e) => setEditingData({ ...editingData, ocular_pressure_od: e.target.value })}
+                          placeholder="Ex: 14"
+                          className="mt-1 bg-white"
+                        />
+                      ) : (
+                        <p className="text-sm mt-1 font-medium">
+                          {selectedConsultation?.ocular_pressure_od ? `${selectedConsultation.ocular_pressure_od} mmHg` : 'Não informado'}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">OE</Label>
+                      {isEditing ? (
+                        <Input
+                          value={editingData.ocular_pressure_oe || ''}
+                          onChange={(e) => setEditingData({ ...editingData, ocular_pressure_oe: e.target.value })}
+                          placeholder="Ex: 14"
+                          className="mt-1 bg-white"
+                        />
+                      ) : (
+                        <p className="text-sm mt-1 font-medium">
+                          {selectedConsultation?.ocular_pressure_oe ? `${selectedConsultation.ocular_pressure_oe} mmHg` : 'Não informado'}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Biomicroscopia */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-2 block">Biomicroscopia</Label>
-                {isEditing ? (
-                  <Textarea
-                    value={editingData.biomicroscopy || ''}
-                    onChange={(e) => setEditingData({ ...editingData, biomicroscopy: e.target.value })}
-                    placeholder="Achados da biomicroscopia (lâmpada de fenda)..."
-                    rows={4}
-                    className="bg-white"
-                  />
-                ) : (
-                  <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[80px]">
-                    {selectedConsultation?.biomicroscopy || 'Não informado'}
-                  </div>
-                )}
-              </div>
-
-              {/* Fundo de Olho */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-2 block">Fundo de Olho</Label>
-                {isEditing ? (
-                  <Textarea
-                    value={editingData.fundus_exam || ''}
-                    onChange={(e) => setEditingData({ ...editingData, fundus_exam: e.target.value })}
-                    placeholder="Achados do exame de fundo de olho..."
-                    rows={4}
-                    className="bg-white"
-                  />
-                ) : (
-                  <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[80px]">
-                    {selectedConsultation?.fundus_exam || 'Não informado'}
-                  </div>
-                )}
-              </div>
-
-              {/* Diagnóstico */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-2 block">Diagnóstico</Label>
-                {isEditing ? (
-                  <Textarea
-                    value={editingData.diagnosis || ''}
-                    onChange={(e) => setEditingData({ ...editingData, diagnosis: e.target.value })}
-                    placeholder="Diagnóstico da consulta..."
-                    rows={3}
-                    className="bg-white"
-                  />
-                ) : (
-                  <div className="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700 min-h-[60px]">
-                    {selectedConsultation?.diagnosis || 'Não informado'}
-                  </div>
-                )}
-              </div>
-
-              {/* Prescrição */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-2 block">Prescrição</Label>
-                {isEditing ? (
-                  <Textarea
-                    value={editingData.prescription || ''}
-                    onChange={(e) => setEditingData({ ...editingData, prescription: e.target.value })}
-                    placeholder="Prescrição médica..."
-                    rows={4}
-                    className="bg-white"
-                  />
-                ) : (
-                  <div className="bg-green-50 p-3 rounded border border-green-200 text-sm text-gray-700 min-h-[80px]">
-                    {selectedConsultation?.prescription || 'Não informado'}
-                  </div>
-                )}
-              </div>
-
-              {/* Observações */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-700 mb-2 block">Observações</Label>
-                {isEditing ? (
-                  <Textarea
-                    value={editingData.observations || ''}
-                    onChange={(e) => setEditingData({ ...editingData, observations: e.target.value })}
-                    placeholder="Observações adicionais..."
-                    rows={3}
-                    className="bg-white"
-                  />
-                ) : (
-                  <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 min-h-[60px]">
-                    {selectedConsultation?.observations || 'Não informado'}
-                  </div>
-                )}
               </div>
             </div>
           </ScrollArea>
