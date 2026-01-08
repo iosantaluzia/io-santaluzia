@@ -1019,7 +1019,9 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
             Detalhes do Paciente
           </DialogTitle>
           <DialogDescription className="text-center">
-            Informações do agendamento
+            {patient.consultationId || patient.time || patient.appointmentDate 
+              ? 'Informações do agendamento' 
+              : 'Informações do paciente'}
           </DialogDescription>
         </DialogHeader>
 
@@ -1318,7 +1320,8 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
             </div>
           </div>
 
-          {/* Informações do Agendamento */}
+          {/* Informações do Agendamento - Só mostrar se houver dados de agendamento */}
+          {(patient.consultationId || patient.time || patient.appointmentDate) && (
           <div className="bg-gray-50 p-4 rounded-lg relative">
             <div className="absolute top-3 right-3 flex gap-2">
               {patient.consultationId && (
@@ -1360,7 +1363,9 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
               <Calendar className="h-4 w-4 text-gray-600" />
               <span className="font-semibold text-gray-700">Agendamento:</span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">Horário: {patient.time}</p>
+            {patient.time && (
+              <p className="text-sm text-gray-600 ml-6">Horário: {patient.time}</p>
+            )}
             {patient.appointmentDate && (
               <p className="text-sm text-gray-600 ml-6">
                 Data: {new Date(patient.appointmentDate).toLocaleDateString('pt-BR')}
@@ -1381,6 +1386,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
               </span>
             </div>
           </div>
+          )}
 
         </div>
       </DialogContent>

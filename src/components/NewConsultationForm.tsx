@@ -149,11 +149,13 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
 
       // Se encontrou uma consulta existente, atualizar ao invés de criar nova
       if (consultationId) {
+        // Ao atualizar uma consulta existente, NÃO alterar o consultation_date
+        // para preservar o horário de agendamento original
         const { error } = await supabase
           .from('consultations')
           .update({
             doctor_name: doctorName,
-            consultation_date: consultationDate,
+            // consultation_date NÃO é incluído aqui para preservar o horário original
             anamnesis: consultationText || null,
             status: 'completed',
             saved_at: savedAt,

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, HardDrive, Plus, Eye, Camera, FileText, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { logger } from '@/utils/logger';
 import { toast } from 'sonner';
 import { PatientDetails } from './PatientDetails';
 import { NewConsultationForm } from './NewConsultationForm';
+import { PatientDetailsModal } from './PatientDetailsModal';
 
 interface PacientesSectionProps {
   patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
@@ -27,9 +28,16 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
   const [showNewPatientForm, setShowNewPatientForm] = useState(false);
   const [showNewConsultation, setShowNewConsultation] = useState(false);
   const [existingConsultation, setExistingConsultation] = useState<any>(null);
+  const [showPatientDetailsModal, setShowPatientDetailsModal] = useState(false);
+  const [selectedPatientForModal, setSelectedPatientForModal] = useState<any>(null);
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const ITEMS_PER_PAGE = 20;
   const [formData, setFormData] = useState({
     name: '',
     cpf: '',
@@ -46,9 +54,17 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
 
   useEffect(() => {
     if (patientSubSection === 'prontuarios') {
-      fetchPatients();
+      fetchPatients(0, true);
     }
   }, [patientSubSection]);
+
+  // Quando o termo de busca mudar, carregar todos os pacientes se necessário
+  useEffect(() => {
+    if (searchTerm && patients.length < ITEMS_PER_PAGE) {
+      // Se há busca mas poucos pacientes carregados, carregar mais para ter dados suficientes para filtrar
+      // Mas não vamos carregar tudo de uma vez, apenas garantir que temos dados suficientes
+    }
+  }, [searchTerm, patients.length]);
 
   // Efeito para abrir automaticamente a consulta quando patientToOpenConsultation for fornecido
   useEffect(() => {
@@ -120,13 +136,24 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
     openConsultation();
   }, [patientToOpenConsultation, patients, onConsultationOpened]);
 
-  const fetchPatients = async () => {
+  const fetchPatients = async (pageNum: number = 0, reset: boolean = false) => {
     try {
-      setLoading(true);
-      const { data, error } = await (supabase as any)
+      if (reset) {
+        setLoading(true);
+        setPage(0);
+        setHasMore(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      const from = pageNum * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
+      const { data, error, count } = await (supabase as any)
         .from('patients')
-        .select('*')
-        .order('name');
+        .select('*', { count: 'exact' })
+        .order('name')
+        .range(from, to);
 
       if (error) {
         console.error('Erro ao buscar pacientes:', error);
@@ -134,14 +161,57 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
         return;
       }
 
-      setPatients(data || []);
+      if (reset) {
+        setPatients(data || []);
+      } else {
+        setPatients(prev => [...prev, ...(data || [])]);
+      }
+
+      // Verificar se há mais itens para carregar
+      setHasMore((data?.length || 0) === ITEMS_PER_PAGE);
     } catch (error) {
       console.error('Erro ao carregar pacientes:', error);
       toast.error('Erro ao carregar pacientes');
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
+
+  // Carregar mais pacientes quando chegar ao final
+  const loadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore && !searchTerm) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchPatients(nextPage, false);
+    }
+  }, [page, hasMore, isLoadingMore, searchTerm]);
+
+  // Observer para scroll infinito
+  useEffect(() => {
+    // Não usar scroll infinito quando há busca ativa
+    if (searchTerm) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, isLoadingMore, searchTerm, loadMore]);
 
   const formatCPF = (cpf: string) => {
     const numbers = cpf.replace(/\D/g, '');
@@ -241,18 +311,22 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
       });
       
       setShowNewPatientForm(false);
-      fetchPatients();
+      fetchPatients(0, true);
     } catch (error) {
       logger.error('Erro ao salvar paciente:', error);
       toast.error('Erro ao salvar paciente. Tente novamente.');
     }
   };
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.cpf.includes(searchTerm) ||
-    patient.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPatients = searchTerm
+    ? patients.filter(patient => {
+        const searchLower = searchTerm.toLowerCase();
+        const nameMatch = patient.name?.toLowerCase().includes(searchLower);
+        const cpfMatch = patient.cpf?.includes(searchTerm.replace(/\D/g, ''));
+        const phoneMatch = patient.phone?.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''));
+        return nameMatch || cpfMatch || phoneMatch;
+      })
+    : patients;
 
   const patientsData = [
     { 
@@ -325,7 +399,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       type="text"
-                      placeholder="Buscar paciente por nome, CPF ou ID..."
+                      placeholder="Buscar paciente por nome, CPF ou telefone..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
@@ -351,7 +425,6 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                         <table className="min-w-full bg-white rounded-md shadow-sm">
                           <thead>
                             <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-                              <th className="py-3 px-6 text-left">ID</th>
                               <th className="py-3 px-6 text-left">Nome</th>
                               <th className="py-3 px-6 text-left">CPF</th>
                               <th className="py-3 px-6 text-left">Nascimento</th>
@@ -361,8 +434,18 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                           </thead>
                           <tbody className="text-gray-600 text-sm font-light">
                             {filteredPatients.map(patient => (
-                              <tr key={patient.id} className="border-b border-gray-200 hover:bg-gray-100">
-                                <td className="py-3 px-6 text-left whitespace-nowrap">{patient.id.slice(0, 8)}...</td>
+                              <tr 
+                                key={patient.id} 
+                                className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                                onClick={(e) => {
+                                  // Não abrir modal se clicar nos botões
+                                  if ((e.target as HTMLElement).closest('button')) {
+                                    return;
+                                  }
+                                  setSelectedPatientForModal(patient);
+                                  setShowPatientDetailsModal(true);
+                                }}
+                              >
                                 <td className="py-3 px-6 text-left font-medium">{patient.name}</td>
                                 <td className="py-3 px-6 text-left">{patient.cpf}</td>
                                 <td className="py-3 px-6 text-left">
@@ -379,19 +462,48 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                                   })()}
                                 </td>
                                 <td className="py-3 px-6 text-left">{patient.phone || '-'}</td>
-                                <td className="py-3 px-6 text-center">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => setSelectedPatient(patient)}
-                                  >
-                                    Ver Prontuário
-                                  </Button>
+                                <td className="py-3 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                                  <div className="flex items-center justify-center gap-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedPatientForModal(patient);
+                                        setShowPatientDetailsModal(true);
+                                      }}
+                                    >
+                                      Ver Detalhes
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => setSelectedPatient(patient)}
+                                    >
+                                      Ver Prontuário
+                                    </Button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
+                        {/* Elemento de observação para scroll infinito */}
+                        {!searchTerm && (
+                          <>
+                            <div ref={observerTarget} className="h-4" />
+                            {isLoadingMore && (
+                              <div className="flex justify-center items-center py-4">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-bege-principal"></div>
+                                <span className="ml-2 text-sm text-gray-600">Carregando mais pacientes...</span>
+                              </div>
+                            )}
+                            {!hasMore && patients.length > ITEMS_PER_PAGE && (
+                              <div className="text-center py-4 text-sm text-gray-500">
+                                Todos os pacientes foram carregados
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -414,7 +526,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                   setShowNewConsultation(false);
                   setSelectedPatient(null);
                   setExistingConsultation(null);
-                  fetchPatients(); // Recarregar lista de pacientes
+                  fetchPatients(0, true); // Recarregar lista de pacientes
                 }}
                 existingConsultation={existingConsultation}
               />
@@ -606,6 +718,36 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Detalhes do Paciente */}
+      {selectedPatientForModal && (
+        <PatientDetailsModal
+          isOpen={showPatientDetailsModal}
+          onClose={() => {
+            setShowPatientDetailsModal(false);
+            setSelectedPatientForModal(null);
+          }}
+          patient={{
+            name: selectedPatientForModal.name,
+            time: '',
+            status: '',
+            cpf: selectedPatientForModal.cpf,
+            phone: selectedPatientForModal.phone,
+            email: selectedPatientForModal.email,
+            address: selectedPatientForModal.address,
+            birthDate: selectedPatientForModal.date_of_birth 
+              ? new Date(selectedPatientForModal.date_of_birth).toLocaleDateString('pt-BR')
+              : undefined,
+            patientId: selectedPatientForModal.id,
+            consultationId: undefined,
+            appointmentDate: undefined,
+            appointmentType: undefined
+          }}
+          onPatientUpdate={async () => {
+            await fetchPatients(0, true);
+          }}
+        />
+      )}
     </div>
   );
 }
