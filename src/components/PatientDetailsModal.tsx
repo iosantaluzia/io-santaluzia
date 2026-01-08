@@ -1395,8 +1395,8 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                   {canEditCurrentConsultation() ? 'Iniciar Consulta' : 'Consulta não pode ser editada (após 12h)'}
                 </Button>
               )}
-              {/* Botão "Agendar Retorno" - disponível para pacientes já cadastrados */}
-              {patient.patientId && onScheduleReturn && (
+              {/* Botão "Agendar Retorno" - disponível para pacientes já cadastrados, visível para médicos e secretárias */}
+              {patient.patientId && onScheduleReturn && (isDoctor || isSecretary) && (
                 <Button
                   size="sm"
                   onClick={handleScheduleReturn}
