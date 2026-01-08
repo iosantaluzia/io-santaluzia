@@ -53,6 +53,8 @@ interface Consultation {
   payment_received?: boolean | null;
   anamnesis?: string;
   prescription?: string;
+  started_at?: string | null;
+  saved_at?: string | null;
 }
 
 interface Exam {
@@ -587,7 +589,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
       // Buscar consultas do paciente
       const { data: consultationsData, error: consultationsError } = await supabase
         .from('consultations')
-        .select('id, consultation_date, doctor_name, diagnosis, status, observations, amount, payment_received, anamnesis, prescription')
+        .select('id, consultation_date, doctor_name, diagnosis, status, observations, amount, payment_received, anamnesis, prescription, started_at, saved_at')
         .eq('patient_id', foundPatientId)
         .order('consultation_date', { ascending: false })
         .limit(10);
@@ -1647,6 +1649,17 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                   {translateStatus(selectedConsultation.status)}
                 </span>
               </div>
+              {selectedConsultation.saved_at && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Finalizada em: {new Date(selectedConsultation.saved_at).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              )}
             </div>
 
             {/* Valor e Pagamento */}
