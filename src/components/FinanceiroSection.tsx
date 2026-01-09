@@ -304,7 +304,7 @@ export function FinanceiroSection() {
           )}
         </h3>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="min-w-full bg-white rounded-md">
             <thead>
               <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
