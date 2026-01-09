@@ -58,13 +58,16 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
     }
   }, [patientSubSection]);
 
-  // Quando o termo de busca mudar, carregar todos os pacientes se necessário
+  // Quando o termo de busca mudar, fazer busca no banco de dados
   useEffect(() => {
-    if (searchTerm && patients.length < ITEMS_PER_PAGE) {
-      // Se há busca mas poucos pacientes carregados, carregar mais para ter dados suficientes para filtrar
-      // Mas não vamos carregar tudo de uma vez, apenas garantir que temos dados suficientes
-    }
-  }, [searchTerm, patients.length]);
+    const timeoutId = setTimeout(() => {
+      if (patientSubSection === 'prontuarios') {
+        searchPatients(searchTerm);
+      }
+    }, 300); // Debounce de 300ms para não fazer muitas requisições
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, patientSubSection]);
 
   // Efeito para abrir automaticamente a consulta quando patientToOpenConsultation for fornecido
   useEffect(() => {
@@ -175,6 +178,83 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
     } finally {
       setLoading(false);
       setIsLoadingMore(false);
+    }
+  };
+
+  // Buscar pacientes por termo de busca
+  const searchPatients = async (term: string) => {
+    try {
+      setLoading(true);
+      setPatients([]);
+
+      const searchTerm = term.toLowerCase().trim();
+      if (!searchTerm) {
+        // Se não há termo de busca, carregar pacientes normais
+        fetchPatients(0, true);
+        return;
+      }
+
+      // Buscar por nome usando ILIKE (case insensitive e busca por partes)
+      const { data: nameResults, error: nameError } = await supabase
+        .from('patients')
+        .select('*')
+        .ilike('name', `%${searchTerm}%`)
+        .order('name')
+        .limit(100); // Limitar para não sobrecarregar
+
+      if (nameError) {
+        console.error('Erro ao buscar por nome:', nameError);
+      }
+
+      // Buscar por CPF (remover formatação)
+      const searchClean = term.replace(/\D/g, '');
+      let cpfResults: any[] = [];
+      if (searchClean) {
+        const { data: cpfData, error: cpfError } = await supabase
+          .from('patients')
+          .select('*')
+          .like('cpf', `%${searchClean}%`)
+          .order('name')
+          .limit(100);
+
+        if (cpfError) {
+          console.error('Erro ao buscar por CPF:', cpfError);
+        } else {
+          cpfResults = cpfData || [];
+        }
+      }
+
+      // Buscar por telefone (remover formatação)
+      let phoneResults: any[] = [];
+      if (searchClean) {
+        const { data: phoneData, error: phoneError } = await supabase
+          .from('patients')
+          .select('*')
+          .like('phone', `%${searchClean}%`)
+          .order('name')
+          .limit(100);
+
+        if (phoneError) {
+          console.error('Erro ao buscar por telefone:', phoneError);
+        } else {
+          phoneResults = phoneData || [];
+        }
+      }
+
+      // Combinar resultados e remover duplicatas
+      const allResults = [...(nameResults || []), ...cpfResults, ...phoneResults];
+      const uniqueResults = allResults.filter((patient, index, self) =>
+        index === self.findIndex(p => p.id === patient.id)
+      );
+
+      setPatients(uniqueResults);
+      setHasMore(false); // Desabilitar scroll infinito durante busca
+
+    } catch (error) {
+      console.error('Erro ao buscar pacientes:', error);
+      toast.error('Erro ao buscar pacientes');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -327,26 +407,8 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
     }
   };
 
-  const filteredPatients = searchTerm
-    ? patients.filter(patient => {
-        const searchLower = searchTerm.toLowerCase().trim();
-        if (!searchLower) return true;
-
-        // Busca por nome (partes das palavras)
-        const nameMatch = patient.name?.toLowerCase().includes(searchLower);
-
-        // Busca por CPF (remove formatação para comparação)
-        const cpfClean = patient.cpf?.replace(/\D/g, '') || '';
-        const searchClean = searchTerm.replace(/\D/g, '');
-        const cpfMatch = searchClean && cpfClean.includes(searchClean);
-
-        // Busca por telefone (remove formatação para comparação)
-        const phoneClean = patient.phone?.replace(/\D/g, '') || '';
-        const phoneMatch = searchClean && phoneClean.includes(searchClean);
-
-        return nameMatch || cpfMatch || phoneMatch;
-      })
-    : patients;
+  // Usar diretamente os pacientes carregados (já filtrados pela busca no banco)
+  const filteredPatients = patients;
 
   const patientsData = [
     { 
