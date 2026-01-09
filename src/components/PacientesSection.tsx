@@ -149,29 +149,47 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
         setIsLoadingMore(true);
       }
 
-      const from = pageNum * ITEMS_PER_PAGE;
-      const to = from + ITEMS_PER_PAGE - 1;
-
-      const { data, error, count } = await (supabase as any)
+      let query = (supabase as any)
         .from('patients')
         .select('*', { count: 'exact' })
-        .order('name')
-        .range(from, to);
+        .order('name');
 
-      if (error) {
-        console.error('Erro ao buscar pacientes:', error);
-        toast.error('Erro ao carregar pacientes');
-        return;
-      }
+      // Se não há termo de busca, carrega todos os dados para melhor scroll
+      // Se há busca, usa paginação para performance
+      if (!searchTerm.trim()) {
+        // Carrega todos os dados quando não há busca
+        const { data, error } = await query;
 
-      if (reset) {
+        if (error) {
+          console.error('Erro ao buscar pacientes:', error);
+          toast.error('Erro ao carregar pacientes');
+          return;
+        }
+
         setPatients(data || []);
+        setHasMore(false); // Todos os dados já foram carregados
       } else {
-        setPatients(prev => [...prev, ...(data || [])]);
-      }
+        // Mantém paginação quando há busca para performance
+        const from = pageNum * ITEMS_PER_PAGE;
+        const to = from + ITEMS_PER_PAGE - 1;
 
-      // Verificar se há mais itens para carregar
-      setHasMore((data?.length || 0) === ITEMS_PER_PAGE);
+        const { data, error, count } = await query.range(from, to);
+
+        if (error) {
+          console.error('Erro ao buscar pacientes:', error);
+          toast.error('Erro ao carregar pacientes');
+          return;
+        }
+
+        if (reset) {
+          setPatients(data || []);
+        } else {
+          setPatients(prev => [...prev, ...(data || [])]);
+        }
+
+        // Verificar se há mais itens para carregar
+        setHasMore((data?.length || 0) === ITEMS_PER_PAGE);
+      }
     } catch (error) {
       console.error('Erro ao carregar pacientes:', error);
       toast.error('Erro ao carregar pacientes');
@@ -200,7 +218,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
         .select('*')
         .ilike('name', `%${searchTerm}%`)
         .order('name')
-        .limit(100); // Limitar para não sobrecarregar
+        .limit(500); // Aumentar limite para resultados mais completos
 
       if (nameError) {
         console.error('Erro ao buscar por nome:', nameError);
@@ -215,7 +233,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
           .select('*')
           .like('cpf', `%${searchClean}%`)
           .order('name')
-          .limit(100);
+          .limit(500);
 
         if (cpfError) {
           console.error('Erro ao buscar por CPF:', cpfError);
@@ -232,7 +250,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
           .select('*')
           .like('phone', `%${searchClean}%`)
           .order('name')
-          .limit(100);
+          .limit(500);
 
         if (phoneError) {
           console.error('Erro ao buscar por telefone:', phoneError);
@@ -267,10 +285,10 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
     }
   }, [page, hasMore, isLoadingMore, searchTerm]);
 
-  // Observer para scroll infinito
+  // Observer para scroll infinito - só usado quando há busca
   useEffect(() => {
-    // Não usar scroll infinito quando há busca ativa
-    if (searchTerm) return;
+    // Só usar scroll infinito quando há busca (todos os dados já são carregados quando não há busca)
+    if (!searchTerm.trim()) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -574,7 +592,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                           </tbody>
                         </table>
                         {/* Elemento de observação para scroll infinito */}
-                        {!searchTerm && (
+                        {searchTerm.trim() && (
                           <>
                             <div ref={observerTarget} className="h-4" />
                             {isLoadingMore && (
