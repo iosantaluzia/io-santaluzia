@@ -69,13 +69,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
   return (
     <Sidebar className={isCollapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="p-4">
-        <div className="flex items-center justify-start">
-          <img
-            src="/uploads/logoiosantaluzia-removebg-preview.png"
-            alt="Instituto de Olhos Santa Luzia"
-            className={`${isCollapsed ? 'h-8 w-auto' : 'h-12 w-auto'} object-contain`}
-          />
-        </div>
+        <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className={`${isCollapsed ? 'h-8 w-auto' : 'h-18 w-auto md:h-24 md:w-auto'} object-contain`} />
       </SidebarHeader>
 
       <SidebarContent>
