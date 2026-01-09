@@ -55,7 +55,7 @@ export function FinanceiroSection() {
           )
         `)
         .not('amount', 'is', null)
-        .gt('amount', 0) // Apenas consultas com valor pago
+        .neq('amount', '0.00') // Excluir apenas valores exatamente zero
         .order('consultation_date', { ascending: false });
 
       if (error) {
