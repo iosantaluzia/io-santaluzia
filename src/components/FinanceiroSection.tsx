@@ -38,7 +38,7 @@ export function FinanceiroSection() {
     try {
       setLoading(true);
 
-      // Buscar todas as consultas com valores
+      // Buscar todas as consultas com valores (excluindo retornos gratuitos)
       const { data: consultations, error } = await supabase
         .from('consultations')
         .select(`
@@ -55,6 +55,7 @@ export function FinanceiroSection() {
           )
         `)
         .not('amount', 'is', null)
+        .gt('amount', 0) // Excluir consultas com valor zero (retornos gratuitos)
         .order('consultation_date', { ascending: false });
 
       if (error) {
