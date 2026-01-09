@@ -188,34 +188,57 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
       // Buscar ou criar paciente
       let patientId: string | null = null;
 
-      // Buscar paciente existente por CPF
-      const { data: existingPatient, error: searchError } = await (supabase as any)
-        .from('patients')
-        .select('id')
-        .eq('cpf', validatedData.cpf)
-        .maybeSingle();
+      // Buscar paciente existente por CPF ou nome/telefone
+      if (validatedData.cpf && validatedData.cpf.trim() !== '') {
+        // Buscar por CPF primeiro
+        const { data: existingPatient, error: searchError } = await (supabase as any)
+          .from('patients')
+          .select('id, name')
+          .eq('cpf', validatedData.cpf)
+          .maybeSingle();
 
-      if (existingPatient) {
-        patientId = existingPatient.id;
-        } else {
-          // Criar novo paciente
-          if (!formData.date_of_birth) {
-            toast.error('Data de nascimento é obrigatória para novos pacientes.');
-            return;
-          }
+        if (existingPatient) {
+          patientId = existingPatient.id;
+        }
+      } else {
+        // Se não há CPF, tentar buscar por nome e telefone para evitar duplicatas
+        const { data: existingPatients, error: searchError } = await (supabase as any)
+          .from('patients')
+          .select('id, name, phone')
+          .eq('name', validatedData.name)
+          .eq('phone', validatedData.phone)
+          .limit(1);
 
-          const { data: newPatient, error: patientError } = await (supabase as any)
-            .from('patients')
-            .insert({
-              name: validatedData.name,
-              cpf: validatedData.cpf,
-              date_of_birth: formData.date_of_birth,
-              phone: validatedData.phone,
-              email: validatedData.email || null,
-              address: validatedData.address || null
-            })
-            .select('id')
-            .single();
+        if (existingPatients && existingPatients.length > 0) {
+          patientId = existingPatients[0].id;
+        }
+      }
+
+      // Se não encontrou paciente existente, criar novo paciente
+      if (!patientId) {
+        // Criar novo paciente - CPF e data de nascimento são opcionais
+        const patientData: any = {
+          name: validatedData.name,
+          phone: validatedData.phone,
+          email: validatedData.email || null,
+          address: validatedData.address || null
+        };
+
+        // Adicionar CPF apenas se foi fornecido
+        if (validatedData.cpf && validatedData.cpf.trim() !== '') {
+          patientData.cpf = validatedData.cpf;
+        }
+
+        // Adicionar data de nascimento apenas se foi fornecida
+        if (validatedData.date_of_birth && validatedData.date_of_birth.trim() !== '') {
+          patientData.date_of_birth = validatedData.date_of_birth;
+        }
+
+        const { data: newPatient, error: patientError } = await (supabase as any)
+          .from('patients')
+          .insert(patientData)
+          .select('id')
+          .single();
 
         if (patientError || !newPatient) {
           logger.error('Erro ao criar paciente:', patientError);
@@ -336,7 +359,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="cpf" className="text-xs font-medium leading-tight">CPF *</Label>
+                  <Label htmlFor="cpf" className="text-xs font-medium leading-tight">CPF</Label>
                   <Input
                     id="cpf"
                     value={formData.cpf}
@@ -344,7 +367,6 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                     placeholder="000.000.000-00"
                     maxLength={14}
                     className="h-8 text-xs mt-0.5"
-                    required
                   />
                 </div>
               </div>
@@ -352,14 +374,13 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
               {/* Segunda linha: Data Nascimento e Telefone */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label htmlFor="date_of_birth" className="text-xs font-medium leading-tight">Data Nascimento *</Label>
+                  <Label htmlFor="date_of_birth" className="text-xs font-medium leading-tight">Data Nascimento</Label>
                   <Input
                     id="date_of_birth"
                     type="date"
                     value={formData.date_of_birth}
                     onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
                     className="h-8 text-xs mt-0.5"
-                    required
                   />
                 </div>
                 <div>

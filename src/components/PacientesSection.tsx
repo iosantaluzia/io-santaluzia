@@ -243,10 +243,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
     
     try {
       // Validar dados
-      const validationResult = patientFormSchema.safeParse({
-        ...formData,
-        date_of_birth: formData.date_of_birth || '1990-01-01'
-      });
+      const validationResult = patientFormSchema.safeParse(formData);
       
       if (!validationResult.success) {
         const firstError = validationResult.error.errors[0];
@@ -257,35 +254,47 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
 
       const validatedData = validationResult.data;
 
-      // Verificar se CPF já existe
-      const { data: existingPatient } = await (supabase as any)
-        .from('patients')
-        .select('id')
-        .eq('cpf', validatedData.cpf)
-        .maybeSingle();
+      // Verificar se CPF já existe (apenas se CPF foi fornecido)
+      if (validatedData.cpf && validatedData.cpf.trim() !== '') {
+        const { data: existingPatient } = await (supabase as any)
+          .from('patients')
+          .select('id')
+          .eq('cpf', validatedData.cpf)
+          .maybeSingle();
 
-      if (existingPatient) {
-        toast.error('CPF já cadastrado. Use a busca para encontrar o paciente.');
-        return;
+        if (existingPatient) {
+          toast.error('CPF já cadastrado. Use a busca para encontrar o paciente.');
+          return;
+        }
       }
 
       // Criar paciente
+      const patientData: any = {
+        name: validatedData.name,
+        phone: validatedData.phone || null,
+        email: validatedData.email || null,
+        address: validatedData.address || null,
+        emergency_contact: validatedData.emergency_contact || null,
+        emergency_phone: validatedData.emergency_phone || null,
+        medical_history: validatedData.medical_history || null,
+        allergies: validatedData.allergies || null,
+        medications: validatedData.medications || null,
+        created_by: appUser?.username || 'sistema'
+      };
+
+      // Adicionar CPF apenas se foi fornecido
+      if (validatedData.cpf && validatedData.cpf.trim() !== '') {
+        patientData.cpf = validatedData.cpf;
+      }
+
+      // Adicionar data de nascimento apenas se foi fornecida
+      if (validatedData.date_of_birth && validatedData.date_of_birth.trim() !== '') {
+        patientData.date_of_birth = validatedData.date_of_birth;
+      }
+
       const { error } = await (supabase as any)
         .from('patients')
-        .insert({
-          name: validatedData.name,
-          cpf: validatedData.cpf,
-          date_of_birth: validatedData.date_of_birth,
-          phone: validatedData.phone || null,
-          email: validatedData.email || null,
-          address: validatedData.address || null,
-          emergency_contact: validatedData.emergency_contact || null,
-          emergency_phone: validatedData.emergency_phone || null,
-          medical_history: validatedData.medical_history || null,
-          allergies: validatedData.allergies || null,
-          medications: validatedData.medications || null,
-          created_by: appUser?.username || 'sistema'
-        });
+        .insert(patientData);
 
       if (error) {
         logger.error('Erro ao criar paciente:', error);
@@ -584,25 +593,23 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
               </div>
 
               <div>
-                <Label htmlFor="cpf">CPF *</Label>
+                <Label htmlFor="cpf">CPF</Label>
                 <Input
                   id="cpf"
                   value={formData.cpf}
                   onChange={(e) => handleInputChange('cpf', e.target.value)}
                   placeholder="000.000.000-00"
                   maxLength={14}
-                  required
                 />
               </div>
 
               <div>
-                <Label htmlFor="date_of_birth">Data de Nascimento *</Label>
+                <Label htmlFor="date_of_birth">Data de Nascimento</Label>
                 <Input
                   id="date_of_birth"
                   type="date"
                   value={formData.date_of_birth}
                   onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                  required
                 />
               </div>
 

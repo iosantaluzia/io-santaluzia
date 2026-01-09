@@ -63,9 +63,9 @@ export const nameSchema = z.string()
 // Appointment form schema
 export const appointmentFormSchema = z.object({
   name: nameSchema,
-  cpf: cpfSchema,
+  cpf: cpfSchema.optional().or(z.literal('')),
   phone: phoneSchema,
-  date_of_birth: z.string().min(1, 'Data de nascimento é obrigatória').optional(),
+  date_of_birth: z.string().optional().or(z.literal('')),
   email: emailSchema.optional().or(z.literal('')),
   address: z.string().max(500, 'Endereço muito longo').optional(),
   cep: cepSchema.optional().or(z.literal('')),
@@ -105,8 +105,8 @@ export const consultationFormSchema = z.object({
 // Patient form schema
 export const patientFormSchema = z.object({
   name: nameSchema,
-  cpf: cpfSchema,
-  date_of_birth: z.string().date('Data de nascimento inválida'),
+  cpf: cpfSchema.optional().or(z.literal('')),
+  date_of_birth: z.string().optional().or(z.literal('')),
   phone: phoneSchema.optional(),
   email: emailSchema.optional().or(z.literal('')),
   address: z.string().max(500).optional(),
