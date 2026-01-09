@@ -329,10 +329,21 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
 
   const filteredPatients = searchTerm
     ? patients.filter(patient => {
-        const searchLower = searchTerm.toLowerCase();
+        const searchLower = searchTerm.toLowerCase().trim();
+        if (!searchLower) return true;
+
+        // Busca por nome (partes das palavras)
         const nameMatch = patient.name?.toLowerCase().includes(searchLower);
-        const cpfMatch = patient.cpf?.includes(searchTerm.replace(/\D/g, ''));
-        const phoneMatch = patient.phone?.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''));
+
+        // Busca por CPF (remove formatação para comparação)
+        const cpfClean = patient.cpf?.replace(/\D/g, '') || '';
+        const searchClean = searchTerm.replace(/\D/g, '');
+        const cpfMatch = searchClean && cpfClean.includes(searchClean);
+
+        // Busca por telefone (remove formatação para comparação)
+        const phoneClean = patient.phone?.replace(/\D/g, '') || '';
+        const phoneMatch = searchClean && phoneClean.includes(searchClean);
+
         return nameMatch || cpfMatch || phoneMatch;
       })
     : patients;
@@ -414,9 +425,9 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                       className="pl-10"
                     />
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setShowNewPatientForm(true)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Novo Paciente
@@ -431,7 +442,8 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                     <div className="w-full">
                       <h3 className="text-xl font-semibold text-cinza-escuro mb-4">Pacientes Cadastrados</h3>
                       <div className="overflow-x-auto">
-                        <table className="min-w-full bg-white rounded-md shadow-sm">
+                        <div className="max-h-96 overflow-y-auto">
+                          <table className="min-w-full bg-white rounded-md shadow-sm">
                           <thead>
                             <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
                               <th className="py-3 px-6 text-left">Nome</th>
@@ -516,6 +528,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                             )}
                           </>
                         )}
+                        </div>
                       </div>
                     </div>
                   ) : (
