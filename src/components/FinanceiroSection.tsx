@@ -1,68 +1,184 @@
 
-import React, { useState } from 'react';
-import { TrendingUp, DollarSign, Calendar, FileText, Filter, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, DollarSign, Calendar, FileText, Filter, User, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+
+interface FinancialData {
+  name: string;
+  monthlyRevenue: number;
+  dailyAverage: number;
+  pendingPayments: number;
+  totalPatients: number;
+  transactions: Array<{
+    id: string;
+    patient: string;
+    service: string;
+    amount: number;
+    date: string;
+    status: string;
+    paymentMethod?: string;
+  }>;
+}
 
 export function FinanceiroSection() {
   const { appUser } = useAuth();
   const [selectedDoctor, setSelectedDoctor] = useState('all');
-  
-  // Dados financeiros mockados - em produção viriam do banco
-  const doctorsData = {
-    'dr-silva': {
-      name: 'Dr. Silva',
-      monthlyRevenue: 25000,
-      dailyAverage: 833,
-      pendingPayments: 3500,
-      totalPatients: 65,
-      transactions: [
-        { id: 1, patient: 'Ana Silva', service: 'Consulta Oftalmológica', amount: 250, date: '05/08/2024', status: 'Pago' },
-        { id: 2, patient: 'Bruno Costa', service: 'Exame de Acuidade Visual', amount: 150, date: '04/08/2024', status: 'Pago' },
-      ]
-    },
-    'dr-santos': {
-      name: 'Dr. Santos',
-      monthlyRevenue: 20000,
-      dailyAverage: 667,
-      pendingPayments: 5000,
-      totalPatients: 55,
-      transactions: [
-        { id: 3, patient: 'Carla Dias', service: 'Cirurgia de Catarata', amount: 3500, date: '04/08/2024', status: 'Pendente' },
-        { id: 4, patient: 'Daniel Rocha', service: 'Mapeamento de Retina', amount: 400, date: '03/08/2024', status: 'Pago' },
-      ]
+  const [financialData, setFinancialData] = useState<Record<string, FinancialData>>({});
+  const [doctorsList, setDoctorsList] = useState<Array<{key: string, name: string}>>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Buscar dados financeiros reais do banco
+  useEffect(() => {
+    fetchFinancialData();
+  }, []);
+
+  const fetchFinancialData = async () => {
+    try {
+      setLoading(true);
+
+      // Buscar todas as consultas com valores
+      const { data: consultations, error } = await supabase
+        .from('consultations')
+        .select(`
+          id,
+          doctor_name,
+          amount,
+          payment_received,
+          payment_method,
+          consultation_date,
+          status,
+          appointment_type,
+          patients (
+            name
+          )
+        `)
+        .not('amount', 'is', null)
+        .order('consultation_date', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar dados financeiros:', error);
+        return;
+      }
+
+      // Organizar dados por médico
+      const doctorsData: Record<string, FinancialData> = {};
+      const doctorsSet = new Set<string>();
+
+      consultations?.forEach(consultation => {
+        const doctorKey = consultation.doctor_name?.toLowerCase().replace(/\s+/g, '-').replace('.', '') || 'desconhecido';
+        const doctorName = consultation.doctor_name || 'Médico Desconhecido';
+
+        doctorsSet.add(doctorName);
+
+        if (!doctorsData[doctorKey]) {
+          doctorsData[doctorKey] = {
+            name: doctorName,
+            monthlyRevenue: 0,
+            dailyAverage: 0,
+            pendingPayments: 0,
+            totalPatients: 0,
+            transactions: []
+          };
+        }
+
+        const amount = Number(consultation.amount) || 0;
+        const patientName = consultation.patients?.name || 'Paciente Desconhecido';
+
+        // Adicionar receita mensal
+        doctorsData[doctorKey].monthlyRevenue += amount;
+
+        // Adicionar pagamentos pendentes se não foi recebido
+        if (!consultation.payment_received) {
+          doctorsData[doctorKey].pendingPayments += amount;
+        }
+
+        // Adicionar transação
+        doctorsData[doctorKey].transactions.push({
+          id: consultation.id,
+          patient: patientName,
+          service: getServiceName(consultation.appointment_type, consultation.status),
+          amount: amount,
+          date: new Date(consultation.consultation_date).toLocaleDateString('pt-BR'),
+          status: consultation.payment_received ? 'Pago' : 'Pendente',
+          paymentMethod: consultation.payment_method
+        });
+      });
+
+      // Calcular médias diárias e totais de pacientes
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      Object.keys(doctorsData).forEach(doctorKey => {
+        const doctor = doctorsData[doctorKey];
+
+        // Média diária baseada na receita mensal
+        doctor.dailyAverage = Math.round(doctor.monthlyRevenue / daysInMonth);
+
+        // Total de pacientes únicos
+        const uniquePatients = new Set(doctor.transactions.map(t => t.patient));
+        doctor.totalPatients = uniquePatients.size;
+      });
+
+      // Criar dados consolidados
+      const allTransactions = Object.values(doctorsData).flatMap(doctor => doctor.transactions);
+      const totalRevenue = Object.values(doctorsData).reduce((sum, doctor) => sum + doctor.monthlyRevenue, 0);
+      const totalPending = Object.values(doctorsData).reduce((sum, doctor) => sum + doctor.pendingPayments, 0);
+      const totalPatients = new Set(allTransactions.map(t => t.patient)).size;
+
+      doctorsData['all'] = {
+        name: 'Todos os Médicos',
+        monthlyRevenue: totalRevenue,
+        dailyAverage: Math.round(totalRevenue / daysInMonth),
+        pendingPayments: totalPending,
+        totalPatients: totalPatients,
+        transactions: allTransactions
+      };
+
+      setFinancialData(doctorsData);
+      setDoctorsList(Array.from(doctorsSet).map(name => ({
+        key: name.toLowerCase().replace(/\s+/g, '-').replace('.', ''),
+        name: name
+      })));
+
+    } catch (error) {
+      console.error('Erro ao processar dados financeiros:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Dados consolidados para conta financeiro
-  const consolidatedData = {
-    monthlyRevenue: 45000,
-    dailyAverage: 1500,
-    pendingPayments: 8500,
-    totalPatients: 120,
-    transactions: [
-      ...doctorsData['dr-silva'].transactions,
-      ...doctorsData['dr-santos'].transactions
-    ]
+  const getServiceName = (appointmentType: string | null, status: string | null): string => {
+    if (appointmentType) {
+      switch (appointmentType) {
+        case 'consulta': return 'Consulta Oftalmológica';
+        case 'retorno': return 'Retorno';
+        case 'exame': return 'Exame Oftalmológico';
+        case 'pagamento_honorarios': return 'Pagamento de Honorários';
+        default: return appointmentType;
+      }
+    }
+    return status === 'completed' ? 'Consulta Oftalmológica' : 'Serviço Médico';
   };
 
   // Determinar dados a exibir baseado no perfil do usuário
   const getFinancialData = () => {
     if (appUser?.role === 'doctor') {
-      // Médico vê apenas seus dados - simulando pelo username
-      const doctorKey = `dr-${appUser.username}`;
-      return doctorsData[doctorKey] || doctorsData['dr-silva'];
+      // Médico vê apenas seus dados - baseado no username
+      const doctorKeys = Object.keys(financialData).filter(key =>
+        key !== 'all' && financialData[key].name.toLowerCase().includes(appUser.username?.toLowerCase() || '')
+      );
+      return doctorKeys.length > 0 ? financialData[doctorKeys[0]] : financialData['all'];
     } else if (appUser?.role === 'admin' || appUser?.username === 'financeiro') {
       // Admin e financeiro veem dados consolidados ou filtrados
-      if (selectedDoctor === 'all') {
-        return consolidatedData;
-      }
-      return doctorsData[selectedDoctor] || consolidatedData;
+      return financialData[selectedDoctor] || financialData['all'];
     }
-    return consolidatedData;
+    return financialData['all'];
   };
 
-  const financialData = getFinancialData();
+  const currentFinancialData = getFinancialData();
   const canViewAllDoctors = appUser?.role === 'admin' || appUser?.username === 'financeiro';
 
   const formatCurrency = (value: number) => {
@@ -72,11 +188,24 @@ export function FinanceiroSection() {
     }).format(value);
   };
 
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="flex justify-center items-center h-64">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-bege-principal" />
+            <p className="text-gray-600">Carregando dados financeiros...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-cinza-escuro">Relatórios Financeiros</h2>
-        
+
         {canViewAllDoctors && (
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-500" />
@@ -86,8 +215,11 @@ export function FinanceiroSection() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Médicos</SelectItem>
-                <SelectItem value="dr-silva">Dr. Silva</SelectItem>
-                <SelectItem value="dr-santos">Dr. Santos</SelectItem>
+                {doctorsList.map(doctor => (
+                  <SelectItem key={doctor.key} value={doctor.key}>
+                    {doctor.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -111,7 +243,7 @@ export function FinanceiroSection() {
           <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Receita Mensal</p>
-              <p className="text-2xl font-bold text-green-600">{formatCurrency(financialData.monthlyRevenue)}</p>
+              <p className="text-2xl font-bold text-green-600">{formatCurrency(currentFinancialData.monthlyRevenue)}</p>
             </div>
             <img 
               src="/dashboard/caixa.png" 
@@ -125,7 +257,7 @@ export function FinanceiroSection() {
           <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Média Diária</p>
-              <p className="text-2xl font-bold text-bege-principal">{formatCurrency(financialData.dailyAverage)}</p>
+              <p className="text-2xl font-bold text-bege-principal">{formatCurrency(currentFinancialData.dailyAverage)}</p>
             </div>
             <img 
               src="/dashboard/receitas.png" 
@@ -139,7 +271,7 @@ export function FinanceiroSection() {
           <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Pagamentos Pendentes</p>
-              <p className="text-2xl font-bold text-yellow-600">{formatCurrency(financialData.pendingPayments)}</p>
+              <p className="text-2xl font-bold text-yellow-600">{formatCurrency(currentFinancialData.pendingPayments)}</p>
             </div>
             <img 
               src="/dashboard/boletos.png" 
@@ -153,7 +285,7 @@ export function FinanceiroSection() {
           <div className="flex items-center justify-between h-full">
             <div>
               <p className="text-sm text-gray-600">Pacientes Atendidos</p>
-              <p className="text-2xl font-bold text-cinza-escuro">{financialData.totalPatients}</p>
+              <p className="text-2xl font-bold text-cinza-escuro">{currentFinancialData.totalPatients}</p>
             </div>
             <img 
               src="/dashboard/anotacoes.png" 
@@ -167,8 +299,8 @@ export function FinanceiroSection() {
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
         <h3 className="text-xl font-semibold text-cinza-escuro mb-4">
           Transações Recentes
-          {selectedDoctor !== 'all' && financialData.name && (
-            <span className="text-sm font-normal text-gray-600 ml-2">- {financialData.name}</span>
+          {selectedDoctor !== 'all' && currentFinancialData.name && (
+            <span className="text-sm font-normal text-gray-600 ml-2">- {currentFinancialData.name}</span>
           )}
         </h3>
 
@@ -179,16 +311,26 @@ export function FinanceiroSection() {
                 <th className="py-3 px-6 text-left">Paciente</th>
                 <th className="py-3 px-6 text-left">Serviço</th>
                 <th className="py-3 px-6 text-right">Valor</th>
+                <th className="py-3 px-6 text-center">Pagamento</th>
                 <th className="py-3 px-6 text-center">Data</th>
                 <th className="py-3 px-6 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="text-gray-600 text-sm font-light">
-              {financialData.transactions.map(transaction => (
+              {currentFinancialData.transactions.map(transaction => (
                 <tr key={transaction.id} className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="py-3 px-6 text-left font-medium">{transaction.patient}</td>
                   <td className="py-3 px-6 text-left">{transaction.service}</td>
                   <td className="py-3 px-6 text-right font-semibold">{formatCurrency(transaction.amount)}</td>
+                  <td className="py-3 px-6 text-center">
+                    {transaction.paymentMethod ? (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                        {transaction.paymentMethod}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
+                  </td>
                   <td className="py-3 px-6 text-center">{transaction.date}</td>
                   <td className="py-3 px-6 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold
@@ -208,15 +350,15 @@ export function FinanceiroSection() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-gray-600">Total Faturado:</p>
-              <p className="font-bold text-cinza-escuro">{formatCurrency(financialData.monthlyRevenue)}</p>
+              <p className="font-bold text-cinza-escuro">{formatCurrency(currentFinancialData.monthlyRevenue)}</p>
             </div>
             <div>
               <p className="text-gray-600">Recebido:</p>
-              <p className="font-bold text-green-600">{formatCurrency(financialData.monthlyRevenue - financialData.pendingPayments)}</p>
+              <p className="font-bold text-green-600">{formatCurrency(currentFinancialData.monthlyRevenue - currentFinancialData.pendingPayments)}</p>
             </div>
             <div>
               <p className="text-gray-600">A Receber:</p>
-              <p className="font-bold text-yellow-600">{formatCurrency(financialData.pendingPayments)}</p>
+              <p className="font-bold text-yellow-600">{formatCurrency(currentFinancialData.pendingPayments)}</p>
             </div>
           </div>
         </div>
