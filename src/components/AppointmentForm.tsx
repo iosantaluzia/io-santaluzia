@@ -166,14 +166,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
       value = formatCEP(value);
     }
 
-    const newFormData = { ...formData, [field]: value };
-
-    // Se o tipo de agendamento for "retorno", automaticamente definir valor como 0,00
-    if (field === 'appointmentType' && value === 'retorno') {
-      newFormData.amount = '0,00';
-    }
-
-    setFormData(newFormData);
+    setFormData({ ...formData, [field]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
