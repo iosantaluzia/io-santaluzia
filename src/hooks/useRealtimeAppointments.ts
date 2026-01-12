@@ -16,6 +16,18 @@ export function useRealtimeAppointments(
   onAppointmentChange: (change: { type: 'INSERT' | 'UPDATE' | 'DELETE'; data: ConsultationUpdate }) => void
 ) {
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Função com debounce para evitar múltiplas chamadas rápidas
+  const debouncedCallback = useCallback((change: { type: 'INSERT' | 'UPDATE' | 'DELETE'; data: ConsultationUpdate }) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      onAppointmentChange(change);
+    }, 300); // 300ms de debounce
+  }, [onAppointmentChange]);
 
   // Configurar Realtime para mudanças na tabela consultations
   useEffect(() => {
@@ -32,12 +44,12 @@ export function useRealtimeAppointments(
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'consultations'
+          table: 'consultations',
+          filter: undefined // Remover filtro para capturar todas as mudanças
         },
         (payload) => {
-          console.log('📨 Nova consulta inserida via Realtime:', payload);
           const newConsultation = payload.new as ConsultationUpdate;
-          onAppointmentChange({
+          debouncedCallback({
             type: 'INSERT',
             data: newConsultation
           });
@@ -48,12 +60,12 @@ export function useRealtimeAppointments(
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'consultations'
+          table: 'consultations',
+          filter: undefined // Remover filtro para capturar todas as mudanças
         },
         (payload) => {
-          console.log('🔄 Consulta atualizada via Realtime:', payload);
           const updatedConsultation = payload.new as ConsultationUpdate;
-          onAppointmentChange({
+          debouncedCallback({
             type: 'UPDATE',
             data: updatedConsultation
           });
@@ -64,31 +76,20 @@ export function useRealtimeAppointments(
         {
           event: 'DELETE',
           schema: 'public',
-          table: 'consultations'
+          table: 'consultations',
+          filter: undefined // Remover filtro para capturar todas as mudanças
         },
         (payload) => {
-          console.log('🗑️ Consulta removida via Realtime:', payload);
           const deletedConsultation = payload.old as ConsultationUpdate;
-          onAppointmentChange({
+          debouncedCallback({
             type: 'DELETE',
             data: deletedConsultation
           });
         }
       )
       .subscribe((status, err) => {
-        console.log('📡 Status da subscrição Realtime (consultations):', status, err);
-
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Conectado ao Realtime para consultas - aguardando mudanças...');
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Erro na conexão Realtime para consultas:', err);
-          console.error('💡 Verifique se a tabela consultations está habilitada para Realtime no Supabase');
-        } else if (status === 'TIMED_OUT') {
-          console.warn('⏱️ Timeout na conexão Realtime para consultas - tentando reconectar...');
-        } else if (status === 'CLOSED') {
-          console.warn('🔌 Conexão Realtime para consultas fechada');
-        } else {
-          console.log('🔄 Status intermediário (consultations):', status);
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Erro na conexão Realtime para consultas:', err);
         }
       });
 
@@ -96,13 +97,16 @@ export function useRealtimeAppointments(
 
     // Limpeza ao desmontar
     return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [onAppointmentChange]);
+  }, [debouncedCallback]);
 
-  // Função para testar a conexão (opcional, para debug)
+  // Função para testar a conexão e verificar realtime
   const testConnection = useCallback(async () => {
     try {
       const { data, error } = await supabase
@@ -111,14 +115,13 @@ export function useRealtimeAppointments(
         .limit(1);
 
       if (error) {
-        console.error('❌ Erro ao testar conexão com tabela consultations:', error);
+        console.error('Erro na conexão com tabela consultations:', error);
         return false;
       }
 
-      console.log('✅ Conexão com tabela consultations OK');
       return true;
     } catch (error) {
-      console.error('❌ Erro inesperado ao testar conexão:', error);
+      console.error('Erro inesperado ao testar conexão:', error);
       return false;
     }
   }, []);

@@ -312,8 +312,6 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
-      console.log('Buscando agendamentos para:', date.toLocaleDateString('pt-BR'));
-
       // Buscar consultas/agendamentos do banco de dados
       // Médicos veem apenas suas próprias consultas (RLS já filtra, mas adicionamos filtro adicional no frontend)
       let query = supabase
@@ -332,7 +330,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
         `)
         .gte('consultation_date', startOfDay.toISOString())
         .lte('consultation_date', endOfDay.toISOString());
-      
+
       // Filtrar por médico se for médico
       if (appUser?.role === 'doctor') {
         const username = appUser.username?.toLowerCase();
@@ -342,13 +340,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           query = query.or('doctor_name.ilike.%fabiola%,doctor_name.ilike.%fabíola%');
         }
       }
-      
-      const { data: consultations, error } = await query.order('consultation_date', { ascending: true });
 
-      console.log('Consultas encontradas:', consultations?.length || 0);
-      if (consultations && consultations.length > 0) {
-        console.log('IDs das consultas encontradas:', consultations.map(c => c.id));
-      }
+      const { data: consultations, error } = await query.order('consultation_date', { ascending: true });
 
       if (error) {
         console.error('Erro ao buscar agendamentos:', error);
@@ -412,7 +405,6 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       matheusSlots.sort((a, b) => a.time.localeCompare(b.time));
       fabiolaSlots.sort((a, b) => a.time.localeCompare(b.time));
 
-      console.log('Slots Matheus:', matheusSlots.length, 'Slots Fabiola:', fabiolaSlots.length);
 
       // Limpar estados primeiro para garantir atualização
       setTimeSlotsMatheus([]);
@@ -517,42 +509,39 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate.getFullYear(), selectedDate.getMonth(), fetchMonthAppointments]);
 
-  // Estado para controlar recarregamento automático
-  const [shouldRefetch, setShouldRefetch] = useState(false);
-  const [refetchType, setRefetchType] = useState<'INSERT' | 'UPDATE' | 'DELETE' | null>(null);
+  // Estado para controlar atualizações em tempo real
+  const lastUpdateRef = useRef<string>('');
 
-  // Callback para quando houver mudanças em tempo real nos agendamentos
+  // Callback otimizado para mudanças em tempo real nos agendamentos
   const handleRealtimeAppointmentChange = useCallback((change: { type: 'INSERT' | 'UPDATE' | 'DELETE'; data: any }) => {
-    console.log('🔄 Mudança detectada em agendamento:', change);
+    const updateKey = `${change.type}_${change.data.id}_${Date.now()}`;
 
-    // Definir flag para recarregar dados
-    setShouldRefetch(true);
-    setRefetchType(change.type);
-  }, []);
+    // Evitar processamento duplicado da mesma atualização
+    if (lastUpdateRef.current === updateKey) {
+      return;
+    }
+    lastUpdateRef.current = updateKey;
 
-  // Effect para recarregar dados quando shouldRefetch for true
-  useEffect(() => {
-    if (shouldRefetch) {
-      console.log('🔄 Recarregando dados após mudança realtime...');
+    // Verificar se a mudança é relevante para a data selecionada
+    const consultationDate = new Date(change.data.consultation_date);
+    const selectedDateStr = selectedDate.toDateString();
+    const consultationDateStr = consultationDate.toDateString();
 
-      // Recarregar dados automaticamente quando houver qualquer mudança
+    if (selectedDateStr === consultationDateStr) {
+      // Recarregar dados da data selecionada
       fetchAppointments(selectedDate);
 
-      // Também recarregar dados do mês para atualizar o calendário
-      fetchMonthAppointments(selectedDate);
-
-      // Mostrar toast de confirmação
-      if (refetchType === 'UPDATE') {
-        toast.success('Agendamento atualizado automaticamente');
-      } else if (refetchType === 'INSERT') {
-        toast.success('Novo agendamento adicionado automaticamente');
+      // Mostrar toast apenas para atualizações feitas por outros usuários
+      if (change.type === 'UPDATE') {
+        toast.success('Status do agendamento atualizado');
+      } else if (change.type === 'INSERT') {
+        toast.success('Novo agendamento adicionado');
       }
-
-      // Resetar flags
-      setShouldRefetch(false);
-      setRefetchType(null);
+    } else {
+      // Mesmo que não seja a data selecionada, atualizar calendário do mês
+      fetchMonthAppointments(selectedDate);
     }
-  }, [shouldRefetch, refetchType, selectedDate, fetchAppointments, fetchMonthAppointments]);
+  }, [selectedDate, fetchAppointments, fetchMonthAppointments]);
 
   // Effect para fazer scroll automático quando os dados são carregados
   useEffect(() => {
@@ -596,6 +585,10 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
       const dbStatus = statusMap[newStatus] || newStatus.toLowerCase();
 
+      // Marcar que esta atualização foi feita localmente para evitar conflito com realtime
+      const localUpdateKey = `LOCAL_UPDATE_${consultationId}_${Date.now()}`;
+      lastUpdateRef.current = localUpdateKey;
+
       const { error } = await supabase
         .from('consultations')
         .update({ status: dbStatus })
@@ -609,8 +602,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
       toast.success(`Status alterado para "${newStatus}"`);
       setOpenStatusPopover(null);
-      
-      // Recarregar agendamentos do dia e do mês
+
+      // Recarregar dados imediatamente após atualização manual
       await fetchAppointments(selectedDate);
       await fetchMonthAppointments(selectedDate);
     } catch (error) {
