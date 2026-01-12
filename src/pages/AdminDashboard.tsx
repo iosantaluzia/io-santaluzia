@@ -192,9 +192,10 @@ const AdminDashboard = () => {
             }}
           />;
         case 'pacientes':
-          return <LazyComponents.PacientesSection 
+          return <LazyComponents.PacientesSection
             patientToOpenConsultation={patientToOpenConsultation}
             onConsultationOpened={() => setPatientToOpenConsultation(null)}
+            onSectionChange={setActiveSection}
           />;
         case 'exames':
           return <LazyComponents.ExamesSection />;

@@ -26,9 +26,10 @@ interface Patient {
 interface PatientDetailsProps {
   patient: Patient;
   onBack: () => void;
+  onSectionChange?: (section: string) => void;
 }
 
-export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
+export function PatientDetails({ patient, onBack, onSectionChange }: PatientDetailsProps) {
   const { appUser } = useAuth();
   // Secretários e financeiro não podem ver prontuários médicos
   const canViewMedicalRecords = appUser?.role === 'admin' || appUser?.role === 'doctor';
@@ -69,6 +70,7 @@ export function PatientDetails({ patient, onBack }: PatientDetailsProps) {
         }}
         onSaved={handleNewConsultationSaved}
         existingConsultation={selectedConsultationId ? { id: selectedConsultationId } : null}
+        onSectionChange={onSectionChange}
       />
     );
   }

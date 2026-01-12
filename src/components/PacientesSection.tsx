@@ -19,9 +19,10 @@ import { PatientDetailsModal } from './PatientDetailsModal';
 interface PacientesSectionProps {
   patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
   onConsultationOpened?: () => void;
+  onSectionChange?: (section: string) => void;
 }
 
-export function PacientesSection({ patientToOpenConsultation, onConsultationOpened }: PacientesSectionProps = {}) {
+export function PacientesSection({ patientToOpenConsultation, onConsultationOpened, onSectionChange }: PacientesSectionProps = {}) {
   const { appUser } = useAuth();
   const [patientSubSection, setPatientSubSection] = useState('prontuarios');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -634,12 +635,14 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                   fetchPatients(0, true); // Recarregar lista de pacientes
                 }}
                 existingConsultation={existingConsultation}
+                onSectionChange={onSectionChange}
               />
             ) : (
               /* Prontuário Detalhado - Usando componente PatientDetails completo */
-              <PatientDetails 
-                patient={selectedPatient} 
-                onBack={() => setSelectedPatient(null)} 
+              <PatientDetails
+                patient={selectedPatient}
+                onBack={() => setSelectedPatient(null)}
+                onSectionChange={onSectionChange}
               />
             )}
           </div>
