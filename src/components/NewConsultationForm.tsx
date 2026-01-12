@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Save, User, TestTube, Calendar, FileText } from 'lucide-react';
+import { ArrowLeft, Save, User, TestTube, Calendar, FileText, Edit } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,39 @@ import { logger } from '@/utils/logger';
 import { toast } from 'sonner';
 import { PatientConsultations } from './PatientConsultations';
 import { getDoctorFullName } from '@/utils/doctorNames';
+
+// Função para calcular idade detalhada em anos, meses e dias
+const calculateDetailedAge = (birthDate: string): string => {
+  const birth = new Date(birthDate);
+  const today = new Date();
+
+  let years = today.getFullYear() - birth.getFullYear();
+  let months = today.getMonth() - birth.getMonth();
+  let days = today.getDate() - birth.getDate();
+
+  // Ajustar se o mês atual for menor que o mês de nascimento
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  // Ajustar se o dia atual for menor que o dia de nascimento
+  if (days < 0) {
+    months--;
+    // Calcular dias do mês anterior
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const daysInLastMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+    days += daysInLastMonth;
+
+    // Se months ficou negativo após o ajuste, ajustar novamente
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+  }
+
+  return `${years} anos, ${months} meses, ${days} dias`;
+};
 
 interface Patient {
   id: string;
@@ -40,6 +73,7 @@ interface NewConsultationFormProps {
   onBack: () => void;
   onSaved: () => void;
   existingConsultation?: ConsultationData | null;
+  onEditPatient?: (patient: Patient) => void;
 }
 
 interface PatientExam {
@@ -63,7 +97,7 @@ const examTypeLabels: { [key: string]: string } = {
   'ultrassom_ocular': 'Ultrassom Ocular'
 };
 
-export function NewConsultationForm({ patient, onBack, onSaved, existingConsultation }: NewConsultationFormProps) {
+export function NewConsultationForm({ patient, onBack, onSaved, existingConsultation, onEditPatient }: NewConsultationFormProps) {
   const { appUser } = useAuth();
   const [loading, setSaving] = useState(false);
   const [consultationText, setConsultationText] = useState('');
@@ -239,8 +273,15 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             Voltar
           </Button>
           <div>
-            <h2 className="text-2xl font-bold text-cinza-escuro">Nova Consulta</h2>
-            <p className="text-gray-600">Registrar nova consulta para {patient.name}</p>
+            <h2 className="text-2xl font-bold text-cinza-escuro">
+              {existingConsultation ? 'Editar Consulta' : 'Nova Consulta'}
+            </h2>
+            <p className="text-gray-600">
+              {existingConsultation
+                ? `Editar consulta de ${patient.name}`
+                : `Registrar nova consulta para ${patient.name}`
+              }
+            </p>
           </div>
         </div>
         <Button 
@@ -256,14 +297,28 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
 
       {/* Informações do Paciente */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="h-12 w-12 rounded-full bg-bege-principal flex items-center justify-center">
-            <User className="h-6 w-6 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="h-12 w-12 rounded-full bg-bege-principal flex items-center justify-center">
+              <User className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-cinza-escuro">{patient.name}</h3>
+              <p className="text-gray-600">CPF: {patient.cpf} • Nascimento: {new Date(patient.date_of_birth).toLocaleDateString('pt-BR')} ({calculateDetailedAge(patient.date_of_birth)})</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-cinza-escuro">{patient.name}</h3>
-            <p className="text-gray-600">CPF: {patient.cpf} • Nascimento: {new Date(patient.date_of_birth).toLocaleDateString('pt-BR')}</p>
-          </div>
+          {onEditPatient && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onEditPatient(patient)}
+              className="bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white border-marrom-acentuado hover:border-marrom-acentuado/90"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar Paciente
+            </Button>
+          )}
         </div>
       </div>
 

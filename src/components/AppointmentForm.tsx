@@ -380,7 +380,9 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
                     type="date"
                     value={formData.date_of_birth}
                     onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                    placeholder="dd/mm/aaaa"
                     className="h-8 text-xs mt-0.5"
+                    style={{ colorScheme: 'light' }}
                   />
                 </div>
                 <div>

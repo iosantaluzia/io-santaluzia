@@ -1,5 +1,5 @@
 // Componente de Agendamentos - Última atualização: 2025-10-20
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronRight, Columns, PanelLeft, Plus, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +9,7 @@ import { PatientDetailsModal } from './PatientDetailsModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments';
 
 interface AgendamentosSectionProps {
   onSectionChange?: (section: string) => void;
@@ -143,6 +144,56 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     city?: string;
   } | undefined>(undefined);
   const [initialAppointmentType, setInitialAppointmentType] = useState<string | undefined>(undefined);
+
+  // Refs para controle de scroll automático
+  const matheusScrollRef = useRef<HTMLDivElement>(null);
+  const fabiolaScrollRef = useRef<HTMLDivElement>(null);
+
+  // Função para encontrar o horário mais próximo ao atual
+  const findClosestAppointmentIndex = useCallback((timeSlots: AppointmentSlot[]): number => {
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // minutos desde meia-noite
+
+    let closestIndex = 0;
+    let smallestDiff = Infinity;
+
+    timeSlots.forEach((slot, index) => {
+      const [hours, minutes] = slot.time.split(':').map(Number);
+      const slotTime = hours * 60 + minutes;
+      const diff = Math.abs(currentTime - slotTime);
+
+      if (diff < smallestDiff) {
+        smallestDiff = diff;
+        closestIndex = index;
+      }
+    });
+
+    return closestIndex;
+  }, []);
+
+  // Função para fazer scroll automático para o horário mais próximo
+  const scrollToClosestAppointment = useCallback((scrollRef: React.RefObject<HTMLDivElement>, timeSlots: AppointmentSlot[]) => {
+    if (!scrollRef.current || timeSlots.length === 0) return;
+
+    const closestIndex = findClosestAppointmentIndex(timeSlots);
+
+    // Aguardar um pouco para garantir que o DOM esteja renderizado
+    setTimeout(() => {
+      if (scrollRef.current) {
+        const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          // Cada item tem aproximadamente 80px de altura (incluindo margem)
+          const itemHeight = 80;
+          const scrollTop = closestIndex * itemHeight;
+
+          scrollContainer.scrollTo({
+            top: scrollTop,
+            behavior: 'smooth'
+          });
+        }
+      }
+    }, 100);
+  }, [findClosestAppointmentIndex]);
 
   // Dados estáticos de fallback (usados quando não há dados no banco)
   // NOTA: Dados fake removidos para Dr. Matheus - apenas dados reais serão exibidos
@@ -466,6 +517,59 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate.getFullYear(), selectedDate.getMonth(), fetchMonthAppointments]);
 
+  // Estado para controlar recarregamento automático
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  const [refetchType, setRefetchType] = useState<'INSERT' | 'UPDATE' | 'DELETE' | null>(null);
+
+  // Callback para quando houver mudanças em tempo real nos agendamentos
+  const handleRealtimeAppointmentChange = useCallback((change: { type: 'INSERT' | 'UPDATE' | 'DELETE'; data: any }) => {
+    console.log('🔄 Mudança detectada em agendamento:', change);
+
+    // Definir flag para recarregar dados
+    setShouldRefetch(true);
+    setRefetchType(change.type);
+  }, []);
+
+  // Effect para recarregar dados quando shouldRefetch for true
+  useEffect(() => {
+    if (shouldRefetch) {
+      console.log('🔄 Recarregando dados após mudança realtime...');
+
+      // Recarregar dados automaticamente quando houver qualquer mudança
+      fetchAppointments(selectedDate);
+
+      // Também recarregar dados do mês para atualizar o calendário
+      fetchMonthAppointments(selectedDate);
+
+      // Mostrar toast de confirmação
+      if (refetchType === 'UPDATE') {
+        toast.success('Agendamento atualizado automaticamente');
+      } else if (refetchType === 'INSERT') {
+        toast.success('Novo agendamento adicionado automaticamente');
+      }
+
+      // Resetar flags
+      setShouldRefetch(false);
+      setRefetchType(null);
+    }
+  }, [shouldRefetch, refetchType, selectedDate, fetchAppointments, fetchMonthAppointments]);
+
+  // Effect para fazer scroll automático quando os dados são carregados
+  useEffect(() => {
+    if (!loading && selectedDate.toDateString() === new Date().toDateString()) {
+      // Só fazer scroll automático se for o dia atual
+      if (timeSlotsMatheus.length > 0) {
+        scrollToClosestAppointment(matheusScrollRef, timeSlotsMatheus);
+      }
+      if (timeSlotsFabiola.length > 0) {
+        scrollToClosestAppointment(fabiolaScrollRef, timeSlotsFabiola);
+      }
+    }
+  }, [loading, timeSlotsMatheus, timeSlotsFabiola, selectedDate, scrollToClosestAppointment]);
+
+  // Configurar realtime para monitorar mudanças nos agendamentos
+  useRealtimeAppointments(handleRealtimeAppointmentChange);
+
   const handlePatientClick = (patient: any) => {
     setSelectedPatient(patient);
     setShowPatientDetails(true);
@@ -787,7 +891,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                   className="w-12 h-12 object-cover rounded-full border-2 border-white shadow-sm bg-amber-50"
                 />
               </div>
-              <ScrollArea className="h-[350px]">
+              <ScrollArea ref={matheusScrollRef} className="h-[350px]">
                 {loading ? (
                   <div className="flex justify-center items-center h-full">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-bege-principal"></div>
@@ -884,7 +988,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                   className="w-12 h-12 object-cover rounded-full border-2 border-white shadow-sm bg-amber-50"
                 />
               </div>
-              <ScrollArea className="h-[350px]">
+              <ScrollArea ref={fabiolaScrollRef} className="h-[350px]">
                 {loading ? (
                   <div className="flex justify-center items-center h-full">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-bege-principal"></div>

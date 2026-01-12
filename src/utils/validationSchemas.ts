@@ -62,15 +62,15 @@ export const nameSchema = z.string()
 
 // Appointment form schema
 export const appointmentFormSchema = z.object({
-  name: nameSchema,
+  name: nameSchema, // Obrigatório
   cpf: cpfSchema.optional().or(z.literal('')),
-  phone: phoneSchema,
+  phone: phoneSchema.optional().or(z.literal('')),
   date_of_birth: z.string().optional().or(z.literal('')),
   email: emailSchema.optional().or(z.literal('')),
   address: z.string().max(500, 'Endereço muito longo').optional(),
   cep: cepSchema.optional().or(z.literal('')),
   city: z.string().max(100, 'Cidade muito longa').optional(),
-  doctor: z.string().min(1, 'Selecione um médico'),
+  doctor: z.string().min(1, 'Selecione um médico'), // Obrigatório
   time: z.string().min(1, 'Selecione um horário'),
   appointmentType: z.string().min(1, 'Selecione o tipo de consulta'),
   amount: z.union([z.string(), z.number()]).optional().transform((val) => {
@@ -104,14 +104,14 @@ export const consultationFormSchema = z.object({
 
 // Patient form schema
 export const patientFormSchema = z.object({
-  name: nameSchema,
+  name: nameSchema, // Apenas nome é obrigatório
   cpf: cpfSchema.optional().or(z.literal('')),
   date_of_birth: z.string().optional().or(z.literal('')),
-  phone: phoneSchema.optional(),
+  phone: phoneSchema.optional().or(z.literal('')),
   email: emailSchema.optional().or(z.literal('')),
   address: z.string().max(500).optional(),
   emergency_contact: z.string().max(255).optional(),
-  emergency_phone: phoneSchema.optional(),
+  emergency_phone: phoneSchema.optional().or(z.literal('')),
   medical_history: z.string().max(5000).optional(),
   allergies: z.string().max(1000).optional(),
   medications: z.string().max(1000).optional()

@@ -1,5 +1,5 @@
 /**
- * Utilitários para formatação de moeda brasileira (R$)
+ * Utilitários para formatação de moeda brasileira (R$) e datas
  */
 
 /**
@@ -84,3 +84,20 @@ export function getNumericValue(formattedValue: string): number {
   return parseCurrency(formattedValue);
 }
 
+/**
+ * Formata data no padrão brasileiro (dd/mm/aaaa)
+ */
+export function formatBrazilianDate(date: Date | string): string {
+  if (!date) return '';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString('pt-BR');
+}
+
+/**
+ * Converte data do formato brasileiro para ISO (yyyy-mm-dd)
+ */
+export function parseBrazilianDate(dateString: string): string {
+  if (!dateString) return '';
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
