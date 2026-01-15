@@ -74,7 +74,6 @@ interface NewConsultationFormProps {
   onSaved: () => void;
   existingConsultation?: ConsultationData | null;
   onEditPatient?: (patient: Patient) => void;
-  onSectionChange?: (section: string) => void;
 }
 
 interface PatientExam {
@@ -98,7 +97,7 @@ const examTypeLabels: { [key: string]: string } = {
   'ultrassom_ocular': 'Ultrassom Ocular'
 };
 
-export function NewConsultationForm({ patient, onBack, onSaved, existingConsultation, onEditPatient, onSectionChange }: NewConsultationFormProps) {
+export function NewConsultationForm({ patient, onBack, onSaved, existingConsultation, onEditPatient }: NewConsultationFormProps) {
   const { appUser } = useAuth();
   const [loading, setSaving] = useState(false);
   const [consultationText, setConsultationText] = useState('');
@@ -251,11 +250,6 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
         }
 
         toast.success('Consulta salva com sucesso!');
-      }
-
-      // Redirecionar para aba de agendamentos ANTES de executar onSaved
-      if (onSectionChange) {
-        onSectionChange('agendamentos');
       }
 
       // Limpar formulário

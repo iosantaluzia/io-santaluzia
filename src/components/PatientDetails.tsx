@@ -58,6 +58,11 @@ export function PatientDetails({ patient, onBack, onSectionChange }: PatientDeta
   const handleNewConsultationSaved = () => {
     setShowNewConsultation(false);
     setActiveTab('prontuario');
+
+    // Redirecionar para agendamentos após salvar consulta
+    if (onSectionChange) {
+      onSectionChange('agendamentos');
+    }
   };
 
   if (showNewConsultation) {
@@ -70,7 +75,6 @@ export function PatientDetails({ patient, onBack, onSectionChange }: PatientDeta
         }}
         onSaved={handleNewConsultationSaved}
         existingConsultation={selectedConsultationId ? { id: selectedConsultationId } : null}
-        onSectionChange={onSectionChange}
       />
     );
   }

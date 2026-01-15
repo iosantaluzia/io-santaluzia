@@ -633,9 +633,13 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                   setSelectedPatient(null);
                   setExistingConsultation(null);
                   fetchPatients(0, true); // Recarregar lista de pacientes
+
+                  // Redirecionar para agendamentos após salvar consulta
+                  if (onSectionChange) {
+                    onSectionChange('agendamentos');
+                  }
                 }}
                 existingConsultation={existingConsultation}
-                onSectionChange={onSectionChange}
               />
             ) : (
               /* Prontuário Detalhado - Usando componente PatientDetails completo */
