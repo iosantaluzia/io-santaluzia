@@ -253,14 +253,14 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
         toast.success('Consulta salva com sucesso!');
       }
 
-      // Limpar formulário
-      setConsultationText('');
-      onSaved();
-
-      // Redirecionar para aba de agendamentos
+      // Redirecionar para aba de agendamentos ANTES de executar onSaved
       if (onSectionChange) {
         onSectionChange('agendamentos');
       }
+
+      // Limpar formulário
+      setConsultationText('');
+      onSaved();
     } catch (error) {
       logger.error('Erro ao salvar consulta:', error);
       toast.error('Erro ao salvar consulta. Tente novamente.');
