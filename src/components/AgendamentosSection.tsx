@@ -891,19 +891,26 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                   </div>
                 ) : timeSlotsMatheus.length > 0 ? (
                   timeSlotsMatheus.map((slot, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       onClick={() => handlePatientClick(slot)}
                       className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex-1">
                         <p className="font-medium text-gray-800">{slot.time}</p>
                         <p className="text-sm text-gray-600 hover:text-medical-primary transition-colors">{slot.name}</p>
-                        {slot.appointmentType && (
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {appointmentTypeLabels[slot.appointmentType] || slot.appointmentType}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {slot.appointmentType && (
+                            <p className="text-xs text-gray-500">
+                              {appointmentTypeLabels[slot.appointmentType] || slot.appointmentType}
+                            </p>
+                          )}
+                          {slot.observations && (
+                            <p className="text-xs text-gray-600 italic truncate max-w-[150px]" title={slot.observations}>
+                              📝 {slot.observations}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       {slot.consultationId ? (
                         <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)}>
@@ -988,19 +995,26 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                   </div>
                 ) : timeSlotsFabiola.length > 0 ? (
                   timeSlotsFabiola.map((slot, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       onClick={() => handlePatientClick(slot)}
                       className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex-1">
                         <p className="font-medium text-gray-800">{slot.time}</p>
                         <p className="text-sm text-gray-600 hover:text-medical-primary transition-colors">{slot.name}</p>
-                        {slot.appointmentType && (
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {appointmentTypeLabels[slot.appointmentType] || slot.appointmentType}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {slot.appointmentType && (
+                            <p className="text-xs text-gray-500">
+                              {appointmentTypeLabels[slot.appointmentType] || slot.appointmentType}
+                            </p>
+                          )}
+                          {slot.observations && (
+                            <p className="text-xs text-gray-600 italic truncate max-w-[150px]" title={slot.observations}>
+                              📝 {slot.observations}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       {slot.consultationId ? (
                         <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)}>
