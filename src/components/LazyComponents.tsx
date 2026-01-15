@@ -52,17 +52,20 @@ export const LazyComponents = {
     </Suspense>
   ),
   
-  PacientesSection: ({ 
-    patientToOpenConsultation, 
-    onConsultationOpened 
-  }: { 
+  PacientesSection: ({
+    patientToOpenConsultation,
+    onConsultationOpened,
+    onSectionChange
+  }: {
     patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
     onConsultationOpened?: () => void;
+    onSectionChange?: (section: string) => void;
   }) => (
     <Suspense fallback={<LoadingSpinner />}>
-      <PacientesSectionLazy 
+      <PacientesSectionLazy
         patientToOpenConsultation={patientToOpenConsultation}
         onConsultationOpened={onConsultationOpened}
+        onSectionChange={onSectionChange}
       />
     </Suspense>
   ),
