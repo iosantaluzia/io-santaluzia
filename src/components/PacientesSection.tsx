@@ -629,6 +629,7 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
                   setExistingConsultation(null);
                 }}
                 onSaved={() => {
+                  console.log('🔄 onSaved chamado - redirecionando para agendamentos');
                   setShowNewConsultation(false);
                   setSelectedPatient(null);
                   setExistingConsultation(null);
@@ -636,7 +637,10 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
 
                   // Redirecionar para agendamentos após salvar consulta
                   if (onSectionChange) {
+                    console.log('✅ onSectionChange disponível, chamando setActiveSection("agendamentos")');
                     onSectionChange('agendamentos');
+                  } else {
+                    console.log('❌ onSectionChange não disponível');
                   }
                 }}
                 existingConsultation={existingConsultation}
