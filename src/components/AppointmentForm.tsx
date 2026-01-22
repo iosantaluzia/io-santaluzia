@@ -81,10 +81,10 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         address: initialPatientData.address || prev.address,
         cep: initialPatientData.cep || prev.cep,
         city: initialPatientData.city || prev.city,
-        appointmentType: initialAppointmentType || prev.appointmentType
+        appointmentType: initialAppointmentType || prev.appointmentType || 'consulta'
       }));
     } else if (isOpen && !initialPatientData) {
-      // Limpar formulário quando não há dados iniciais
+      // Limpar formulário quando não há dados iniciais, mas manter initialAppointmentType se fornecido
       setFormData({
         name: '',
         cpf: '',
@@ -96,7 +96,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         city: '',
         doctor: '',
         time: '',
-        appointmentType: '',
+        appointmentType: initialAppointmentType || '',
         amount: '',
         payment_received: false,
         payment_method: '',
@@ -268,6 +268,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
           observations: validatedData.notes || null,
           payment_received: formData.payment_received || false,
           status: 'scheduled',
+          appointment_type: validatedData.appointmentType || 'consulta', // Incluir tipo de agendamento
           created_by: appUser?.username || 'sistema'
         })
         .select('id')

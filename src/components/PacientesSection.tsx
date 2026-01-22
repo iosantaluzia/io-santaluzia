@@ -18,11 +18,13 @@ import { PatientDetailsModal } from './PatientDetailsModal';
 
 interface PacientesSectionProps {
   patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
+  patientIdToOpen?: string | null;
   onConsultationOpened?: () => void;
+  onPatientOpened?: () => void;
   onSectionChange?: (section: string) => void;
 }
 
-export function PacientesSection({ patientToOpenConsultation, onConsultationOpened, onSectionChange }: PacientesSectionProps = {}) {
+export function PacientesSection({ patientToOpenConsultation, patientIdToOpen, onConsultationOpened, onPatientOpened, onSectionChange }: PacientesSectionProps = {}) {
   const { appUser } = useAuth();
   const [patientSubSection, setPatientSubSection] = useState('prontuarios');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -139,6 +141,59 @@ export function PacientesSection({ patientToOpenConsultation, onConsultationOpen
 
     openConsultation();
   }, [patientToOpenConsultation, patients, onConsultationOpened]);
+
+  // Efeito para abrir automaticamente o prontuário quando patientIdToOpen for fornecido
+  useEffect(() => {
+    const openPatient = async () => {
+      if (!patientIdToOpen) return;
+
+      // Primeiro, tentar encontrar o paciente na lista atual
+      let patient = patients.find(p => p.id === patientIdToOpen);
+      
+      // Se não encontrou na lista, buscar diretamente do banco
+      if (!patient) {
+        try {
+          const { data, error } = await supabase
+            .from('patients')
+            .select('*')
+            .eq('id', patientIdToOpen)
+            .single();
+          
+          if (error) {
+            console.error('Erro ao buscar paciente:', error);
+            toast.error('Erro ao carregar dados do paciente');
+            return;
+          }
+          
+          if (data) {
+            patient = data;
+            // Adicionar o paciente à lista se não estiver lá
+            if (!patients.find(p => p.id === patient.id)) {
+              setPatients(prev => [...prev, patient]);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar paciente:', error);
+          toast.error('Erro ao carregar dados do paciente');
+          return;
+        }
+      }
+      
+      if (patient) {
+        setSelectedPatient(patient);
+        setPatientSubSection('prontuarios'); // Garantir que estamos na subseção correta
+        setShowNewConsultation(false);
+        setExistingConsultation(null);
+        
+        // Notificar que o paciente foi aberto
+        if (onPatientOpened) {
+          onPatientOpened();
+        }
+      }
+    };
+
+    openPatient();
+  }, [patientIdToOpen, patients, onPatientOpened]);
 
   const fetchPatients = async (pageNum: number = 0, reset: boolean = false) => {
     try {

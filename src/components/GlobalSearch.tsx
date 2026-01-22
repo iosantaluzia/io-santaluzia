@@ -78,6 +78,7 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
             exam_type,
             exam_date,
             description,
+            patient_id,
             patients!inner(id, name)
           `)
           .or(`exam_type.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
@@ -257,9 +258,9 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
                       <button
                         key={`${result.type}-${result.id}`}
                         onClick={() => handleResultClick(result)}
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-3 transition-colors"
+                        className="w-full px-4 py-2.5 text-left hover:bg-gray-50 active:bg-gray-100 flex items-start gap-3 transition-colors cursor-pointer focus:outline-none focus:bg-gray-50"
                       >
-                        <div className="mt-0.5 text-gray-400">
+                        <div className="mt-0.5 text-gray-400 flex-shrink-0">
                           {getCategoryIcon(result.type)}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -267,7 +268,7 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
                             {result.title}
                           </div>
                           {result.subtitle && (
-                            <div className="text-xs text-gray-500 truncate">
+                            <div className="text-xs text-gray-500 truncate mt-0.5">
                               {result.subtitle}
                             </div>
                           )}

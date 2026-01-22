@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [selectedPatientName, setSelectedPatientName] = useState<string>('');
   const [patientToOpenConsultation, setPatientToOpenConsultation] = useState<{ patientId: string; consultationId?: string } | null>(null);
+  const [patientIdToOpen, setPatientIdToOpen] = useState<string | null>(null);
   const [initialSectionSet, setInitialSectionSet] = useState(false);
 
   // Definir seção inicial quando appUser for carregado pela primeira vez
@@ -194,7 +195,14 @@ const AdminDashboard = () => {
         case 'pacientes':
           return <LazyComponents.PacientesSection
             patientToOpenConsultation={patientToOpenConsultation}
-            onConsultationOpened={() => setPatientToOpenConsultation(null)}
+            patientIdToOpen={patientIdToOpen}
+            onConsultationOpened={() => {
+              setPatientToOpenConsultation(null);
+              setPatientIdToOpen(null);
+            }}
+            onPatientOpened={() => {
+              setPatientIdToOpen(null);
+            }}
             onSectionChange={setActiveSection}
           />;
         case 'exames':
@@ -265,10 +273,39 @@ const AdminDashboard = () => {
             <div className="flex-1 flex justify-center px-4">
               <div className="w-full max-w-2xl">
                 <GlobalSearch 
-                  onSectionChange={setActiveSection}
+                  onSectionChange={(section) => {
+                    setActiveSection(section);
+                    // Limpar estados de navegação quando mudar de seção manualmente
+                    if (section !== 'pacientes') {
+                      setPatientIdToOpen(null);
+                      setPatientToOpenConsultation(null);
+                    }
+                  }}
                   onResultClick={(result) => {
-                    // Você pode adicionar lógica adicional aqui se necessário
                     console.log('Resultado selecionado:', result);
+                    
+                    // Navegar baseado no tipo de resultado
+                    if (result.type === 'patient') {
+                      // Navegar para pacientes e abrir o prontuário do paciente específico
+                      setPatientIdToOpen(result.id);
+                      setActiveSection('pacientes');
+                    } else if (result.type === 'exam') {
+                      // Para exames, navegar para o paciente que tem o exame
+                      const examData = result.data;
+                      // Tentar obter patient_id de diferentes formas
+                      const patientId = examData?.patient_id || examData?.patients?.id;
+                      if (patientId) {
+                        setPatientIdToOpen(patientId);
+                        setActiveSection('pacientes');
+                        // TODO: Futuramente, podemos adicionar lógica para abrir diretamente a aba de exames do paciente
+                      } else {
+                        // Se não tiver patient_id, apenas navegar para exames
+                        setActiveSection('exames');
+                      }
+                    } else if (result.type === 'stock') {
+                      // Estoque já navega corretamente
+                      setActiveSection('estoque');
+                    }
                   }}
                 />
               </div>
