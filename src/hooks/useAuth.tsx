@@ -228,15 +228,23 @@ export function useAuth() {
       }
 
       if (data.user) {
-        // Update last login - usar setTimeout para não bloquear
+        // Update last login - usar setTimeout para não bloquear o fluxo de login
         setTimeout(async () => {
           try {
-            await supabase
+            const { error: updateError } = await supabase
               .from('app_users')
               .update({ last_login: new Date().toISOString() })
               .eq('auth_user_id', data.user.id);
+            
+            if (updateError) {
+              logger.error('Failed to update last login:', updateError);
+              console.error('Erro ao atualizar último login:', updateError);
+            } else {
+              logger.log('Last login updated successfully for user:', data.user.id);
+            }
           } catch (updateError) {
-            logger.log('Failed to update last login:', updateError);
+            logger.error('Exception updating last login:', updateError);
+            console.error('Exceção ao atualizar último login:', updateError);
           }
         }, 100);
       }

@@ -35,6 +35,9 @@ export function useRealtimeChat(currentUsername: string | null) {
     if (!currentUsername) return;
 
     try {
+      // Garantir que o username está em minúsculas
+      const usernameLower = currentUsername.toLowerCase();
+      
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - MESSAGE_RETENTION_HOURS);
 
@@ -52,7 +55,7 @@ export function useRealtimeChat(currentUsername: string | null) {
         .from('internal_messages')
         .select('*')
         .eq('message_type', 'private')
-        .or(`from_username.eq.${currentUsername},to_username.eq.${currentUsername}`)
+        .or(`from_username.eq.${usernameLower},to_username.eq.${usernameLower}`)
         .gte('created_at', twentyFourHoursAgo.toISOString())
         .order('created_at', { ascending: true });
 
@@ -66,12 +69,10 @@ export function useRealtimeChat(currentUsername: string | null) {
       );
 
       setMessages(allMessages as ChatMessage[]);
-
-      // Calcular mensagens não lidas
       const unread = allMessages.filter(
         msg => !msg.read && 
-        msg.from_username !== currentUsername &&
-        (msg.message_type === 'group' || msg.to_username === currentUsername)
+        msg.from_username?.toLowerCase() !== usernameLower &&
+        (msg.message_type === 'group' || msg.to_username?.toLowerCase() === usernameLower)
       ).length;
 
       setUnreadCount(unread);
@@ -89,6 +90,9 @@ export function useRealtimeChat(currentUsername: string | null) {
       return;
     }
 
+    // Garantir que o username está em minúsculas
+    const usernameLower = currentUsername.toLowerCase();
+
     // Limpar canais anteriores
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
@@ -99,7 +103,7 @@ export function useRealtimeChat(currentUsername: string | null) {
 
     // Canal para mensagens - escutar TODAS as inserções e filtrar no código
     const channel = supabase
-      .channel(`internal_messages_${currentUsername}_${Date.now()}`)
+      .channel(`internal_messages_${usernameLower}_${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -111,6 +115,11 @@ export function useRealtimeChat(currentUsername: string | null) {
           console.log('📨 Nova mensagem recebida via Realtime:', payload);
           const newMessage = payload.new as ChatMessage;
           
+          // Garantir comparação case-insensitive
+          const currentUsernameLower = currentUsername.toLowerCase();
+          const fromUsernameLower = newMessage.from_username?.toLowerCase() || '';
+          const toUsernameLower = newMessage.to_username?.toLowerCase() || '';
+
           // Verificar se é mensagem de grupo
           if (newMessage.message_type === 'group') {
             setMessages(prev => {
@@ -124,7 +133,7 @@ export function useRealtimeChat(currentUsername: string | null) {
             });
 
             // Incrementar contador de não lidas se não for do usuário atual
-            if (newMessage.from_username !== currentUsername) {
+            if (fromUsernameLower !== currentUsernameLower) {
               setUnreadCount(prev => {
                 const newCount = prev + 1;
                 console.log('📊 Contador de não lidas atualizado:', newCount);
@@ -135,7 +144,7 @@ export function useRealtimeChat(currentUsername: string | null) {
           // Verificar se é mensagem privada para o usuário atual
           else if (newMessage.message_type === 'private') {
             // Só adicionar se for para o usuário atual ou do usuário atual
-            if (newMessage.to_username === currentUsername || newMessage.from_username === currentUsername) {
+            if (toUsernameLower === currentUsernameLower || fromUsernameLower === currentUsernameLower) {
               setMessages(prev => {
                 if (prev.some(msg => msg.id === newMessage.id)) {
                   console.log('⚠️ Mensagem privada duplicada ignorada:', newMessage.id);
@@ -146,7 +155,7 @@ export function useRealtimeChat(currentUsername: string | null) {
               });
 
               // Incrementar contador se for para o usuário atual
-              if (newMessage.to_username === currentUsername && newMessage.from_username !== currentUsername) {
+              if (toUsernameLower === currentUsernameLower && fromUsernameLower !== currentUsernameLower) {
                 setUnreadCount(prev => {
                   const newCount = prev + 1;
                   console.log('📊 Contador de não lidas atualizado (privada):', newCount);
@@ -243,7 +252,7 @@ export function useRealtimeChat(currentUsername: string | null) {
         if (status === 'SUBSCRIBED') {
           // Enviar presença do usuário atual
           await presenceChannel.track({
-            username: currentUsername,
+            username: usernameLower,
             online_at: new Date().toISOString()
           });
         }
@@ -260,7 +269,7 @@ export function useRealtimeChat(currentUsername: string | null) {
         supabase.removeChannel(channelRef.current);
       }
       if (presenceChannelRef.current) {
-        presenceChannelRef.current.track({ username: currentUsername, online_at: null });
+        presenceChannelRef.current.track({ username: usernameLower, online_at: null });
         supabase.removeChannel(presenceChannelRef.current);
       }
     };
@@ -273,15 +282,28 @@ export function useRealtimeChat(currentUsername: string | null) {
     toUsername?: string
   ) => {
     if (!currentUsername || !message.trim()) {
+      console.error('❌ Não é possível enviar mensagem:', { currentUsername, message: message.trim() });
       return null;
     }
 
+    // Garantir que o username está em minúsculas
+    const usernameLower = currentUsername.toLowerCase();
+    const toUsernameLower = type === 'private' ? (toUsername?.toLowerCase() || null) : null;
+
     try {
+      console.log('📤 Tentando enviar mensagem:', {
+        from_username: usernameLower,
+        to_username: toUsernameLower,
+        message_type: type,
+        message_length: message.trim().length,
+        currentUsername_original: currentUsername
+      });
+
       const { data, error } = await supabase
         .from('internal_messages')
         .insert({
-          from_username: currentUsername,
-          to_username: type === 'private' ? toUsername || null : null,
+          from_username: usernameLower,
+          to_username: toUsernameLower,
           message: message.trim(),
           message_type: type,
           read: false
@@ -289,11 +311,34 @@ export function useRealtimeChat(currentUsername: string | null) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao enviar mensagem:', error);
+        console.error('Detalhes do erro:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
 
-      return data as ChatMessage;
+      console.log('✅ Mensagem enviada com sucesso:', data);
+      
+      // Atualizar estado local IMEDIATAMENTE para que a mensagem apareça na tela
+      const newMessage = data as ChatMessage;
+      setMessages(prev => {
+        // Evitar duplicatas caso o Realtime também adicione
+        if (prev.some(msg => msg.id === newMessage.id)) {
+          console.log('⚠️ Mensagem já existe no estado, ignorando duplicata');
+          return prev;
+        }
+        console.log('✅ Adicionando mensagem ao estado local imediatamente');
+        return [...prev, newMessage];
+      });
+      
+      return newMessage;
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Exceção ao enviar mensagem:', error);
       throw error;
     }
   }, [currentUsername]);
@@ -303,20 +348,24 @@ export function useRealtimeChat(currentUsername: string | null) {
     if (!currentUsername) return;
 
     try {
+      // Garantir que os usernames estão em minúsculas
+      const usernameLower = currentUsername.toLowerCase();
+      const fromUsernameLower = fromUsername?.toLowerCase();
+
       let query = supabase
         .from('internal_messages')
         .update({ read: true })
         .eq('read', false);
 
-      if (fromUsername) {
+      if (fromUsernameLower) {
         // Marcar mensagens de um usuário específico
         query = query.or(
-          `and(message_type.eq.private,from_username.eq.${fromUsername},to_username.eq.${currentUsername}),and(message_type.eq.group,from_username.eq.${fromUsername})`
+          `and(message_type.eq.private,from_username.eq.${fromUsernameLower},to_username.eq.${usernameLower}),and(message_type.eq.group,from_username.eq.${fromUsernameLower})`
         );
       } else {
         // Marcar todas as mensagens não lidas para o usuário atual
         query = query.or(
-          `and(message_type.eq.group,from_username.neq.${currentUsername}),and(message_type.eq.private,to_username.eq.${currentUsername})`
+          `and(message_type.eq.group,from_username.neq.${usernameLower}),and(message_type.eq.private,to_username.eq.${usernameLower})`
         );
       }
 
@@ -328,14 +377,17 @@ export function useRealtimeChat(currentUsername: string | null) {
       setMessages(prev =>
         prev.map(msg => {
           if (msg.read) return msg;
-          if (fromUsername) {
-            if (msg.from_username === fromUsername && 
-                (msg.message_type === 'group' || msg.to_username === currentUsername)) {
+          const msgFromLower = msg.from_username?.toLowerCase() || '';
+          const msgToLower = msg.to_username?.toLowerCase() || '';
+          
+          if (fromUsernameLower) {
+            if (msgFromLower === fromUsernameLower && 
+                (msg.message_type === 'group' || msgToLower === usernameLower)) {
               return { ...msg, read: true };
             }
           } else {
-            if (msg.from_username !== currentUsername &&
-                (msg.message_type === 'group' || msg.to_username === currentUsername)) {
+            if (msgFromLower !== usernameLower &&
+                (msg.message_type === 'group' || msgToLower === usernameLower)) {
               return { ...msg, read: true };
             }
           }
@@ -346,14 +398,17 @@ export function useRealtimeChat(currentUsername: string | null) {
       // Recalcular não lidas
       const updatedMessages = messages.map(msg => {
         if (msg.read) return msg;
-        if (fromUsername) {
-          if (msg.from_username === fromUsername && 
-              (msg.message_type === 'group' || msg.to_username === currentUsername)) {
+        const msgFromLower = msg.from_username?.toLowerCase() || '';
+        const msgToLower = msg.to_username?.toLowerCase() || '';
+        
+        if (fromUsernameLower) {
+          if (msgFromLower === fromUsernameLower && 
+              (msg.message_type === 'group' || msgToLower === usernameLower)) {
             return { ...msg, read: true };
           }
         } else {
-          if (msg.from_username !== currentUsername &&
-              (msg.message_type === 'group' || msg.to_username === currentUsername)) {
+          if (msgFromLower !== usernameLower &&
+              (msg.message_type === 'group' || msgToLower === usernameLower)) {
             return { ...msg, read: true };
           }
         }
@@ -362,8 +417,8 @@ export function useRealtimeChat(currentUsername: string | null) {
 
       const unread = updatedMessages.filter(
         msg => !msg.read && 
-        msg.from_username !== currentUsername &&
-        (msg.message_type === 'group' || msg.to_username === currentUsername)
+        (msg.from_username?.toLowerCase() || '') !== usernameLower &&
+        (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === usernameLower)
       ).length;
 
       setUnreadCount(unread);
@@ -374,10 +429,13 @@ export function useRealtimeChat(currentUsername: string | null) {
 
   // Obter mensagens entre dois usuários
   const getMessagesBetween = useCallback((user1: string, user2: string) => {
+    const user1Lower = user1.toLowerCase();
+    const user2Lower = user2.toLowerCase();
+    
     return messages.filter(msg =>
       msg.message_type === 'private' &&
-      ((msg.from_username === user1 && msg.to_username === user2) ||
-       (msg.from_username === user2 && msg.to_username === user1))
+      ((msg.from_username?.toLowerCase() === user1Lower && msg.to_username?.toLowerCase() === user2Lower) ||
+       (msg.from_username?.toLowerCase() === user2Lower && msg.to_username?.toLowerCase() === user1Lower))
     ).sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
@@ -385,11 +443,14 @@ export function useRealtimeChat(currentUsername: string | null) {
 
   // Obter contagem de não lidas de um usuário específico
   const getUnreadCountFrom = useCallback((fromUsername: string) => {
+    const fromUsernameLower = fromUsername.toLowerCase();
+    const currentUsernameLower = currentUsername?.toLowerCase() || '';
+    
     return messages.filter(
       msg => !msg.read &&
-      msg.from_username === fromUsername &&
-      msg.from_username !== currentUsername &&
-      (msg.message_type === 'group' || msg.to_username === currentUsername)
+      (msg.from_username?.toLowerCase() || '') === fromUsernameLower &&
+      (msg.from_username?.toLowerCase() || '') !== currentUsernameLower &&
+      (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === currentUsernameLower)
     ).length;
   }, [messages, currentUsername]);
 

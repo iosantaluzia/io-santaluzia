@@ -65,7 +65,7 @@ export function EstoqueSection() {
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold text-cinza-escuro">Inventário Atual</h3>
-          <Button className="bg-bege-principal text-white hover:bg-marrom-acentuado">
+          <Button className="bg-medical-primary text-white hover:bg-medical-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Item
           </Button>

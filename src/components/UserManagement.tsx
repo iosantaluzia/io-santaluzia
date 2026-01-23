@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { Edit, Save, X, Trash2 } from 'lucide-react';
+import { Edit, Save, X, Trash2, Plus } from 'lucide-react';
 
 interface AppUser {
   id: string;
@@ -28,6 +28,12 @@ export function UserManagement() {
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
   const [editFormData, setEditFormData] = useState({ username: '', password: '' });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUserFormData, setNewUserFormData] = useState({ 
+    username: '', 
+    password: '', 
+    role: 'secretary' as 'admin' | 'doctor' | 'secretary' | 'financeiro' 
+  });
   
   // Verificar se o usuário tem permissão (apenas matheus e secretaria)
   const canManageUsers = appUser?.username?.toLowerCase() === 'matheus' || appUser?.username?.toLowerCase() === 'secretaria';
@@ -85,6 +91,108 @@ export function UserManagement() {
     onError: (error: any) => {
       console.error('Error deleting user:', error);
       toast.error('Erro ao deletar usuário: ' + (error.message || 'Erro desconhecido'));
+    },
+  });
+
+  // Criar novo usuário
+  const createUserMutation = useMutation({
+    mutationFn: async ({ username, password, role }: { username: string; password: string; role: 'admin' | 'doctor' | 'secretary' | 'financeiro' }) => {
+      const email = `${username}@iosantaluzia.com`;
+      
+      // Verificar se o username já existe
+      const { data: existingUser } = await supabase
+        .from('app_users')
+        .select('id, auth_user_id')
+        .eq('username', username.toLowerCase())
+        .maybeSingle();
+
+      if (existingUser) {
+        if (existingUser.auth_user_id) {
+          throw new Error('Usuário já existe e está vinculado a uma conta de autenticação');
+        }
+        throw new Error('Username já existe. Use um username diferente.');
+      }
+
+      // Criar registro em app_users primeiro (sem auth_user_id)
+      const { data: newAppUser, error: appUserError } = await supabase
+        .from('app_users')
+        .insert({
+          username: username.toLowerCase(),
+          role,
+          approved: true,
+          auth_user_id: null,
+          created_by: appUser?.username || 'system'
+        })
+        .select()
+        .single();
+
+      if (appUserError) {
+        throw appUserError;
+      }
+
+      // Criar usuário no Supabase Auth
+      // O trigger handle_new_user() irá vincular automaticamente o auth_user_id
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username.toLowerCase()
+          },
+          emailRedirectTo: undefined
+        }
+      });
+
+      if (authError) {
+        // Se falhar ao criar no auth, deletar o registro de app_users
+        try {
+          await supabase
+            .from('app_users')
+            .delete()
+            .eq('id', newAppUser.id);
+        } catch (deleteError) {
+          console.error('Erro ao limpar registro de app_users após falha:', deleteError);
+        }
+        
+        if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
+          throw new Error('Email já está em uso. Use um username diferente.');
+        }
+        throw authError;
+      }
+
+      if (!authData.user) {
+        // Se não criou o usuário, deletar o registro de app_users
+        try {
+          await supabase
+            .from('app_users')
+            .delete()
+            .eq('id', newAppUser.id);
+        } catch (deleteError) {
+          console.error('Erro ao limpar registro de app_users:', deleteError);
+        }
+        throw new Error('Erro ao criar usuário de autenticação');
+      }
+
+      // O trigger handle_new_user() deve vincular automaticamente, mas vamos atualizar manualmente para garantir
+      const { error: linkError } = await supabase
+        .from('app_users')
+        .update({ auth_user_id: authData.user.id })
+        .eq('id', newAppUser.id);
+
+      if (linkError) {
+        console.warn('Aviso: Não foi possível vincular auth_user_id automaticamente:', linkError);
+        // Não falhar aqui, pois o trigger pode fazer isso
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['app_users'] });
+      setShowAddUser(false);
+      setNewUserFormData({ username: '', password: '', role: 'secretary' });
+      toast.success('Usuário criado com sucesso');
+    },
+    onError: (error: any) => {
+      console.error('Error creating user:', error);
+      toast.error('Erro ao criar usuário: ' + (error.message || 'Erro desconhecido'));
     },
   });
 
@@ -238,9 +346,16 @@ export function UserManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-marrom-principal">Gerenciamento de Usuários</h2>
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-cinza-escuro">Gerenciamento de Usuários</h2>
+        <Button 
+          onClick={() => setShowAddUser(true)}
+          className="bg-medical-primary text-white hover:bg-medical-primary/90"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Adicionar Usuário
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -356,6 +471,94 @@ export function UserManagement() {
                   {editUserMutation.isPending ? 'Salvando...' : 'Salvar'}
                 </Button>
               </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Adicionar Usuário */}
+      <Dialog open={showAddUser} onOpenChange={setShowAddUser}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Novo Usuário</DialogTitle>
+            <DialogDescription>
+              Crie um novo usuário com login e permissões para o dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="new-username">Username *</Label>
+              <Input
+                id="new-username"
+                value={newUserFormData.username}
+                onChange={(e) => setNewUserFormData({ ...newUserFormData, username: e.target.value.toLowerCase() })}
+                placeholder="Digite o username (ex: joao)"
+                disabled={createUserMutation.isPending}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                O email será gerado automaticamente como: {newUserFormData.username || 'username'}@iosantaluzia.com
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="new-password">Senha *</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newUserFormData.password}
+                onChange={(e) => setNewUserFormData({ ...newUserFormData, password: e.target.value })}
+                placeholder="Digite a senha"
+                disabled={createUserMutation.isPending}
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-role">Função *</Label>
+              <select
+                id="new-role"
+                value={newUserFormData.role}
+                onChange={(e) => setNewUserFormData({ ...newUserFormData, role: e.target.value as any })}
+                disabled={createUserMutation.isPending}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="secretary">Secretária</option>
+                <option value="doctor">Médico</option>
+                <option value="admin">Administrador</option>
+                <option value="financeiro">Financeiro</option>
+              </select>
+            </div>
+            <div className="flex justify-end space-x-2 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddUser(false);
+                  setNewUserFormData({ username: '', password: '', role: 'secretary' });
+                }}
+                disabled={createUserMutation.isPending}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!newUserFormData.username.trim()) {
+                    toast.error('O username é obrigatório');
+                    return;
+                  }
+                  if (!newUserFormData.password.trim() || newUserFormData.password.length < 6) {
+                    toast.error('A senha deve ter pelo menos 6 caracteres');
+                    return;
+                  }
+                  createUserMutation.mutate({
+                    username: newUserFormData.username.trim(),
+                    password: newUserFormData.password,
+                    role: newUserFormData.role
+                  });
+                }}
+                disabled={createUserMutation.isPending}
+                className="bg-medical-primary text-white hover:bg-medical-primary/90"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {createUserMutation.isPending ? 'Criando...' : 'Criar Usuário'}
+              </Button>
             </div>
           </div>
         </DialogContent>

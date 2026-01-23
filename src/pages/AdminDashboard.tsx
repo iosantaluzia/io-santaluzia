@@ -375,7 +375,7 @@ const AdminDashboard = () => {
         
         {/* Chat flutuante para comunicação interna */}
         {isAuthenticated && appUser && (
-          <FloatingChat currentUsername={appUser.username} />
+          <FloatingChat currentUsername={appUser.username?.toLowerCase() || null} />
         )}
       </div>
     </SidebarProvider>

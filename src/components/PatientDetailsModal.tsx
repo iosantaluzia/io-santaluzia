@@ -1083,17 +1083,18 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
 
         <div className="space-y-4 overflow-hidden flex flex-col">
           {/* Layout em duas colunas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
+          <div className={`grid overflow-hidden ${isEditing ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-2 gap-6'}`}>
             {/* Coluna Esquerda: Dados do Paciente */}
-            <div className="space-y-3 relative">
+            <div className={`relative ${isEditing ? 'space-y-2' : 'space-y-3'}`}>
               {/* Botão de Editar */}
               <div className="absolute top-0 right-0">
                 {!isEditing ? (
                   <Button
                     onClick={() => setIsEditing(true)}
-                    className="h-8 w-8 p-0 bg-marrom-acentuado hover:bg-white text-white hover:text-marrom-acentuado border border-transparent hover:border-marrom-acentuado transition-colors"
+                    className="h-8 px-3 bg-marrom-acentuado hover:bg-white text-white hover:text-marrom-acentuado border border-transparent hover:border-marrom-acentuado transition-colors flex items-center gap-2"
                   >
                     <Settings className="h-4 w-4" />
+                    <span className="text-sm font-medium">Editar</span>
                   </Button>
                 ) : (
                   <div className="flex gap-1">
@@ -1195,72 +1196,72 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                   )}
                 </>
               ) : (
-                <div className="space-y-3 pt-6">
-                  <div>
-                    <Label htmlFor="edit-name">Nome Completo *</Label>
-                    <Input
-                      id="edit-name"
-                      value={editingPatient.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Nome do paciente"
-                      required
-                    />
-                  </div>
+                <div className="space-y-2 pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="edit-name">Nome Completo *</Label>
+                      <Input
+                        id="edit-name"
+                        value={editingPatient.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        placeholder="Nome do paciente"
+                        required
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="edit-cpf">CPF</Label>
-                    <Input
-                      id="edit-cpf"
-                      value={editingPatient.cpf}
-                      onChange={(e) => handleInputChange('cpf', e.target.value)}
-                      placeholder="000.000.000-00"
-                      maxLength={14}
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="edit-cpf">CPF</Label>
+                      <Input
+                        id="edit-cpf"
+                        value={editingPatient.cpf}
+                        onChange={(e) => handleInputChange('cpf', e.target.value)}
+                        placeholder="000.000.000-00"
+                        maxLength={14}
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="edit-phone">Telefone</Label>
-                    <Input
-                      id="edit-phone"
-                      value={editingPatient.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="(00) 00000-0000"
-                      maxLength={15}
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="edit-phone">Telefone</Label>
+                      <Input
+                        id="edit-phone"
+                        value={editingPatient.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="edit-email">Email</Label>
-                    <Input
-                      id="edit-email"
-                      type="email"
-                      value={editingPatient.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="email@exemplo.com"
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="edit-email">Email</Label>
+                      <Input
+                        id="edit-email"
+                        type="email"
+                        value={editingPatient.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        placeholder="email@exemplo.com"
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="edit-birthdate">Data de Nascimento</Label>
-                    <Input
-                      id="edit-birthdate"
-                      type="date"
-                      value={editingPatient.date_of_birth}
-                      onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="edit-birthdate">Data de Nascimento</Label>
+                      <Input
+                        id="edit-birthdate"
+                        type="date"
+                        value={editingPatient.date_of_birth}
+                        onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="edit-address">Endereço</Label>
-                    <Input
-                      id="edit-address"
-                      value={editingPatient.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      placeholder="Rua, número, bairro"
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="edit-address">Endereço</Label>
+                      <Input
+                        id="edit-address"
+                        value={editingPatient.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        placeholder="Rua, número, bairro"
+                      />
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="edit-cep">CEP</Label>
                       <Input
@@ -1287,6 +1288,7 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
             </div>
 
             {/* Coluna Direita: Histórico de Consultas e Exames */}
+            {!isEditing && (
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -1374,10 +1376,11 @@ export function PatientDetailsModal({ isOpen, onClose, patient, onOpenConsultati
                 )}
               </ScrollArea>
             </div>
+            )}
           </div>
 
-          {/* Informações do Agendamento - Só mostrar se houver dados de agendamento */}
-          {(patient.consultationId || patient.time || patient.appointmentDate) && (
+          {/* Informações do Agendamento - Só mostrar se houver dados de agendamento e não estiver editando */}
+          {!isEditing && (patient.consultationId || patient.time || patient.appointmentDate) && (
           <div className="bg-marrom-acentuado/10 p-4 rounded-lg relative border border-marrom-acentuado/20">
             <div className="absolute top-3 right-3 flex gap-2">
               {patient.consultationId && (

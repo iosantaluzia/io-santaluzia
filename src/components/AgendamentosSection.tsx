@@ -3,7 +3,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronRight, Columns, PanelLeft, Plus, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { cn } from '@/lib/utils';
 import { AppointmentForm } from './AppointmentForm';
 import { PatientDetailsModal } from './PatientDetailsModal';
 import { toast } from 'sonner';
@@ -91,10 +93,28 @@ const getStatusColor = (status: string | null | undefined): string => {
     return 'bg-red-100 text-red-800';
   }
   if (statusLower === 'rescheduled' || statusLower === 'remarcado') {
-    return 'bg-blue-100 text-blue-800';
+    return 'bg-orange-100 text-orange-800';
   }
   return 'bg-gray-100 text-gray-800';
 };
+
+// PopoverContent customizado sem portal para ficar contido no container
+const ContainedPopoverContent = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, align = "end", sideOffset = 4, ...props }, ref) => (
+  <PopoverPrimitive.Content
+    ref={ref}
+    align={align}
+    sideOffset={sideOffset}
+    className={cn(
+      "z-50 w-56 rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  />
+));
+ContainedPopoverContent.displayName = "ContainedPopoverContent";
 
 export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation, onOpenConsultationForPatient }: AgendamentosSectionProps) {
   const { appUser } = useAuth();
@@ -577,9 +597,10 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     try {
       // Mapear status em português para valores do banco
       const statusMap: { [key: string]: string } = {
+        'Agendado': 'scheduled',
         'Aguardando': 'pending',
         'Cancelado': 'cancelled',
-        'Remarcado': 'scheduled', // Remarcado volta para agendado
+        'Remarcado': 'rescheduled',
         'Realizado': 'completed'
       };
 
@@ -894,7 +915,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                     <div
                       key={idx}
                       onClick={() => handlePatientClick(slot)}
-                      className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors relative"
                     >
                       <div className="flex-1">
                         <p className="font-medium text-gray-800">{slot.time}</p>
@@ -913,21 +934,36 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                         </div>
                       </div>
                       {slot.consultationId ? (
-                        <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)}>
-                          <PopoverTrigger asChild>
-                            <span 
-                              className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 transition-all duration-200 hover:scale-105 ${getStatusColor(slot.status)} group`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenStatusPopover(openStatusPopover === slot.consultationId ? null : slot.consultationId!);
-                              }}
+                        <div className="relative overflow-visible" onClick={(e) => e.stopPropagation()}>
+                          <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)} modal={false}>
+                            <PopoverTrigger asChild>
+                              <span 
+                                className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center justify-center group-hover:justify-between gap-0 group-hover:gap-1 transition-all duration-200 hover:scale-105 ${getStatusColor(slot.status)} group`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenStatusPopover(openStatusPopover === slot.consultationId ? null : slot.consultationId!);
+                                }}
+                              >
+                                <span className="transition-all duration-200">{translateStatus(slot.status)}</span>
+                                <ChevronDown className="h-3 w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-200 flex-shrink-0 overflow-hidden" />
+                              </span>
+                            </PopoverTrigger>
+                            <ContainedPopoverContent 
+                              className="w-56 p-2" 
+                              onClick={(e) => e.stopPropagation()}
+                              side="bottom"
+                              align="end"
+                              sideOffset={4}
                             >
-                              <span className="transition-all duration-200">{translateStatus(slot.status)}</span>
-                              <ChevronDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                            </span>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-56 p-2" onClick={(e) => e.stopPropagation()}>
                             <div className="space-y-2">
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Agendado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('scheduled')}`}>
+                                  Agendado
+                                </span>
+                              </button>
                               <button
                                 onClick={() => handleUpdateStatus(slot.consultationId!, 'Aguardando')}
                                 className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
@@ -948,7 +984,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                                 onClick={() => handleUpdateStatus(slot.consultationId!, 'Remarcado')}
                                 className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
                               >
-                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('scheduled')}`}>
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('rescheduled')}`}>
                                   Remarcado
                                 </span>
                               </button>
@@ -961,8 +997,9 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                                 </span>
                               </button>
                             </div>
-                          </PopoverContent>
+                          </ContainedPopoverContent>
                         </Popover>
+                        </div>
                       ) : (
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
                           {translateStatus(slot.status)}
@@ -998,7 +1035,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                     <div
                       key={idx}
                       onClick={() => handlePatientClick(slot)}
-                      className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors relative"
                     >
                       <div className="flex-1">
                         <p className="font-medium text-gray-800">{slot.time}</p>
@@ -1017,21 +1054,36 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                         </div>
                       </div>
                       {slot.consultationId ? (
-                        <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)}>
-                          <PopoverTrigger asChild>
-                            <span 
-                              className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 transition-all duration-200 hover:scale-105 ${getStatusColor(slot.status)} group`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenStatusPopover(openStatusPopover === slot.consultationId ? null : slot.consultationId!);
-                              }}
+                        <div className="relative overflow-visible" onClick={(e) => e.stopPropagation()}>
+                          <Popover open={openStatusPopover === slot.consultationId} onOpenChange={(open) => setOpenStatusPopover(open ? slot.consultationId! : null)} modal={false}>
+                            <PopoverTrigger asChild>
+                              <span 
+                                className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center justify-center group-hover:justify-between gap-0 group-hover:gap-1 transition-all duration-200 hover:scale-105 ${getStatusColor(slot.status)} group`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenStatusPopover(openStatusPopover === slot.consultationId ? null : slot.consultationId!);
+                                }}
+                              >
+                                <span className="transition-all duration-200">{translateStatus(slot.status)}</span>
+                                <ChevronDown className="h-3 w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-200 flex-shrink-0 overflow-hidden" />
+                              </span>
+                            </PopoverTrigger>
+                            <ContainedPopoverContent 
+                              className="w-56 p-2" 
+                              onClick={(e) => e.stopPropagation()}
+                              side="bottom"
+                              align="end"
+                              sideOffset={4}
                             >
-                              <span className="transition-all duration-200">{translateStatus(slot.status)}</span>
-                              <ChevronDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                            </span>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-56 p-2" onClick={(e) => e.stopPropagation()}>
                             <div className="space-y-2">
+                              <button
+                                onClick={() => handleUpdateStatus(slot.consultationId!, 'Agendado')}
+                                className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
+                              >
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('scheduled')}`}>
+                                  Agendado
+                                </span>
+                              </button>
                               <button
                                 onClick={() => handleUpdateStatus(slot.consultationId!, 'Aguardando')}
                                 className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
@@ -1052,7 +1104,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                                 onClick={() => handleUpdateStatus(slot.consultationId!, 'Remarcado')}
                                 className="w-full flex items-center justify-center hover:scale-105 transition-transform duration-150"
                               >
-                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('scheduled')}`}>
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor('rescheduled')}`}>
                                   Remarcado
                                 </span>
                               </button>
@@ -1065,8 +1117,9 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
                                 </span>
                               </button>
                             </div>
-                          </PopoverContent>
+                          </ContainedPopoverContent>
                         </Popover>
+                        </div>
                       ) : (
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(slot.status)}`}>
                           {translateStatus(slot.status)}

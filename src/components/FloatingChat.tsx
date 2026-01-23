@@ -31,6 +31,16 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
   const previousUnreadCountRef = useRef(0);
   const previousMessagesLengthRef = useRef(0);
 
+  // Debug: Log quando o username mudar
+  useEffect(() => {
+    if (currentUsername) {
+      console.log('💬 FloatingChat inicializado para usuário:', currentUsername);
+      console.log('💬 Username em minúsculas:', currentUsername.toLowerCase());
+    } else {
+      console.warn('⚠️ FloatingChat sem currentUsername');
+    }
+  }, [currentUsername]);
+
   const {
     messages,
     onlineUsers,
@@ -134,11 +144,23 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newMessage.trim() || !currentUsername || isSending) return;
+    if (!newMessage.trim() || !currentUsername || isSending) {
+      if (!currentUsername) {
+        toast.error('Usuário não identificado. Faça login novamente.');
+      }
+      return;
+    }
 
     setIsSending(true);
     try {
       const type = selectedUser ? 'private' : 'group';
+      console.log('📨 Enviando mensagem via FloatingChat:', {
+        currentUsername,
+        type,
+        selectedUser,
+        messageLength: newMessage.trim().length
+      });
+      
       await sendMessage(newMessage.trim(), type, selectedUser || undefined);
       setNewMessage('');
       
@@ -147,9 +169,21 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
       } else {
         toast.success('Mensagem enviada');
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Erro ao enviar mensagem');
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar mensagem no FloatingChat:', error);
+      const errorMessage = error?.message || 'Erro desconhecido ao enviar mensagem';
+      toast.error(`Erro ao enviar mensagem: ${errorMessage}`);
+      
+      // Log detalhado para debug
+      if (error?.code) {
+        console.error('Código do erro:', error.code);
+      }
+      if (error?.details) {
+        console.error('Detalhes do erro:', error.details);
+      }
+      if (error?.hint) {
+        console.error('Dica do erro:', error.hint);
+      }
     } finally {
       setIsSending(false);
     }
@@ -359,7 +393,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                                 {date}
                               </div>
                               {dateMessages.map((message) => {
-                                const isOwn = message.from_username === currentUsername;
+                                const isOwn = (message.from_username?.toLowerCase() || '') === (currentUsername?.toLowerCase() || '');
                                 return (
                                   <div
                                     key={message.id}
@@ -409,20 +443,32 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                               ? `Enviar mensagem para ${selectedUser}...`
                               : 'Enviar mensagem para o grupo...'
                           }
-                          disabled={isSending || !isConnected}
+                          disabled={isSending}
                           className="flex-1"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey && !isSending && newMessage.trim()) {
+                              e.preventDefault();
+                              handleSendMessage(e as any);
+                            }
+                          }}
                         />
                         <Button
                           type="submit"
-                          disabled={isSending || !newMessage.trim() || !isConnected}
+                          disabled={isSending || !newMessage.trim()}
                           size="sm"
+                          className="bg-medical-primary text-white hover:bg-medical-primary/90"
                         >
                           <Send className="h-4 w-4" />
                         </Button>
                       </form>
                       {!isConnected && (
-                        <p className="text-xs text-red-500 mt-1">
-                          Reconectando...
+                        <p className="text-xs text-yellow-600 mt-1">
+                          ⚠️ Reconectando ao chat... (você ainda pode enviar mensagens)
+                        </p>
+                      )}
+                      {isConnected && (
+                        <p className="text-xs text-green-600 mt-1">
+                          ✓ Conectado
                         </p>
                       )}
                     </div>
