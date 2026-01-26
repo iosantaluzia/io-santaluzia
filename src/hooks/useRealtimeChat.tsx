@@ -29,6 +29,7 @@ export function useRealtimeChat(currentUsername: string | null) {
   
   const channelRef = useRef<RealtimeChannel | null>(null);
   const presenceChannelRef = useRef<RealtimeChannel | null>(null);
+  const currentUsernameRef = useRef<string | null>(null);
 
   // Carregar mensagens iniciais (últimas 24 horas)
   const loadMessages = useCallback(async () => {
@@ -87,32 +88,53 @@ export function useRealtimeChat(currentUsername: string | null) {
   useEffect(() => {
     if (!currentUsername) {
       setIsConnected(false);
+      currentUsernameRef.current = null;
       return;
     }
+
+    // Sempre recriar o canal para garantir que está funcionando
+    // A verificação anterior estava impedindo a subscrição correta
+    console.log('🔄 Recriando canal Realtime para garantir conexão ativa');
+
+    console.log('🔌 Configurando Realtime para usuário:', currentUsername);
+    currentUsernameRef.current = currentUsername;
 
     // Garantir que o username está em minúsculas
     const usernameLower = currentUsername.toLowerCase();
 
-    // Limpar canais anteriores
+    // Limpar canais anteriores apenas se existirem
     if (channelRef.current) {
+      console.log('🧹 Limpando canal anterior...');
       supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
     if (presenceChannelRef.current) {
       supabase.removeChannel(presenceChannelRef.current);
+      presenceChannelRef.current = null;
     }
 
     // Canal para mensagens - escutar TODAS as inserções e filtrar no código
+    // Usar um nome de canal estável baseado no username para evitar múltiplas conexões
+    const channelName = `internal_messages_${usernameLower}`;
+    console.log('📡 Criando canal Realtime:', channelName);
+    
     const channel = supabase
-      .channel(`internal_messages_${usernameLower}_${Date.now()}`)
+      .channel(channelName, {
+        config: {
+          broadcast: { self: false },
+        }
+      })
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'internal_messages'
+          table: 'internal_messages',
+          filter: undefined // Sem filtro - escutar todas as inserções
         },
         (payload) => {
           console.log('📨 Nova mensagem recebida via Realtime:', payload);
+          console.log('📨 Payload completo:', JSON.stringify(payload, null, 2));
           const newMessage = payload.new as ChatMessage;
           
           // Garantir comparação case-insensitive
@@ -120,50 +142,36 @@ export function useRealtimeChat(currentUsername: string | null) {
           const fromUsernameLower = newMessage.from_username?.toLowerCase() || '';
           const toUsernameLower = newMessage.to_username?.toLowerCase() || '';
 
-          // Verificar se é mensagem de grupo
-          if (newMessage.message_type === 'group') {
-            setMessages(prev => {
-              // Evitar duplicatas
-              if (prev.some(msg => msg.id === newMessage.id)) {
-                console.log('⚠️ Mensagem duplicada ignorada:', newMessage.id);
-                return prev;
-              }
-              console.log('✅ Mensagem de grupo adicionada:', newMessage);
-              return [...prev, newMessage];
-            });
+          // Verificar se é mensagem relevante para o usuário atual
+          const isRelevant = 
+            newMessage.message_type === 'group' ||
+            (newMessage.message_type === 'private' && 
+             (toUsernameLower === currentUsernameLower || fromUsernameLower === currentUsernameLower));
 
-            // Incrementar contador de não lidas se não for do usuário atual
-            if (fromUsernameLower !== currentUsernameLower) {
-              setUnreadCount(prev => {
-                const newCount = prev + 1;
-                console.log('📊 Contador de não lidas atualizado:', newCount);
-                return newCount;
-              });
-            }
-          } 
-          // Verificar se é mensagem privada para o usuário atual
-          else if (newMessage.message_type === 'private') {
-            // Só adicionar se for para o usuário atual ou do usuário atual
-            if (toUsernameLower === currentUsernameLower || fromUsernameLower === currentUsernameLower) {
-              setMessages(prev => {
-                if (prev.some(msg => msg.id === newMessage.id)) {
-                  console.log('⚠️ Mensagem privada duplicada ignorada:', newMessage.id);
-                  return prev;
-                }
-                console.log('✅ Mensagem privada adicionada:', newMessage);
-                return [...prev, newMessage];
-              });
-
-              // Incrementar contador se for para o usuário atual
-              if (toUsernameLower === currentUsernameLower && fromUsernameLower !== currentUsernameLower) {
-                setUnreadCount(prev => {
-                  const newCount = prev + 1;
-                  console.log('📊 Contador de não lidas atualizado (privada):', newCount);
-                  return newCount;
-                });
-              }
-            }
+          if (!isRelevant) {
+            console.log('⚠️ Mensagem não relevante para o usuário atual, ignorando');
+            return;
           }
+
+          // Adicionar mensagem ao estado
+          setMessages(prev => {
+            // Evitar duplicatas
+            if (prev.some(msg => msg.id === newMessage.id)) {
+              console.log('⚠️ Mensagem duplicada ignorada:', newMessage.id);
+              return prev;
+            }
+            
+            console.log('✅ Mensagem adicionada via Realtime:', {
+              id: newMessage.id,
+              type: newMessage.message_type,
+              from: newMessage.from_username,
+              to: newMessage.to_username,
+              read: newMessage.read
+            });
+            
+            // O unreadCount será recalculado automaticamente pelo useEffect quando messages mudar
+            return [...prev, newMessage];
+          });
         }
       )
       .on(
@@ -174,25 +182,51 @@ export function useRealtimeChat(currentUsername: string | null) {
           table: 'internal_messages'
         },
         (payload) => {
+          console.log('🔄 Mensagem atualizada via Realtime:', payload);
           const updatedMessage = payload.new as ChatMessage;
           setMessages(prev =>
             prev.map(msg => msg.id === updatedMessage.id ? updatedMessage : msg)
           );
         }
       )
-      .subscribe((status, err) => {
+      .subscribe(async (status, err) => {
         console.log('📡 Status da subscrição Realtime:', status, err);
+        console.log('📡 Detalhes do canal:', {
+          name: channelName,
+          state: channel.state,
+          topic: channel.topic
+        });
+        
         setIsConnected(status === 'SUBSCRIBED');
         
         if (status === 'SUBSCRIBED') {
           console.log('✅ Conectado ao Realtime para mensagens - aguardando novas mensagens...');
+          console.log('📊 Canal ativo:', channelName);
+          console.log('📊 Estado do canal:', channel.state);
+          console.log('📊 Tópico do canal:', channel.topic);
+          
+          // Verificar se o canal está realmente escutando
+          const channelState = channel.state;
+          if (channelState !== 'joined') {
+            console.warn('⚠️ Canal não está no estado "joined", estado atual:', channelState);
+          }
         } else if (status === 'CHANNEL_ERROR') {
           console.error('❌ Erro na conexão Realtime:', err);
           console.error('💡 Verifique se a tabela internal_messages está habilitada para Realtime no Supabase');
+          setIsConnected(false);
         } else if (status === 'TIMED_OUT') {
           console.warn('⏱️ Timeout na conexão Realtime - tentando reconectar...');
+          setIsConnected(false);
+          // Tentar reconectar após um delay
+          setTimeout(() => {
+            if (channelRef.current && currentUsername) {
+              console.log('🔄 Tentando reconectar...');
+              channelRef.current.subscribe();
+            }
+          }, 2000);
         } else if (status === 'CLOSED') {
           console.warn('🔌 Conexão Realtime fechada');
+          setIsConnected(false);
         } else {
           console.log('🔄 Status intermediário:', status);
         }
@@ -202,7 +236,7 @@ export function useRealtimeChat(currentUsername: string | null) {
 
     // Canal de presença para usuários online
     const presenceChannel = supabase
-      .channel('online_users')
+      .channel(`online_users_${usernameLower}`)
       .on('presence', { event: 'sync' }, () => {
         const state = presenceChannel.presenceState();
         const users: OnlineUser[] = [];
@@ -263,17 +297,55 @@ export function useRealtimeChat(currentUsername: string | null) {
     // Carregar mensagens iniciais
     loadMessages();
 
+    // Verificação periódica da conexão (a cada 30 segundos)
+    const connectionCheckInterval = setInterval(() => {
+      if (channelRef.current) {
+        const channelState = channelRef.current.state;
+        if (channelState !== 'joined' && channelState !== 'joining') {
+          console.warn('⚠️ Canal Realtime desconectado, tentando reconectar...');
+          setIsConnected(false);
+          // Tentar reconectar
+          channelRef.current.subscribe();
+        } else {
+          console.log('✅ Canal Realtime ainda conectado:', channelState);
+        }
+      }
+    }, 30000);
+
     // Limpeza ao desmontar
     return () => {
+      console.log('🧹 Limpando canais Realtime...');
+      clearInterval(connectionCheckInterval);
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
       if (presenceChannelRef.current) {
         presenceChannelRef.current.track({ username: usernameLower, online_at: null });
         supabase.removeChannel(presenceChannelRef.current);
+        presenceChannelRef.current = null;
       }
     };
-  }, [currentUsername, loadMessages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUsername]); // loadMessages intencionalmente omitido para evitar re-subscrições constantes
+
+  // Recalcular unreadCount sempre que messages mudar
+  useEffect(() => {
+    if (!currentUsername) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const usernameLower = currentUsername.toLowerCase();
+    const unread = messages.filter(
+      msg => !msg.read && 
+      (msg.from_username?.toLowerCase() || '') !== usernameLower &&
+      (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === usernameLower)
+    ).length;
+
+    setUnreadCount(unread);
+    console.log('📊 UnreadCount recalculado baseado em messages:', unread);
+  }, [messages, currentUsername]);
 
   // Enviar mensagem
   const sendMessage = useCallback(async (

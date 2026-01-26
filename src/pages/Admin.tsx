@@ -97,6 +97,10 @@ const Admin = () => {
     try {
       await signOut();
       toast.success('Logout realizado com sucesso!');
+      // Forçar atualização da página para garantir que o logout seja aplicado
+      setTimeout(() => {
+        window.location.href = '/admin';
+      }, 500);
     } catch (error) {
       console.error('Error during logout:', error);
       toast.error('Erro ao fazer logout');

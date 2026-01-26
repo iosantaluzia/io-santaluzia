@@ -257,12 +257,15 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    // Limpar cache antes do logout
-    appUserCache.current = {};
-    fetchingAppUser.current = {};
-    
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
+    try {
+      // Limpar cache antes do logout
+      appUserCache.current = {};
+      fetchingAppUser.current = {};
+      
+      // Fazer logout do Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      // Limpar estado local independente de erro
       setAuthState({
         user: null,
         session: null,
@@ -270,8 +273,34 @@ export function useAuth() {
         loading: false,
         error: null
       });
+      
+      // Limpar localStorage do Supabase explicitamente
+      // O Supabase armazena a sessão em localStorage com chaves específicas
+      const supabaseStorageKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('sb-') || 
+        key.includes('supabase.auth')
+      );
+      supabaseStorageKeys.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn('Erro ao limpar localStorage:', key, e);
+        }
+      });
+      
+      return { error };
+    } catch (error) {
+      console.error('Erro no signOut:', error);
+      // Mesmo em caso de erro, limpar o estado
+      setAuthState({
+        user: null,
+        session: null,
+        appUser: null,
+        loading: false,
+        error: null
+      });
+      return { error: error as Error };
     }
-    return { error };
   };
 
   const retry = () => {

@@ -30,7 +30,6 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('agendamentos');
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const [selectedPatientName, setSelectedPatientName] = useState<string>('');
   const [patientToOpenConsultation, setPatientToOpenConsultation] = useState<{ patientId: string; consultationId?: string } | null>(null);
   const [patientIdToOpen, setPatientIdToOpen] = useState<string | null>(null);
   const [initialSectionSet, setInitialSectionSet] = useState(false);
@@ -62,11 +61,24 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      // Limpar estados locais primeiro
       setActiveSection('overview');
       setShowUserManagement(false);
+      
+      // Fazer logout do Supabase
+      await signOut();
+      
+      // Aguardar um pouco mais para garantir que o logout seja completamente processado
+      // e que o estado seja atualizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Forçar reload completo da página para garantir que tudo seja limpo
+      // Usar replace para não deixar histórico e forçar reload completo
+      // Adicionar timestamp para evitar cache
+      window.location.replace(`/adminio?logout=${Date.now()}`);
     } catch (error) {
-      console.error('Error during logout:', error);
+      // Mesmo em caso de erro, forçar redirecionamento
+      window.location.replace(`/adminio?logout=${Date.now()}`);
     }
   };
 
@@ -219,7 +231,6 @@ const AdminDashboard = () => {
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
       }
     } catch (error) {
-      console.error('Error rendering content:', error);
       return (
         <div className="p-4 text-center">
           <p className="text-red-600 mb-4">Erro ao carregar seção</p>
@@ -282,8 +293,6 @@ const AdminDashboard = () => {
                     }
                   }}
                   onResultClick={(result) => {
-                    console.log('Resultado selecionado:', result);
-                    
                     // Navegar baseado no tipo de resultado
                     if (result.type === 'patient') {
                       // Navegar para pacientes e abrir o prontuário do paciente específico

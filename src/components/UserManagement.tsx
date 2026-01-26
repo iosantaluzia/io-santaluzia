@@ -15,6 +15,7 @@ import { Edit, Save, X, Trash2, Plus } from 'lucide-react';
 interface AppUser {
   id: string;
   username: string;
+  display_name: string | null;
   role: 'admin' | 'doctor' | 'secretary' | 'financeiro';
   approved: boolean;
   auth_user_id: string | null;
@@ -26,11 +27,12 @@ export function UserManagement() {
   const { appUser } = useAuth();
   const queryClient = useQueryClient();
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
-  const [editFormData, setEditFormData] = useState({ username: '', password: '' });
+  const [editFormData, setEditFormData] = useState({ username: '', display_name: '', password: '' });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUserFormData, setNewUserFormData] = useState({ 
     username: '', 
+    display_name: '',
     password: '', 
     role: 'secretary' as 'admin' | 'doctor' | 'secretary' | 'financeiro' 
   });
@@ -85,7 +87,7 @@ export function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ['app_users'] });
       setShowDeleteConfirm(false);
       setEditingUser(null);
-      setEditFormData({ username: '', password: '' });
+      setEditFormData({ username: '', display_name: '', password: '' });
       toast.success('Usuário deletado com sucesso');
     },
     onError: (error: any) => {
@@ -96,7 +98,7 @@ export function UserManagement() {
 
   // Criar novo usuário
   const createUserMutation = useMutation({
-    mutationFn: async ({ username, password, role }: { username: string; password: string; role: 'admin' | 'doctor' | 'secretary' | 'financeiro' }) => {
+    mutationFn: async ({ username, display_name, password, role }: { username: string; display_name?: string; password: string; role: 'admin' | 'doctor' | 'secretary' | 'financeiro' }) => {
       const email = `${username}@iosantaluzia.com`;
       
       // Verificar se o username já existe
@@ -118,6 +120,7 @@ export function UserManagement() {
         .from('app_users')
         .insert({
           username: username.toLowerCase(),
+          display_name: display_name?.trim() || null,
           role,
           approved: true,
           auth_user_id: null,
@@ -198,7 +201,7 @@ export function UserManagement() {
 
   // Editar usuário
   const editUserMutation = useMutation({
-    mutationFn: async ({ userId, username, password }: { userId: string; username: string; password?: string }) => {
+    mutationFn: async ({ userId, username, display_name, password }: { userId: string; username: string; display_name?: string; password?: string }) => {
       // Buscar dados atuais do usuário
       const { data: currentUser } = await supabase
         .from('app_users')
@@ -208,10 +211,16 @@ export function UserManagement() {
 
       if (!currentUser) throw new Error('Usuário não encontrado');
 
-      // Atualizar username na tabela app_users
+      // Preparar dados para atualização
+      const updateData: { username: string; display_name?: string } = { username };
+      if (display_name !== undefined) {
+        updateData.display_name = display_name.trim() || null;
+      }
+
+      // Atualizar username e display_name na tabela app_users
       const { error: appUserError } = await supabase
         .from('app_users')
-        .update({ username })
+        .update(updateData)
         .eq('id', userId);
       
       if (appUserError) throw appUserError;
@@ -261,7 +270,7 @@ export function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['app_users'] });
       setEditingUser(null);
-      setEditFormData({ username: '', password: '' });
+      setEditFormData({ username: '', display_name: '', password: '' });
       toast.success('Usuário atualizado com sucesso');
     },
     onError: (error: any) => {
@@ -272,7 +281,11 @@ export function UserManagement() {
 
   const handleEditUser = (user: AppUser) => {
     setEditingUser(user);
-    setEditFormData({ username: user.username, password: '' });
+    setEditFormData({ 
+      username: user.username, 
+      display_name: user.display_name || '', 
+      password: '' 
+    });
   };
 
   const handleSaveEdit = () => {
@@ -285,14 +298,15 @@ export function UserManagement() {
 
     editUserMutation.mutate({
       userId: editingUser.id,
-      username: editFormData.username.trim(),
+      username: editFormData.username.trim().toLowerCase(),
+      display_name: editFormData.display_name.trim() || undefined,
       password: editFormData.password.trim() || undefined
     });
   };
 
   const handleCancelEdit = () => {
     setEditingUser(null);
-    setEditFormData({ username: '', password: '' });
+    setEditFormData({ username: '', display_name: '', password: '' });
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -422,14 +436,30 @@ export function UserManagement() {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="edit-username">Username</Label>
+              <Label htmlFor="edit-username">Username (Login)</Label>
               <Input
                 id="edit-username"
                 value={editFormData.username}
-                onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
-                placeholder="Digite o username"
+                onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value.toLowerCase() })}
+                placeholder="Digite o username (minúsculas)"
                 disabled={editUserMutation.isPending || deleteUserMutation.isPending}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Username usado para login (será convertido para minúsculas)
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="edit-display-name">Nome de Exibição</Label>
+              <Input
+                id="edit-display-name"
+                value={editFormData.display_name}
+                onChange={(e) => setEditFormData({ ...editFormData, display_name: e.target.value })}
+                placeholder="Digite o nome de exibição (ex: Dr. Matheus)"
+                disabled={editUserMutation.isPending || deleteUserMutation.isPending}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Nome que será exibido no chat e outras partes do sistema
+              </p>
             </div>
             <div>
               <Label htmlFor="edit-password">Nova Senha (opcional)</Label>
@@ -487,7 +517,7 @@ export function UserManagement() {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="new-username">Username *</Label>
+              <Label htmlFor="new-username">Username (Login) *</Label>
               <Input
                 id="new-username"
                 value={newUserFormData.username}
@@ -497,6 +527,19 @@ export function UserManagement() {
               />
               <p className="text-xs text-gray-500 mt-1">
                 O email será gerado automaticamente como: {newUserFormData.username || 'username'}@iosantaluzia.com
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="new-display-name">Nome de Exibição</Label>
+              <Input
+                id="new-display-name"
+                value={newUserFormData.display_name}
+                onChange={(e) => setNewUserFormData({ ...newUserFormData, display_name: e.target.value })}
+                placeholder="Digite o nome de exibição (ex: Dr. João)"
+                disabled={createUserMutation.isPending}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Nome que será exibido no chat e outras partes do sistema (opcional)
               </p>
             </div>
             <div>
@@ -530,7 +573,7 @@ export function UserManagement() {
                 variant="outline"
                 onClick={() => {
                   setShowAddUser(false);
-                  setNewUserFormData({ username: '', password: '', role: 'secretary' });
+                  setNewUserFormData({ username: '', display_name: '', password: '', role: 'secretary' });
                 }}
                 disabled={createUserMutation.isPending}
               >
@@ -549,6 +592,7 @@ export function UserManagement() {
                   }
                   createUserMutation.mutate({
                     username: newUserFormData.username.trim(),
+                    display_name: newUserFormData.display_name.trim() || undefined,
                     password: newUserFormData.password,
                     role: newUserFormData.role
                   });
