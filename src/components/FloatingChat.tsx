@@ -130,14 +130,15 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
       });
       
       // Determinar qual conversa abrir ao clicar
-      const conversationToOpen = latestMessage.message_type === 'group' 
-        ? null 
+      const conversationToOpen = latestMessage.message_type === 'group'
+        ? null
         : latestMessage.from_username;
 
-      // Função para abrir a conversa
+      // Função para abrir a conversa e marcar como lida (para badge/toast sumirem)
       const openConversation = () => {
         setSelectedUser(conversationToOpen);
         setIsOpen(true);
+        markAsRead(conversationToOpen ?? undefined);
       };
 
       // Criar toast customizado com JSX para tornar clicável
@@ -277,18 +278,8 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
     return latestMessage.from_username;
   }, [messages, currentUsername]);
 
-  // Marcar como lida quando abrir
-  useEffect(() => {
-    if (isOpen && currentUsername) {
-      if (selectedUser) {
-        markAsRead(selectedUser);
-      } else {
-        markAsRead();
-      }
-      // Não limpar notificações completamente, apenas marcar como lidas
-      // O indicador será atualizado automaticamente pelo unreadCount
-    }
-  }, [isOpen, selectedUser, currentUsername, markAsRead]);
+  // Não marcar como lida ao abrir o modal — apenas quando o usuário abrir uma conversa específica
+  // (ao clicar no botão flutuante com conversa pré-selecionada ou ao clicar em um item da lista)
 
   // Filtrar mensagens baseado no tipo de chat
   const displayMessages = selectedUser
@@ -404,10 +395,12 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
         <div className="fixed bottom-6 right-6 z-50">
           <Button
             onClick={() => {
-              // Se houver mensagens não lidas, abrir na conversa mais recente
+              // Se houver mensagens não lidas, abrir na conversa mais recente e marcar essa conversa como lida
               if (unreadCount > 0) {
                 const latestConversation = findLatestUnreadConversation();
                 setSelectedUser(latestConversation);
+                // Marcar como lida a conversa que estamos abrindo (null = Todos/grupo)
+                markAsRead(latestConversation ?? undefined);
               }
               setIsOpen(true);
             }}
@@ -473,7 +466,10 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                           variant={selectedUser === null ? 'default' : 'ghost'}
                           size="sm"
                           className="w-full justify-start text-xs"
-                          onClick={() => setSelectedUser(null)}
+                          onClick={() => {
+                            setSelectedUser(null);
+                            markAsRead(); // Marcar mensagens do grupo como lidas ao abrir "Todos"
+                          }}
                         >
                           <MessageCircle className="h-3 w-3 mr-1" />
                           Todos

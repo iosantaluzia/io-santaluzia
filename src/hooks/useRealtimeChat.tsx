@@ -113,65 +113,53 @@ export function useRealtimeChat(currentUsername: string | null) {
       presenceChannelRef.current = null;
     }
 
-    // Canal para mensagens - escutar TODAS as inserções e filtrar no código
-    // Usar um nome de canal estável baseado no username para evitar múltiplas conexões
-    const channelName = `internal_messages_${usernameLower}`;
-    console.log('📡 Criando canal Realtime:', channelName);
-    
+    // Canal compartilhado para mensagens: todos os usuários no mesmo canal para Broadcast em tempo real
+    // Nome fixo para que quem envia faça broadcast e todos os inscritos recebam
+    const channelName = 'internal_messages_live';
+    console.log('📡 Criando canal Realtime (compartilhado):', channelName);
+
+    const addMessageIfRelevant = (newMessage: ChatMessage) => {
+      const currentUsernameLower = currentUsername.toLowerCase();
+      const fromUsernameLower = newMessage.from_username?.toLowerCase() || '';
+      const toUsernameLower = newMessage.to_username?.toLowerCase() || '';
+      const isRelevant =
+        newMessage.message_type === 'group' ||
+        (newMessage.message_type === 'private' &&
+          (toUsernameLower === currentUsernameLower || fromUsernameLower === currentUsernameLower));
+      if (!isRelevant) return;
+      setMessages(prev => {
+        if (prev.some(msg => msg.id === newMessage.id)) return prev;
+        return [...prev, newMessage];
+      });
+    };
+
     const channel = supabase
       .channel(channelName, {
         config: {
           broadcast: { self: false },
-        }
+        },
       })
+      .on(
+        'broadcast',
+        { event: 'new_message' },
+        (payload: { message?: ChatMessage; payload?: { message?: ChatMessage } }) => {
+          const newMessage = payload?.message ?? payload?.payload?.message;
+          if (!newMessage?.id) return;
+          console.log('📨 Nova mensagem recebida via Broadcast:', newMessage.id);
+          addMessageIfRelevant(newMessage);
+        }
+      )
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'internal_messages',
-          filter: undefined // Sem filtro - escutar todas as inserções
         },
         (payload) => {
-          console.log('📨 Nova mensagem recebida via Realtime:', payload);
-          console.log('📨 Payload completo:', JSON.stringify(payload, null, 2));
           const newMessage = payload.new as ChatMessage;
-          
-          // Garantir comparação case-insensitive
-          const currentUsernameLower = currentUsername.toLowerCase();
-          const fromUsernameLower = newMessage.from_username?.toLowerCase() || '';
-          const toUsernameLower = newMessage.to_username?.toLowerCase() || '';
-
-          // Verificar se é mensagem relevante para o usuário atual
-          const isRelevant = 
-            newMessage.message_type === 'group' ||
-            (newMessage.message_type === 'private' && 
-             (toUsernameLower === currentUsernameLower || fromUsernameLower === currentUsernameLower));
-
-          if (!isRelevant) {
-            console.log('⚠️ Mensagem não relevante para o usuário atual, ignorando');
-            return;
-          }
-
-          // Adicionar mensagem ao estado
-          setMessages(prev => {
-            // Evitar duplicatas
-            if (prev.some(msg => msg.id === newMessage.id)) {
-              console.log('⚠️ Mensagem duplicada ignorada:', newMessage.id);
-              return prev;
-            }
-            
-            console.log('✅ Mensagem adicionada via Realtime:', {
-              id: newMessage.id,
-              type: newMessage.message_type,
-              from: newMessage.from_username,
-              to: newMessage.to_username,
-              read: newMessage.read
-            });
-            
-            // O unreadCount será recalculado automaticamente pelo useEffect quando messages mudar
-            return [...prev, newMessage];
-          });
+          console.log('📨 Nova mensagem recebida via postgres_changes:', newMessage.id);
+          addMessageIfRelevant(newMessage);
         }
       )
       .on(
@@ -179,56 +167,32 @@ export function useRealtimeChat(currentUsername: string | null) {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'internal_messages'
+          table: 'internal_messages',
         },
         (payload) => {
-          console.log('🔄 Mensagem atualizada via Realtime:', payload);
           const updatedMessage = payload.new as ChatMessage;
           setMessages(prev =>
-            prev.map(msg => msg.id === updatedMessage.id ? updatedMessage : msg)
+            prev.map(msg => (msg.id === updatedMessage.id ? updatedMessage : msg))
           );
         }
       )
       .subscribe(async (status, err) => {
         console.log('📡 Status da subscrição Realtime:', status, err);
-        console.log('📡 Detalhes do canal:', {
-          name: channelName,
-          state: channel.state,
-          topic: channel.topic
-        });
-        
         setIsConnected(status === 'SUBSCRIBED');
-        
         if (status === 'SUBSCRIBED') {
-          console.log('✅ Conectado ao Realtime para mensagens - aguardando novas mensagens...');
-          console.log('📊 Canal ativo:', channelName);
-          console.log('📊 Estado do canal:', channel.state);
-          console.log('📊 Tópico do canal:', channel.topic);
-          
-          // Verificar se o canal está realmente escutando
-          const channelState = channel.state;
-          if (channelState !== 'joined') {
-            console.warn('⚠️ Canal não está no estado "joined", estado atual:', channelState);
-          }
+          console.log('✅ Conectado ao Realtime (Broadcast + postgres_changes)');
         } else if (status === 'CHANNEL_ERROR') {
           console.error('❌ Erro na conexão Realtime:', err);
-          console.error('💡 Verifique se a tabela internal_messages está habilitada para Realtime no Supabase');
           setIsConnected(false);
         } else if (status === 'TIMED_OUT') {
-          console.warn('⏱️ Timeout na conexão Realtime - tentando reconectar...');
           setIsConnected(false);
-          // Tentar reconectar após um delay
           setTimeout(() => {
             if (channelRef.current && currentUsername) {
-              console.log('🔄 Tentando reconectar...');
               channelRef.current.subscribe();
             }
           }, 2000);
         } else if (status === 'CLOSED') {
-          console.warn('🔌 Conexão Realtime fechada');
           setIsConnected(false);
-        } else {
-          console.log('🔄 Status intermediário:', status);
         }
       });
 
@@ -395,19 +359,25 @@ export function useRealtimeChat(currentUsername: string | null) {
       }
 
       console.log('✅ Mensagem enviada com sucesso:', data);
-      
-      // Atualizar estado local IMEDIATAMENTE para que a mensagem apareça na tela
+
       const newMessage = data as ChatMessage;
+
+      // Atualizar estado local imediatamente para o remetente
       setMessages(prev => {
-        // Evitar duplicatas caso o Realtime também adicione
-        if (prev.some(msg => msg.id === newMessage.id)) {
-          console.log('⚠️ Mensagem já existe no estado, ignorando duplicata');
-          return prev;
-        }
-        console.log('✅ Adicionando mensagem ao estado local imediatamente');
+        if (prev.some(msg => msg.id === newMessage.id)) return prev;
         return [...prev, newMessage];
       });
-      
+
+      // Broadcast para outros clientes receberem em tempo real (não depende de postgres_changes)
+      const ch = channelRef.current;
+      if (ch) {
+        ch.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: { message: newMessage },
+        }).catch((e) => console.warn('Broadcast falhou (outros usuários podem não ver em tempo real):', e));
+      }
+
       return newMessage;
     } catch (error) {
       console.error('❌ Exceção ao enviar mensagem:', error);
@@ -415,66 +385,21 @@ export function useRealtimeChat(currentUsername: string | null) {
     }
   }, [currentUsername]);
 
-  // Marcar mensagens como lidas
+  // Marcar mensagens como lidas (atualização otimista: UI atualiza primeiro, depois persiste no Supabase)
   const markAsRead = useCallback(async (fromUsername?: string) => {
     if (!currentUsername) return;
 
-    try {
-      // Garantir que os usernames estão em minúsculas
-      const usernameLower = currentUsername.toLowerCase();
-      const fromUsernameLower = fromUsername?.toLowerCase();
+    const usernameLower = currentUsername.toLowerCase();
+    const fromUsernameLower = fromUsername?.toLowerCase();
 
-      let query = supabase
-        .from('internal_messages')
-        .update({ read: true })
-        .eq('read', false);
-
-      if (fromUsernameLower) {
-        // Marcar mensagens de um usuário específico
-        query = query.or(
-          `and(message_type.eq.private,from_username.eq.${fromUsernameLower},to_username.eq.${usernameLower}),and(message_type.eq.group,from_username.eq.${fromUsernameLower})`
-        );
-      } else {
-        // Marcar todas as mensagens não lidas para o usuário atual
-        query = query.or(
-          `and(message_type.eq.group,from_username.neq.${usernameLower}),and(message_type.eq.private,to_username.eq.${usernameLower})`
-        );
-      }
-
-      const { error } = await query;
-
-      if (error) throw error;
-
-      // Atualizar estado local
-      setMessages(prev =>
-        prev.map(msg => {
-          if (msg.read) return msg;
-          const msgFromLower = msg.from_username?.toLowerCase() || '';
-          const msgToLower = msg.to_username?.toLowerCase() || '';
-          
-          if (fromUsernameLower) {
-            if (msgFromLower === fromUsernameLower && 
-                (msg.message_type === 'group' || msgToLower === usernameLower)) {
-              return { ...msg, read: true };
-            }
-          } else {
-            if (msgFromLower !== usernameLower &&
-                (msg.message_type === 'group' || msgToLower === usernameLower)) {
-              return { ...msg, read: true };
-            }
-          }
-          return msg;
-        })
-      );
-
-      // Recalcular não lidas
-      const updatedMessages = messages.map(msg => {
+    // 1) Atualização otimista: atualizar estado local imediatamente para o badge/toast sumirem
+    setMessages(prev =>
+      prev.map(msg => {
         if (msg.read) return msg;
         const msgFromLower = msg.from_username?.toLowerCase() || '';
         const msgToLower = msg.to_username?.toLowerCase() || '';
-        
         if (fromUsernameLower) {
-          if (msgFromLower === fromUsernameLower && 
+          if (msgFromLower === fromUsernameLower &&
               (msg.message_type === 'group' || msgToLower === usernameLower)) {
             return { ...msg, read: true };
           }
@@ -485,19 +410,34 @@ export function useRealtimeChat(currentUsername: string | null) {
           }
         }
         return msg;
-      });
+      })
+    );
 
-      const unread = updatedMessages.filter(
-        msg => !msg.read && 
-        (msg.from_username?.toLowerCase() || '') !== usernameLower &&
-        (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === usernameLower)
-      ).length;
+    // 2) Persistir no Supabase (se falhar, a UI já foi atualizada)
+    try {
+      let query = supabase
+        .from('internal_messages')
+        .update({ read: true })
+        .eq('read', false);
 
-      setUnreadCount(unread);
+      if (fromUsernameLower) {
+        query = query.or(
+          `and(message_type.eq.private,from_username.eq.${fromUsernameLower},to_username.eq.${usernameLower}),and(message_type.eq.group,from_username.eq.${fromUsernameLower})`
+        );
+      } else {
+        query = query.or(
+          `and(message_type.eq.group,from_username.neq.${usernameLower}),and(message_type.eq.private,to_username.eq.${usernameLower})`
+        );
+      }
+
+      const { error } = await query;
+      if (error) {
+        console.error('Error marking messages as read (UI already updated):', error);
+      }
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
-  }, [currentUsername, messages]);
+  }, [currentUsername]);
 
   // Obter mensagens entre dois usuários
   const getMessagesBetween = useCallback((user1: string, user2: string) => {
