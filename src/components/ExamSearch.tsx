@@ -27,6 +27,71 @@ const ExamSearch: React.FC<ExamSearchProps> = ({ exames }) => {
       .trim();
   };
 
+  // Palavras comuns que devem ser ignoradas na busca
+  const stopWords = new Set(['de', 'do', 'da', 'dos', 'das', 'em', 'no', 'na', 'nos', 'nas', 'a', 'o', 'e', 'ou', 'para', 'com', 'por']);
+
+  // Sinônimos e variações comuns
+  const synonyms: { [key: string]: string[] } = {
+    'visao': ['visual', 'visão'],
+    'visual': ['visao', 'visão'],
+    'visão': ['visao', 'visual'],
+    'campo': ['perimetria', 'campimetria'],
+    'perimetria': ['campo', 'campimetria'],
+    'campimetria': ['campo', 'perimetria'],
+    'pressao': ['pressão', 'tonometria'],
+    'pressão': ['pressao', 'tonometria'],
+    'tonometria': ['pressao', 'pressão'],
+    'cornea': ['córnea'],
+    'córnea': ['cornea'],
+    'retina': ['fundo', 'fundoscopia'],
+    'fundo': ['retina', 'fundoscopia'],
+    'fundoscopia': ['retina', 'fundo'],
+    'grau': ['refração', 'refrativo'],
+    'refração': ['grau', 'refrativo'],
+    'refrativo': ['grau', 'refração']
+  };
+
+  // Normaliza e tokeniza o texto, removendo stop words e expandindo sinônimos
+  const tokenizeAndNormalize = (text: string): string[] => {
+    const normalized = normalizeText(text);
+    const tokens = normalized.split(/\s+/).filter(token => token.length > 0);
+    
+    // Remove stop words
+    const filteredTokens = tokens.filter(token => !stopWords.has(token));
+    
+    // Expande sinônimos
+    const expandedTokens = new Set<string>();
+    filteredTokens.forEach(token => {
+      expandedTokens.add(token);
+      if (synonyms[token]) {
+        synonyms[token].forEach(syn => expandedTokens.add(normalizeText(syn)));
+      }
+    });
+    
+    return Array.from(expandedTokens);
+  };
+
+  // Verifica se dois textos têm palavras em comum (independente da ordem)
+  const hasCommonTokens = (text1: string, text2: string): boolean => {
+    const tokens1 = tokenizeAndNormalize(text1);
+    const tokens2 = tokenizeAndNormalize(text2);
+    
+    // Se não há tokens suficientes, usa busca simples
+    if (tokens1.length === 0 || tokens2.length === 0) {
+      return normalizeText(text1).includes(normalizeText(text2)) || 
+             normalizeText(text2).includes(normalizeText(text1));
+    }
+    
+    // Verifica se há tokens em comum
+    const commonTokens = tokens1.filter(token => tokens2.includes(token));
+    
+    // Considera match se houver pelo menos 50% dos tokens em comum ou se todos os tokens principais estão presentes
+    const minCommonTokens = Math.min(tokens1.length, tokens2.length);
+    const threshold = Math.max(1, Math.ceil(minCommonTokens * 0.5));
+    
+    return commonTokens.length >= threshold;
+  };
+
   const searchExam = (term: string) => {
     if (!term.trim()) {
       setSearchResult(null);
@@ -34,12 +99,11 @@ const ExamSearch: React.FC<ExamSearchProps> = ({ exames }) => {
     }
 
     const normalizedTerm = normalizeText(term);
+    const searchTokens = tokenizeAndNormalize(term);
     
-    // Busca exata
+    // Busca exata (nome completo igual)
     const exactMatch = exames.find(exame => 
-      normalizeText(exame.nome) === normalizedTerm ||
-      normalizeText(exame.descricao).includes(normalizedTerm) ||
-      normalizeText(exame.descricaoDetalhada).includes(normalizedTerm)
+      normalizeText(exame.nome) === normalizedTerm
     );
 
     if (exactMatch) {
@@ -51,26 +115,62 @@ const ExamSearch: React.FC<ExamSearchProps> = ({ exames }) => {
       return;
     }
 
-    // Busca parcial
-    const partialMatches = exames.filter(exame => 
-      normalizeText(exame.nome).includes(normalizedTerm) ||
-      normalizeText(exame.descricao).includes(normalizedTerm) ||
-      normalizeText(exame.descricaoDetalhada).includes(normalizedTerm)
-    );
-
-    if (partialMatches.length > 0) {
-      setSearchResult({
-        found: true,
-        exam: partialMatches[0],
-        suggestions: partialMatches.slice(1).map(exame => exame.nome)
+    // Se o termo é apenas "visão", "visao" ou "visual" sem outras palavras, pular busca direta nos exames
+    // e ir direto para termos relacionados (para evitar encontrar exames que apenas mencionam "visão" na descrição)
+    const isOnlyVisionTerm = searchTokens.length === 1 && 
+      (searchTokens[0] === 'visao' || searchTokens[0] === 'visual' || searchTokens[0] === 'visão');
+    
+    // Busca inteligente usando tokens e sinônimos (pular se for termo genérico de visão)
+    if (!isOnlyVisionTerm) {
+      const smartMatches = exames.filter(exame => {
+        const nomeNormalized = normalizeText(exame.nome);
+        const descricaoNormalized = normalizeText(exame.descricao);
+        const descricaoDetalhadaNormalized = normalizeText(exame.descricaoDetalhada);
+        
+        // Busca exata no nome
+        if (nomeNormalized === normalizedTerm) return true;
+        
+        // Busca usando tokens comuns (independente da ordem)
+        if (hasCommonTokens(term, exame.nome)) return true;
+        if (hasCommonTokens(term, exame.descricao)) return true;
+        if (hasCommonTokens(term, exame.descricaoDetalhada)) return true;
+        
+        // Busca parcial tradicional (fallback)
+        if (nomeNormalized.includes(normalizedTerm) || normalizedTerm.includes(nomeNormalized)) return true;
+        if (descricaoNormalized.includes(normalizedTerm)) return true;
+        if (descricaoDetalhadaNormalized.includes(normalizedTerm)) return true;
+        
+        return false;
       });
-      return;
+
+      if (smartMatches.length > 0) {
+        setSearchResult({
+          found: true,
+          exam: smartMatches[0],
+          suggestions: smartMatches.slice(1).map(exame => exame.nome)
+        });
+        return;
+      }
     }
 
     // Busca por termos relacionados
     const relatedTerms: { [key: string]: string[] } = {
       // EXAMES DE CONSULTA
       'acuidade visual': ['Exame de Consulta'],
+      'acuidade visão': ['Exame de Consulta'],
+      'acuidade visao': ['Exame de Consulta'],
+      'visão': ['Exame de Consulta'],
+      'visao': ['Exame de Consulta'],
+      'visual': ['Exame de Consulta'],
+      'teste visão': ['Exame de Consulta'],
+      'teste visao': ['Exame de Consulta'],
+      'teste visual': ['Exame de Consulta'],
+      'exame visão': ['Exame de Consulta'],
+      'exame visao': ['Exame de Consulta'],
+      'exame visual': ['Exame de Consulta'],
+      'medir visão': ['Exame de Consulta'],
+      'medir visao': ['Exame de Consulta'],
+      'medir visual': ['Exame de Consulta'],
       'refração': ['Exame de Consulta', 'Aberrômetro'],
       'grau do olho': ['Exame de Consulta', 'Aberrômetro'],
       'medir grau': ['Exame de Consulta', 'Aberrômetro'],
@@ -127,10 +227,23 @@ const ExamSearch: React.FC<ExamSearchProps> = ({ exames }) => {
       // Glaucoma e Campo Visual
       'glaucoma': ['Campimetria', 'OCT'],
       'campo visual': ['Campimetria'],
+      'campo de visão': ['Campimetria'],
+      'campo de visao': ['Campimetria'],
+      'campo visão': ['Campimetria'],
+      'campo visao': ['Campimetria'],
+      'visual campo': ['Campimetria'],
+      'visão campo': ['Campimetria'],
+      'visao campo': ['Campimetria'],
+      'exame campo visual': ['Campimetria'],
+      'exame campo visão': ['Campimetria'],
+      'teste campo visual': ['Campimetria'],
+      'teste campo visão': ['Campimetria'],
       'campimetria': ['Campimetria'],
       'perimetria': ['Campimetria'],
       'perda campo visual': ['Campimetria'],
       'perda campo': ['Campimetria'],
+      'perda visão': ['Campimetria'],
+      'perda visao': ['Campimetria'],
       
       // Catarata
       'catarata': ['Pentacam', 'YAG Laser'],
@@ -213,10 +326,36 @@ const ExamSearch: React.FC<ExamSearchProps> = ({ exames }) => {
     const suggestions: string[] = [];
     const foundExams: string[] = [];
     
+    // Busca inteligente nos termos relacionados
     Object.entries(relatedTerms).forEach(([key, values]) => {
-      if (normalizeText(key).includes(normalizedTerm) || normalizedTerm.includes(normalizeText(key))) {
+      const keyNormalized = normalizeText(key);
+      
+      // Busca exata
+      if (keyNormalized === normalizedTerm) {
         suggestions.push(...values);
         foundExams.push(...values);
+        return;
+      }
+      
+      // Busca usando tokens comuns (independente da ordem)
+      if (hasCommonTokens(term, key)) {
+        suggestions.push(...values);
+        foundExams.push(...values);
+        return;
+      }
+      
+      // Busca parcial
+      if (keyNormalized.includes(normalizedTerm) || normalizedTerm.includes(keyNormalized)) {
+        suggestions.push(...values);
+        foundExams.push(...values);
+        return;
+      }
+      
+      // Para termos genéricos de visão, verificar se o termo pesquisado está contido no key
+      if (isOnlyVisionTerm && (keyNormalized.includes('visao') || keyNormalized.includes('visual') || keyNormalized.includes('visão'))) {
+        suggestions.push(...values);
+        foundExams.push(...values);
+        return;
       }
     });
 
@@ -237,37 +376,42 @@ const ExamSearch: React.FC<ExamSearchProps> = ({ exames }) => {
         'Cirurgia Refrativa': 'Cirurgia para correção de graus (miopia, hipermetropia, astigmatismo)'
       };
 
-      // Traduzir "Exame de Consulta" para o termo técnico específico
+      // Traduzir "Exame de Consulta" para o termo técnico específico usando busca inteligente
       const translateConsultationExam = (term: string): string => {
-        if (normalizedTerm.includes('pressao') || normalizedTerm.includes('pressão')) {
+        const termTokens = tokenizeAndNormalize(term);
+        const termTokensLower = termTokens.map(t => t.toLowerCase());
+        
+        if (termTokensLower.some(t => t.includes('pressao') || t.includes('pressão') || t.includes('tonometria'))) {
           return 'Tonometria - Exame realizado durante a consulta';
-        } else if (normalizedTerm.includes('grau') || normalizedTerm.includes('refração')) {
+        } else if (termTokensLower.some(t => t.includes('grau') || t.includes('refração') || t.includes('refracao'))) {
           return 'Refração - Exame realizado durante a consulta';
-        } else if (normalizedTerm.includes('campo') || normalizedTerm.includes('visual')) {
+        } else if (termTokensLower.some(t => t.includes('campo') || t.includes('visual') || t.includes('visao') || t.includes('visão') || t.includes('campimetria') || t.includes('perimetria'))) {
           return 'Campimetria - Exame realizado durante a consulta';
-        } else if (normalizedTerm.includes('retina') || normalizedTerm.includes('fundo')) {
+        } else if (termTokensLower.some(t => t.includes('retina') || t.includes('fundo') || t.includes('fundoscopia'))) {
           return 'Fundoscopia - Exame realizado durante a consulta';
-        } else if (normalizedTerm.includes('córnea') || normalizedTerm.includes('cornea')) {
+        } else if (termTokensLower.some(t => t.includes('córnea') || t.includes('cornea') || t.includes('topografia'))) {
           return 'Biomicroscopia - Exame realizado durante a consulta';
-        } else if (normalizedTerm.includes('lente') || normalizedTerm.includes('contato')) {
+        } else if (termTokensLower.some(t => t.includes('lente') || t.includes('contato'))) {
           return 'Adaptação de Lentes - Exame realizado durante a consulta';
-        } else if (normalizedTerm.includes('acuidade') || normalizedTerm.includes('visão')) {
+        } else if (termTokensLower.some(t => t.includes('acuidade') || t.includes('visão') || t.includes('visao') || t.includes('visual'))) {
           return 'Acuidade Visual - Exame realizado durante a consulta';
         }
         return 'Exame de Consulta - Exame realizado durante a consulta oftalmológica';
       };
 
-      // Identificar o termo técnico principal
+      // Identificar o termo técnico principal usando busca inteligente
       let technicalTerm = '';
-      if (normalizedTerm.includes('pressao') || normalizedTerm.includes('pressão')) {
+      const searchTokensLower = searchTokens.map(t => t.toLowerCase());
+      
+      if (searchTokensLower.some(t => t.includes('pressao') || t.includes('pressão') || t.includes('tonometria'))) {
         technicalTerm = 'Tonometria';
-      } else if (normalizedTerm.includes('grau') || normalizedTerm.includes('refração')) {
+      } else if (searchTokensLower.some(t => t.includes('grau') || t.includes('refração') || t.includes('refracao'))) {
         technicalTerm = 'Refração';
-      } else if (normalizedTerm.includes('campo') || normalizedTerm.includes('visual')) {
+      } else if (searchTokensLower.some(t => t.includes('campo') || t.includes('visual') || t.includes('visao') || t.includes('visão') || t.includes('campimetria') || t.includes('perimetria'))) {
         technicalTerm = 'Campimetria';
-      } else if (normalizedTerm.includes('retina') || normalizedTerm.includes('fundo')) {
+      } else if (searchTokensLower.some(t => t.includes('retina') || t.includes('fundo') || t.includes('fundoscopia'))) {
         technicalTerm = 'Fundoscopia';
-      } else if (normalizedTerm.includes('córnea') || normalizedTerm.includes('cornea')) {
+      } else if (searchTokensLower.some(t => t.includes('córnea') || t.includes('cornea') || t.includes('topografia'))) {
         technicalTerm = 'Topografia Corneana';
       }
 
