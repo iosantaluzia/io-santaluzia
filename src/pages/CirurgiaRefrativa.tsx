@@ -47,6 +47,11 @@ const CirurgiaRefrativa = () => {
       name: "Astigmatismo",
       description: "Visão embaçada devido à curvatura irregular da córnea",
       correction: "Laser corrige as irregularidades da superfície corneana"
+    },
+    {
+      name: "Presbiopia",
+      description: "Dificuldade para enxergar objetos próximos (vista cansada)",
+      correction: "Laser cria zonas de foco Blend Zone, permitindo visão nítida em todas as distâncias"
     }
   ];
 
@@ -66,15 +71,6 @@ const CirurgiaRefrativa = () => {
                 correção definitiva para miopia, hipermetropia e astigmatismo com tecnologia 
                 laser de última geração.
               </p>
-              <div className="bg-medical-muted/20 p-6 rounded-lg">
-                <h3 className="text-xl font-semibold text-medical-primary mb-3">
-                  Tecnologia LASIK
-                </h3>
-                <p className="text-medical-secondary">
-                  Utilizamos a mais avançada tecnologia laser para remodelar a córnea com 
-                  precisão microscópica, proporcionando resultados excepcionais.
-                </p>
-              </div>
             </div>
             <div className="relative">
               <img
@@ -82,6 +78,42 @@ const CirurgiaRefrativa = () => {
                 alt="Cirurgia Refrativa"
                 className="rounded-lg shadow-medium w-full"
               />
+            </div>
+          </div>
+
+          {/* Tecnologia Presbyond Section */}
+          <div className="bg-gradient-to-r from-medical-primary/5 to-medical-accent/5 rounded-2xl p-8 mb-16">
+            <h2 className="text-3xl font-serif font-bold text-medical-primary text-center mb-6">
+              Tecnologia Presbyond® da Zeiss
+            </h2>
+            <p className="text-lg text-medical-secondary mb-6 text-center max-w-3xl mx-auto">
+              Tecnologia exclusiva disponível em nosso instituto
+            </p>
+            <div className="bg-white rounded-lg p-8 shadow-soft max-w-4xl mx-auto">
+              <p className="text-medical-secondary mb-6 leading-relaxed">
+                Projetada para tratar a presbiopia (vista cansada). Essa técnica utiliza um conceito de Blend Zone, que permite que o cérebro selecione automaticamente a melhor imagem conforme a distância, criando uma sobreposição de zonas de foco em ambos os olhos.
+              </p>
+              <h3 className="text-xl font-semibold text-medical-primary mb-4">
+                Os principais benefícios incluem:
+              </h3>
+              <ul className="space-y-3 text-medical-secondary">
+                <li className="flex items-start">
+                  <span className="text-medical-primary mr-3 font-bold">•</span>
+                  <span>Correção simultânea de múltiplos erros refrativos, como presbiopia, astigmatismo, miopia e hipermetropia, em um único procedimento.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-medical-primary mr-3 font-bold">•</span>
+                  <span>Preservação da visão binocular natural, mantendo a coordenação entre os dois olhos.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-medical-primary mr-3 font-bold">•</span>
+                  <span>Recuperação rápida e resultados duradouros, permitindo que a maioria dos pacientes retome suas atividades rapidamente.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-medical-primary mr-3 font-bold">•</span>
+                  <span>Ajuste personalizado da córnea, criando uma zona de transição suave que permite enxergar bem em todas as distâncias.</span>
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -115,15 +147,17 @@ const CirurgiaRefrativa = () => {
             <h2 className="text-3xl font-serif font-bold text-medical-primary mb-8 text-center">
               Condições Tratadas
             </h2>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {conditions.map((condition, index) => (
-                <div key={index} className="text-center">
-                  <h3 className="text-xl font-semibold text-medical-primary mb-4">
-                    {condition.name}
-                  </h3>
-                  <p className="text-medical-secondary mb-4">
-                    {condition.description}
-                  </p>
+                <div key={index} className="text-center flex flex-col h-full">
+                  <div className="flex-1 flex flex-col justify-start">
+                    <h3 className="text-xl font-semibold text-medical-primary mb-4">
+                      {condition.name}
+                    </h3>
+                    <p className="text-medical-secondary mb-4">
+                      {condition.description}
+                    </p>
+                  </div>
                   <div className="bg-medical-muted/10 p-4 rounded-lg">
                     <h4 className="font-medium text-medical-primary mb-2">Como Corrigimos:</h4>
                     <p className="text-sm text-medical-secondary">
@@ -136,52 +170,52 @@ const CirurgiaRefrativa = () => {
           </div>
 
           {/* Process Section */}
-          <div className="bg-medical-muted/10 rounded-2xl p-8 mb-12">
+          <div className="bg-medical-muted/10 rounded-2xl p-8 mb-12 overflow-hidden">
             <h2 className="text-3xl font-serif font-bold text-medical-primary mb-8 text-center">
               Processo da Cirurgia
             </h2>
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-6">
+              <div className="text-center relative z-0">
+                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4 relative z-10">
                   1
                 </div>
-                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3 relative z-10">
                   Avaliação
                 </h3>
-                <p className="text-medical-secondary text-sm">
+                <p className="text-medical-secondary text-sm relative z-10">
                   Exames detalhados para verificar candidatura à cirurgia.
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div className="text-center relative z-0">
+                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4 relative z-10">
                   2
                 </div>
-                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3 relative z-10">
                   Preparação
                 </h3>
-                <p className="text-medical-secondary text-sm">
+                <p className="text-medical-secondary text-sm relative z-10">
                   Anestesia tópica e posicionamento para o procedimento.
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div className="text-center relative z-0">
+                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4 relative z-10">
                   3
                 </div>
-                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3 relative z-10">
                   Cirurgia
                 </h3>
-                <p className="text-medical-secondary text-sm">
+                <p className="text-medical-secondary text-sm relative z-10">
                   Aplicação precisa do laser na córnea em poucos minutos.
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div className="text-center relative z-0">
+                <div className="bg-medical-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4 relative z-10">
                   4
                 </div>
-                <h3 className="text-lg font-semibold text-medical-primary mb-3">
+                <h3 className="text-lg font-semibold text-medical-primary mb-3 relative z-10">
                   Recuperação
                 </h3>
-                <p className="text-medical-secondary text-sm">
+                <p className="text-medical-secondary text-sm relative z-10">
                   Acompanhamento pós-operatório para garantir os melhores resultados.
                 </p>
               </div>
@@ -215,7 +249,7 @@ const CirurgiaRefrativa = () => {
                   <li>• Use os colírios conforme prescrito</li>
                   <li>• Evite esfregar os olhos</li>
                   <li>• Descanse com os olhos fechados</li>
-                  <li>• Use óculos escuros ao sair</li>
+                  <li>• Use óculos escuros ao sair ao sol</li>
                 </ul>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-soft">
@@ -267,11 +301,11 @@ const CirurgiaRefrativa = () => {
         </div>
       </main>
       <Footer
-        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
+        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-[134px] w-auto brightness-0 invert" />}
         brandName=""
         socialLinks={[
-          { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
-          { icon: <Facebook className="h-5 w-5" />, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
+          { icon: <Instagram className="h-[30px] w-[30px]" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
+          { icon: <Facebook className="h-[30px] w-[30px]" />, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
         ]}
         mainLinks={[
           { href: "/instituto", label: "O Instituto" },

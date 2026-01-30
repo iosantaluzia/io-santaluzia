@@ -12,8 +12,8 @@ const Historia = () => {
       title: '2024',
       content: (
         <div>
-          <div className="bg-medical-accent/50 p-4 rounded-lg mb-4">
-            <p className="text-gray-800 text-sm md:text-base font-semibold">
+          <div className="bg-medical-primary p-4 rounded-lg mb-4">
+            <p className="text-white text-sm md:text-base font-semibold">
               Inovação Tecnológica em Cirurgia Refrativa
             </p>
           </div>
@@ -26,6 +26,13 @@ const Historia = () => {
             Esta tecnologia revolucionária permite tratamentos mais precisos e personalizados, 
             estabelecendo um novo padrão de excelência em correção visual na região.
           </p>
+          <div className="flex justify-center mb-4">
+            <img
+              src="/uploads/Zeiss MEL 90.png"
+              alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
+              className="w-full max-w-md h-auto object-contain"
+            />
+          </div>
           <div className="mb-4">
             <div className="flex gap-2 items-center text-gray-600 text-sm md:text-base mb-2">
               🔬 Primeiro MEL 90 Zeiss da região
@@ -40,13 +47,6 @@ const Historia = () => {
               📈 Novo padrão de excelência regional
             </div>
           </div>
-          <div className="flex justify-center">
-            <img
-              src="/uploads/ZEISS-MEL-90-photo.jpeg"
-              alt="MEL 90 Zeiss - Laser de Cirurgia Refrativa"
-              className="rounded-lg shadow-medium w-full max-w-md h-auto object-cover"
-            />
-          </div>
         </div>
       )
     },
@@ -54,8 +54,8 @@ const Historia = () => {
       title: '2023-2024',
       content: (
         <div>
-          <div className="bg-medical-accent/50 p-4 rounded-lg mb-4">
-            <p className="text-gray-800 text-sm md:text-base font-semibold">
+          <div className="bg-medical-primary p-4 rounded-lg mb-4">
+            <p className="text-white text-sm md:text-base font-semibold">
               Ampliação e Crescimento do Instituto
             </p>
           </div>
@@ -85,8 +85,8 @@ const Historia = () => {
       title: '2014-2023',
       content: (
         <div>
-          <div className="bg-medical-accent/50 p-4 rounded-lg mb-4">
-            <p className="text-gray-800 text-sm md:text-base font-semibold">
+          <div className="bg-medical-primary p-4 rounded-lg mb-4">
+            <p className="text-white text-sm md:text-base font-semibold">
               Uma Década de Excelência
             </p>
           </div>
@@ -120,8 +120,8 @@ const Historia = () => {
       title: '2014',
       content: (
         <div>
-          <div className="bg-medical-accent/50 p-4 rounded-lg mb-4">
-            <p className="text-gray-800 text-sm md:text-base font-semibold">
+          <div className="bg-medical-primary p-4 rounded-lg mb-4">
+            <p className="text-white text-sm md:text-base font-semibold">
               Fundação do Instituto
             </p>
           </div>
@@ -160,18 +160,18 @@ const Historia = () => {
           <img 
             src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" 
             alt="Instituto de Olhos Santa Luzia" 
-            className="h-28 w-auto brightness-0 invert mx-auto" 
+            className="h-[134px] w-auto brightness-0 invert" 
           />
         } 
         brandName="" 
         socialLinks={[
           {
-            icon: <Instagram className="h-5 w-5" />,
+            icon: <Instagram className="h-[30px] w-[30px]" />,
             href: "https://www.instagram.com/io.santaluzia/",
             label: "Instagram"
           }, 
           {
-            icon: <Facebook className="h-5 w-5" />,
+            icon: <Facebook className="h-[30px] w-[30px]" />,
             href: "https://www.facebook.com/institudodeolhossantaluzia",
             label: "Facebook"
           }

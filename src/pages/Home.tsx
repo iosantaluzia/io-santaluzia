@@ -89,17 +89,20 @@ const Home = () => {
       >
         <div className="w-full">
           <div className="max-w-4xl mx-auto px-4 pb-8">
-          <div className="mb-6 flex justify-center">
-            <img 
-              src="/uploads/logoiosantaluzia-removebg-preview.png" 
-              alt="Instituto de Olhos Santa Luzia" 
-              className="h-18 w-auto md:h-24 md:w-auto object-contain"
-            />
-          </div>
           <div className="relative">
               {/* Image Carousel - Above Text for both mobile and desktop */}
               <div className="mb-6">
                 <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-3xl">
+                  {/* Notch com Logo */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[15%] z-20">
+                    <div className="bg-background rounded-2xl px-6 py-2 md:py-4 shadow-lg border-2 border-medical-primary/10">
+                      <img 
+                        src="/uploads/logoiosantaluzia-removebg-preview.png" 
+                        alt="Instituto de Olhos Santa Luzia" 
+                        className="h-20 w-auto md:h-24 md:w-auto object-contain scale-[1.2]"
+                      />
+                    </div>
+                  </div>
                   {heroImages.map((img, idx) => {
                     const isAnimatedImage = img !== "/uploads/exames.jpg";
                     return (
@@ -318,11 +321,11 @@ const Home = () => {
       </div>
 
       <Footer
-        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-28 w-auto brightness-0 invert mx-auto" />}
+        logo={<img src="/uploads/26442ffb-6359-4e38-a0f7-eaddfc7505f1.png" alt="Instituto de Olhos Santa Luzia" className="h-[134px] w-auto brightness-0 invert" />}
         brandName=""
         socialLinks={[
-          { icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
-          { icon: <Facebook className="h-5 w-5" />, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
+          { icon: <Instagram className="h-[30px] w-[30px]" />, href: "https://www.instagram.com/io.santaluzia/", label: "Instagram" },
+          { icon: <Facebook className="h-[30px] w-[30px]" />, href: "https://www.facebook.com/institudodeolhossantaluzia", label: "Facebook" }
         ]}
         mainLinks={[
           { href: "/instituto", label: "O Instituto" },
