@@ -73,7 +73,7 @@ export function Footer({
                       <>
                         <br className="md:hidden" />
                         <span className="md:hidden">CEP:</span>
-                        <span className="hidden md:inline">CEP:</span>
+                        <span className="hidden md:inline md:ml-2">CEP:</span>
                       </>
                     )}
                     {part}
