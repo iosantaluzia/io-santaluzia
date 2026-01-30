@@ -148,7 +148,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               <img 
                 src="/uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
                 alt="Instituto de Olhos Santa Luzia" 
-                className="h-6 w-6 md:h-7 md:w-7 object-contain animate-spin-slow"
+                className="h-[35px] w-[35px] md:h-[41px] md:w-[41px] object-contain animate-spin-slow"
               />
             </motion.div>
           )}
