@@ -123,7 +123,7 @@ export function useAuth() {
 
     // Criar promessa de fetch
     fetchingAppUser.current[authUserId] = fetchAppUser(authUserId);
-    
+
     try {
       await fetchingAppUser.current[authUserId];
     } finally {
@@ -179,9 +179,9 @@ export function useAuth() {
       }));
     } catch (error) {
       logger.error('Error in fetchAppUser:', error);
-      
+
       appUserCache.current[authUserId] = null;
-      
+
       if (error instanceof Error && error.message === 'Timeout') {
         setAuthState(prev => ({
           ...prev,
@@ -200,11 +200,9 @@ export function useAuth() {
     }
   };
 
-  const signInWithUsername = async (username: string, password: string) => {
+  const signInWithUsername = async (identifier: string, password_or_dob: string) => {
     try {
-      // SECURITY NOTE: Email mapping is hardcoded but non-sensitive
-      // TODO: Consider moving this mapping to database for better maintainability
-      // This mapping is safe as it only contains public email addresses, not passwords or secrets
+      // 1. Staff check (legacy mapping)
       const emailMap: Record<string, string> = {
         'matheus': 'matheus@iosantaluzia.com',
         'fabiola': 'fabiola@iosantaluzia.com',
@@ -212,47 +210,116 @@ export function useAuth() {
         'financeiro': 'financeiro@iosantaluzia.com'
       };
 
-      const email = emailMap[username.toLowerCase()];
-      if (!email) {
-        return { data: null, error: { message: 'Usuário não encontrado' } };
+      const staffEmail = emailMap[identifier.toLowerCase()];
+      if (staffEmail) {
+        return await supabase.auth.signInWithPassword({
+          email: staffEmail,
+          password: password_or_dob
+        });
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      // 2. Patient check
+      const cleanIdentifier = identifier.trim();
+      const cleanCPF = cleanIdentifier.replace(/\D/g, '');
+
+      // Encontrar paciente por CPF ou Email
+      const { data: patient, error: patientError } = await supabase
+        .from('patients')
+        .select('*')
+        .or(`cpf.eq."${cleanIdentifier}",cpf.eq."${cleanCPF}",email.eq."${cleanIdentifier}"`)
+        .maybeSingle();
+
+      if (patientError) {
+        logger.error('Error searching patient:', patientError);
+        return { data: null, error: { message: 'Erro ao buscar dados do paciente' } };
+      }
+
+      if (!patient) {
+        return { data: null, error: { message: 'Paciente não encontrado em nossa base de dados' } };
+      }
+
+      // Validar data de nascimento (que é a senha)
+      // Formato esperado: dd/mm/aa
+      const parts = password_or_dob.split('/');
+      if (parts.length !== 3) {
+        return { data: null, error: { message: 'Formato de data de nascimento inválido (use dd/mm/aa)' } };
+      }
+
+      let [day, month, year] = parts;
+      if (year.length === 2) {
+        const yearNum = parseInt(year);
+        year = yearNum > 30 ? `19${year}` : `20${year}`;
+      }
+      const formattedDOB = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+      if (patient.date_of_birth !== formattedDOB) {
+        return { data: null, error: { message: 'Data de nascimento incorreta para este CPF/Email' } };
+      }
+
+      // Paciente validado! Agora vamos autenticar no Supabase Auth
+      // Usamos um email sintético: cpf@paciente.iosantaluzia.com.br
+      const syntheticEmail = `${patient.cpf.replace(/\D/g, '')}@paciente.iosantaluzia.com.br`;
+
+      // Tenta login
+      let loginResult = await supabase.auth.signInWithPassword({
+        email: syntheticEmail,
+        password: password_or_dob
       });
 
-      if (error) {
-        logger.error('Login error:', error);
-        return { data, error };
-      }
+      if (loginResult.error) {
+        // Se falhou por credenciais inválidas, pode ser que o usuário auth ainda não exista
+        if (loginResult.error.message.toLowerCase().includes('invalid login credentials')) {
+          logger.log('Auth user not found for patient, creating default account...');
 
-      if (data.user) {
-        // Update last login - usar setTimeout para não bloquear o fluxo de login
-        setTimeout(async () => {
-          try {
-            const { error: updateError } = await supabase
-              .from('app_users')
-              .update({ last_login: new Date().toISOString() })
-              .eq('auth_user_id', data.user.id);
-            
-            if (updateError) {
-              logger.error('Failed to update last login:', updateError);
-              console.error('Erro ao atualizar último login:', updateError);
-            } else {
-              logger.log('Last login updated successfully for user:', data.user.id);
+          // Criar usuário auth
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: syntheticEmail,
+            password: password_or_dob,
+            options: {
+              data: {
+                username: patient.name,
+                full_name: patient.name,
+                role: 'patient',
+                patient_id: patient.id
+              }
             }
-          } catch (updateError) {
-            logger.error('Exception updating last login:', updateError);
-            console.error('Exceção ao atualizar último login:', updateError);
+          });
+
+          if (signUpError) {
+            logger.error('Error creating patient auth:', signUpError);
+            return { data: null, error: signUpError };
           }
-        }, 100);
+
+          if (signUpData.user) {
+            // Garantir que app_users existe para este paciente
+            // Como é um paciente, vamos criar com role 'patient' (mesmo não estando no enum base, o portal aceita)
+            const { error: appUserError } = await supabase
+              .from('app_users')
+              .upsert({
+                auth_user_id: signUpData.user.id,
+                username: patient.cpf,
+                role: 'patient' as any,
+                approved: true,
+                created_by: 'system'
+              });
+
+            if (appUserError) {
+              logger.error('Error creating app_user for patient:', appUserError);
+            }
+
+            // Tenta login novamente após o cadastro
+            loginResult = await supabase.auth.signInWithPassword({
+              email: syntheticEmail,
+              password: password_or_dob
+            });
+          }
+        }
       }
 
-      return { data, error: null };
+      return loginResult;
     } catch (error) {
       logger.error('Error in signInWithUsername:', error);
-      return { data: null, error: { message: 'Erro inesperado' } };
+      return { data: null, error: { message: 'Erro inesperado no sistema' } };
     }
   };
 
@@ -261,10 +328,10 @@ export function useAuth() {
       // Limpar cache antes do logout
       appUserCache.current = {};
       fetchingAppUser.current = {};
-      
+
       // Fazer logout do Supabase
       const { error } = await supabase.auth.signOut();
-      
+
       // Limpar estado local independente de erro
       setAuthState({
         user: null,
@@ -273,11 +340,11 @@ export function useAuth() {
         loading: false,
         error: null
       });
-      
+
       // Limpar localStorage do Supabase explicitamente
       // O Supabase armazena a sessão em localStorage com chaves específicas
-      const supabaseStorageKeys = Object.keys(localStorage).filter(key => 
-        key.startsWith('sb-') || 
+      const supabaseStorageKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('sb-') ||
         key.includes('supabase.auth')
       );
       supabaseStorageKeys.forEach(key => {
@@ -287,7 +354,7 @@ export function useAuth() {
           console.warn('Erro ao limpar localStorage:', key, e);
         }
       });
-      
+
       return { error };
     } catch (error) {
       console.error('Erro no signOut:', error);

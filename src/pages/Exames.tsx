@@ -63,7 +63,7 @@ const Exames = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 md:mb-12">
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-sans text-medical-primary mb-4 md:mb-8 px-4">
-              Exames Complementares
+              Centro Diagnóstico
             </h1>
             <p className="text-base md:text-lg text-medical-secondary max-w-3xl mx-auto px-4">
               Oferecemos uma ampla gama de exames oftalmológicos com equipamentos de última geração 

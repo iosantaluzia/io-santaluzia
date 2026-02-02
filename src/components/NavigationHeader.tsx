@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import PatientPortalModal from "./PatientPortalModal";
 import { cn } from "@/lib/utils";
 
 interface NavigationHeaderProps {
@@ -30,11 +29,12 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
     width: 0,
     opacity: 0,
   });
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
-  const [isPortalModalOpen, setIsPortalModalOpen] = useState(false);
+
+
   const [institutoDropdownOpen, setInstitutoDropdownOpen] = useState(false);
   const [cirurgiasDropdownOpen, setCirurgiasDropdownOpen] = useState(false);
   const institutoButtonRef = useRef<HTMLButtonElement>(null);
@@ -53,7 +53,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
         });
       }
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -62,7 +62,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
   // Atualiza cursor quando dropdowns abrem/fecham
   useEffect(() => {
     if (isMobile) return;
-    
+
     const updateCursor = () => {
       if (institutoDropdownOpen && institutoButtonRef.current) {
         const { width } = institutoButtonRef.current.getBoundingClientRect();
@@ -91,7 +91,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
         const isInstitutoActive = location.pathname === '/historia' || location.pathname === '/corpo-clinico';
         const isCirurgiasActive = location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone';
         const isAnyTabActive = location.pathname === '/exames' || location.pathname === '/artigos';
-        
+
         // Se não está em nenhuma página ativa, remove o hover
         if (!isInstitutoActive && !isCirurgiasActive && !isAnyTabActive) {
           setPosition((prev) => ({
@@ -145,14 +145,14 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               className="cursor-pointer flex-shrink-0 rounded-full overflow-hidden bg-white h-7 w-7 md:h-8 md:w-8 flex items-center justify-center"
               onClick={() => navigate("/")}
             >
-              <img 
-                src="/uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
-                alt="Instituto de Olhos Santa Luzia" 
+              <img
+                src="/uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png"
+                alt="Instituto de Olhos Santa Luzia"
                 className="h-[35px] w-[35px] md:h-[41px] md:w-[41px] object-contain animate-spin-slow"
               />
             </motion.div>
           )}
-          
+
           <motion.ul
             layout
             transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
@@ -168,7 +168,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             {/* Instituto Dropdown */}
             <DropdownMenu open={institutoDropdownOpen} onOpenChange={setInstitutoDropdownOpen}>
               <DropdownMenuTrigger asChild>
-                <motion.button 
+                <motion.button
                   ref={institutoButtonRef}
                   layout
                   layoutId="instituto-button"
@@ -195,17 +195,15 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                       opacity: 0,
                     }));
                   }}
-                  className={`relative z-10 cursor-pointer transition-colors rounded-full flex items-center justify-center flex-shrink-0 ${
-                    isMobile 
-                      ? (location.pathname === '/historia' || location.pathname === '/corpo-clinico' || institutoDropdownOpen)
-                        ? "px-3 py-1.5"
-                        : "px-1.5 py-1"
-                      : "px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase space-x-1"
-                  } ${
-                    institutoDropdownOpen || location.pathname === '/historia' || location.pathname === '/corpo-clinico'
-                      ? "bg-medical-primary text-white font-semibold" 
+                  className={`relative z-10 cursor-pointer transition-colors rounded-full flex items-center justify-center flex-shrink-0 ${isMobile
+                    ? (location.pathname === '/historia' || location.pathname === '/corpo-clinico' || institutoDropdownOpen)
+                      ? "px-3 py-1.5"
+                      : "px-1.5 py-1"
+                    : "px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase space-x-1"
+                    } ${institutoDropdownOpen || location.pathname === '/historia' || location.pathname === '/corpo-clinico'
+                      ? "bg-medical-primary text-white font-semibold"
                       : "text-medical-primary hover:text-white hover:bg-medical-primary"
-                  }`}
+                    }`}
                 >
                   {isMobile ? (
                     <div className="flex items-center gap-1">
@@ -259,7 +257,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
             {/* Cirurgias Dropdown */}
             <DropdownMenu open={cirurgiasDropdownOpen} onOpenChange={setCirurgiasDropdownOpen}>
               <DropdownMenuTrigger asChild>
-                <motion.button 
+                <motion.button
                   ref={cirurgiasButtonRef}
                   layout
                   layoutId="cirurgias-button"
@@ -286,17 +284,15 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
                       opacity: 0,
                     }));
                   }}
-                  className={`relative z-10 cursor-pointer transition-colors rounded-full flex items-center justify-center flex-shrink-0 ${
-                    isMobile 
-                      ? (location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone' || cirurgiasDropdownOpen)
-                        ? "px-3 py-1.5"
-                        : "px-1.5 py-1"
-                      : "px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase space-x-1"
-                  } ${
-                    cirurgiasDropdownOpen || location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone'
-                      ? "bg-medical-primary text-white font-semibold" 
+                  className={`relative z-10 cursor-pointer transition-colors rounded-full flex items-center justify-center flex-shrink-0 ${isMobile
+                    ? (location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone' || cirurgiasDropdownOpen)
+                      ? "px-3 py-1.5"
+                      : "px-1.5 py-1"
+                    : "px-2 py-1.5 md:px-2 md:py-1.5 lg:px-3 lg:py-2 text-xs uppercase space-x-1"
+                    } ${cirurgiasDropdownOpen || location.pathname === '/catarata' || location.pathname === '/cirurgia-refrativa' || location.pathname === '/ceratocone'
+                      ? "bg-medical-primary text-white font-semibold"
                       : "text-medical-primary hover:text-white hover:bg-medical-primary"
-                  }`}
+                    }`}
                 >
                   {isMobile ? (
                     <div className="flex items-center gap-1">
@@ -349,7 +345,7 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
 
             {/* Regular Navigation Items */}
             {navItems.map((item) => (
-              <Tab 
+              <Tab
                 key={item.name}
                 setPosition={setPosition}
                 isActive={location.pathname === item.path}
@@ -367,32 +363,14 @@ function NavigationHeader({ showLogo }: NavigationHeaderProps) {
               </Tab>
             ))}
 
-            {/* Portal do Paciente */}
-            <Tab 
-              setPosition={setPosition}
-              isActive={false}
-              onClick={() => {
-                setIsPortalModalOpen(true);
-                // Fecha dropdowns quando abrir portal
-                setInstitutoDropdownOpen(false);
-                setCirurgiasDropdownOpen(false);
-              }}
-              isMobile={isMobile}
-              icon={Users}
-              hasDropdownOpen={institutoDropdownOpen || cirurgiasDropdownOpen}
-            >
-              Portal do Paciente
-            </Tab>
+
 
             <Cursor position={position} isMobile={isMobile} />
           </motion.ul>
         </div>
       </div>
 
-      <PatientPortalModal 
-        isOpen={isPortalModalOpen} 
-        onClose={() => setIsPortalModalOpen(false)} 
-      />
+
     </>
   );
 }
@@ -433,10 +411,10 @@ const Tab = ({
         left: ref.current.offsetLeft,
       });
     }, 350); // Aguarda a animação de 0.3s + pequeno buffer
-    
+
     return () => clearTimeout(timeoutId);
   }, [isActive, setPosition, isMobile]);
-  
+
   return (
     <motion.li
       layout
@@ -491,8 +469,8 @@ const Tab = ({
         isActive
           ? "bg-medical-primary text-white font-semibold shadow-soft"
           : isMobile
-          ? "text-medical-primary active:bg-transparent"
-          : "text-medical-primary hover:text-white hover:bg-medical-primary/50 focus:outline-none focus:bg-transparent"
+            ? "text-medical-primary active:bg-transparent"
+            : "text-medical-primary hover:text-white hover:bg-medical-primary/50 focus:outline-none focus:bg-transparent"
       )}
     >
       {isMobile ? (
@@ -535,11 +513,11 @@ const Tab = ({
 
 const Cursor = ({ position, isMobile }: { position: HighlightPosition; isMobile: boolean }) => {
   if (isMobile) return null;
-  
+
   return (
     <motion.li
       animate={position}
-      transition={{ 
+      transition={{
         type: "tween",
         ease: [0.4, 0, 0.2, 1],
         duration: 0.4

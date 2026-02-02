@@ -67,8 +67,8 @@ const CirurgiaRefrativa = () => {
                 Cirurgia Refrativa
               </h1>
               <p className="text-lg text-medical-secondary mb-8">
-                Liberdade e segurança em um só procedimento. A cirurgia refrativa oferece 
-                correção definitiva para miopia, hipermetropia e astigmatismo com tecnologia 
+                Liberdade e segurança em um só procedimento. A cirurgia refrativa oferece
+                correção definitiva para miopia, hipermetropia e astigmatismo com tecnologia
                 laser de última geração.
               </p>
             </div>
@@ -82,38 +82,49 @@ const CirurgiaRefrativa = () => {
           </div>
 
           {/* Tecnologia Presbyond Section */}
-          <div className="bg-gradient-to-r from-medical-primary/5 to-medical-accent/5 rounded-2xl p-8 mb-16">
+          <div className="bg-gradient-to-r from-medical-primary/5 to-medical-accent/5 rounded-2xl px-4 md:px-8 py-8 mb-16">
             <h2 className="text-3xl font-serif font-bold text-medical-primary text-center mb-6">
               Tecnologia Presbyond® da Zeiss
             </h2>
             <p className="text-lg text-medical-secondary mb-6 text-center max-w-3xl mx-auto">
               Tecnologia exclusiva disponível em nosso instituto
             </p>
-            <div className="bg-white rounded-lg p-8 shadow-soft max-w-4xl mx-auto">
+            <div className="px-2 md:px-8 py-8 max-w-4xl mx-auto">
               <p className="text-medical-secondary mb-6 leading-relaxed">
                 Projetada para tratar a presbiopia (vista cansada). Essa técnica utiliza um conceito de Blend Zone, que permite que o cérebro selecione automaticamente a melhor imagem conforme a distância, criando uma sobreposição de zonas de foco em ambos os olhos.
               </p>
-              <h3 className="text-xl font-semibold text-medical-primary mb-4">
-                Os principais benefícios incluem:
-              </h3>
-              <ul className="space-y-3 text-medical-secondary">
-                <li className="flex items-start">
-                  <span className="text-medical-primary mr-3 font-bold">•</span>
-                  <span>Correção simultânea de múltiplos erros refrativos, como presbiopia, astigmatismo, miopia e hipermetropia, em um único procedimento.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-medical-primary mr-3 font-bold">•</span>
-                  <span>Preservação da visão binocular natural, mantendo a coordenação entre os dois olhos.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-medical-primary mr-3 font-bold">•</span>
-                  <span>Recuperação rápida e resultados duradouros, permitindo que a maioria dos pacientes retome suas atividades rapidamente.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-medical-primary mr-3 font-bold">•</span>
-                  <span>Ajuste personalizado da córnea, criando uma zona de transição suave que permite enxergar bem em todas as distâncias.</span>
-                </li>
-              </ul>
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h3 className="text-xl font-semibold text-medical-primary mb-4">
+                    Os principais benefícios incluem:
+                  </h3>
+                  <ul className="space-y-3 text-medical-secondary">
+                    <li className="flex items-start">
+                      <span className="text-medical-primary mr-3 font-bold">•</span>
+                      <span>Correção simultânea de múltiplos erros refrativos, como presbiopia, astigmatismo, miopia e hipermetropia, em um único procedimento.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-medical-primary mr-3 font-bold">•</span>
+                      <span>Preservação da visão binocular natural, mantendo a coordenação entre os dois olhos.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-medical-primary mr-3 font-bold">•</span>
+                      <span>Recuperação rápida e resultados duradouros, permitindo que a maioria dos pacientes retome suas atividades rapidamente.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-medical-primary mr-3 font-bold">•</span>
+                      <span>Ajuste personalizado da córnea, criando uma zona de transição suave que permite enxergar bem em todas as distâncias.</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="flex justify-center">
+                  <img
+                    src="/uploads/Zeiss MEL 90.png"
+                    alt="Zeiss MEL 90"
+                    className="max-w-full h-auto"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -323,7 +334,7 @@ const CirurgiaRefrativa = () => {
         }}
       />
       <FloatingWhatsAppButton />
-      
+
       {/* PDF Modal */}
       <PDFModal
         isOpen={isPDFModalOpen}

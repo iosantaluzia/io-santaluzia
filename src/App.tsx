@@ -17,7 +17,7 @@ import Artigos from "./pages/Artigos";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import Admin from "./pages/Admin";
-import PatientPortal from "./pages/PatientPortal";
+
 import OftalmologistaSinop from "./pages/OftalmologistaSinop";
 
 const queryClient = new QueryClient();
@@ -39,7 +39,7 @@ const App = () => (
             <Route path="/cirurgia-refrativa" element={<CirurgiaRefrativa />} />
             <Route path="/ceratocone" element={<Ceratocone />} />
             <Route path="/artigos" element={<Artigos />} />
-            <Route path="/portal-paciente" element={<PatientPortal />} />
+
             <Route path="/admin" element={<Admin />} />
             <Route path="/adminio" element={<AdminDashboard />} />
             <Route path="/oftalmologista-sinop" element={<OftalmologistaSinop />} />

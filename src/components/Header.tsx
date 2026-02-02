@@ -4,11 +4,11 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import HeaderDropdown from "./HeaderDropdown";
-import PatientPortalModal from "./PatientPortalModal";
+
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isPortalModalOpen, setIsPortalModalOpen] = useState(false);
+
   const navigate = useNavigate();
 
   const institutoItems = [
@@ -27,15 +27,15 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div 
+          <div
             className="flex items-center space-x-3 cursor-pointer"
             onClick={() => navigate("/")}
           >
             <div className="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center">
-              <img 
-                src="/uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png" 
-                alt="Instituto de Olhos Santa Luzia" 
-                className="h-12 w-12 object-contain animate-spin-slow" 
+              <img
+                src="/uploads/e6a1d636-8727-4054-a89d-8ed7337a643a.png"
+                alt="Instituto de Olhos Santa Luzia"
+                className="h-12 w-12 object-contain animate-spin-slow"
               />
             </div>
             <div className="hidden sm:block">
@@ -50,24 +50,19 @@ const Header = () => {
           <nav className="hidden lg:flex items-center space-x-8">
             <HeaderDropdown title="O Instituto" items={institutoItems} />
             <HeaderDropdown title="Cirurgias" items={cirurgiasItems} />
-            <a 
-              href="/exames" 
+            <a
+              href="/exames"
               className="text-medical-primary hover:text-medical-secondary transition-colors duration-300 font-medium"
             >
               Exames
             </a>
-            <a 
-              href="/artigos" 
+            <a
+              href="/artigos"
               className="text-medical-primary hover:text-medical-secondary transition-colors duration-300 font-medium"
             >
               Artigos
             </a>
-            <button
-              onClick={() => setIsPortalModalOpen(true)}
-              className="text-medical-primary hover:text-medical-secondary transition-colors duration-300 font-medium"
-            >
-              Portal do Paciente
-            </button>
+
           </nav>
 
           {/* CTA Button */}
@@ -78,8 +73,8 @@ const Header = () => {
           </div>
 
           {/* Mobile menu button */}
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)} 
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="lg:hidden p-2 text-medical-primary"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -96,29 +91,21 @@ const Header = () => {
               <div className="px-4 py-3">
                 <HeaderDropdown title="Cirurgias" items={cirurgiasItems} className="w-full justify-between" />
               </div>
-              <a 
-                href="/exames" 
+              <a
+                href="/exames"
                 className="block px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Exames
               </a>
-              <a 
-                href="/artigos" 
+              <a
+                href="/artigos"
                 className="block px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Artigos
               </a>
-              <button
-                onClick={() => {
-                  setIsPortalModalOpen(true);
-                  setIsMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-3 text-medical-primary hover:bg-medical-muted transition-colors"
-              >
-                Portal do Paciente
-              </button>
+
               <div className="px-4 py-3">
                 <Button variant="default" className="w-full bg-gradient-primary">
                   Agendar Consulta
@@ -129,10 +116,7 @@ const Header = () => {
         )}
       </div>
 
-      <PatientPortalModal 
-        isOpen={isPortalModalOpen} 
-        onClose={() => setIsPortalModalOpen(false)} 
-      />
+
     </header>
   );
 };

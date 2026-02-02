@@ -2,10 +2,10 @@
 import { ArrowRight, Eye, Heart, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import PatientPortalModal from "./PatientPortalModal";
+
 
 const Hero = () => {
-  const [isPortalModalOpen, setIsPortalModalOpen] = useState(false);
+
 
   return (
     <section id="inicio" className="min-h-screen bg-gradient-hero relative overflow-hidden">
@@ -27,8 +27,8 @@ const Hero = () => {
                 com excelência
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                No Instituto de Olhos Santa Luzia, oferecemos cuidados oftalmológicos 
-                especializados com tecnologia de ponta e uma equipe altamente qualificada 
+                No Instituto de Olhos Santa Luzia, oferecemos cuidados oftalmológicos
+                especializados com tecnologia de ponta e uma equipe altamente qualificada
                 para garantir a saúde dos seus olhos.
               </p>
             </div>
@@ -55,14 +55,7 @@ const Hero = () => {
                 Agendar Consulta
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-medical-primary text-medical-primary"
-                onClick={() => setIsPortalModalOpen(true)}
-              >
-                Consultar Exames
-              </Button>
+
             </div>
           </div>
 
@@ -106,10 +99,7 @@ const Hero = () => {
         </div>
       </div>
 
-      <PatientPortalModal 
-        isOpen={isPortalModalOpen} 
-        onClose={() => setIsPortalModalOpen(false)} 
-      />
+
     </section>
   );
 };
