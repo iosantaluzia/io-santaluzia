@@ -15,7 +15,7 @@ const CorpoClinico = () => {
               Corpo Clínico
             </h1>
             <p className="text-base md:text-lg text-medical-secondary max-w-3xl mx-auto px-4">
-              Nossa equipe é formada por oftalmologistas experientes e especializados nas mais 
+              Nossa equipe é formada por oftalmologistas experientes e especializados nas mais
               diversas áreas da medicina ocular, garantindo um atendimento de alta qualidade.
             </p>
           </div>
@@ -79,11 +79,11 @@ const CorpoClinico = () => {
               Compromisso com a Excelência
             </h2>
             <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
-              Nossos profissionais estão em constante atualização, participando de congressos 
+              Nossos profissionais estão em constante atualização, participando de congressos
               e cursos de especialização para oferecer sempre os melhores tratamentos disponíveis.
             </p>
             <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-              Acreditamos que o cuidado humanizado, aliado à competência técnica, é fundamental 
+              Acreditamos que o cuidado humanizado, aliado à competência técnica, é fundamental
               para o sucesso dos tratamentos e a satisfação dos nossos pacientes.
             </p>
           </div>
