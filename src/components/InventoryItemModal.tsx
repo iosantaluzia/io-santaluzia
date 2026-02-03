@@ -7,7 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
+
+const COMMON_LENS_BRANDS = [
+    { label: 'ISERT 151 Esférica', prefix: 'Lente ISERT 151 Esférica' },
+    { label: 'Vivinex Gemetric (Multifocal)', prefix: 'Lente Vivinex Gemetric Asférica Multifocal' },
+    { label: 'Vivinex Impress (Monofocal)', prefix: 'Lente Vivinex Impress Asférica Monofocal' },
+];
 
 interface InventoryItemModalProps {
     isOpen: boolean;
@@ -103,17 +109,6 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Nome do Item</Label>
-                        <Input
-                            id="name"
-                            placeholder="Ex: Colírio Hipromelose"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
                         <Select
                             value={formData.category}
@@ -132,6 +127,58 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                 <SelectItem value="Outros">Outros</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    {formData.category === 'Lentes' && !itemToEdit && (
+                        <div className="space-y-2 p-3 bg-bege-principal/5 rounded-md border border-bege-principal/20">
+                            <Label className="text-marrom-acentuado text-xs flex items-center gap-1 font-semibold">
+                                <Info className="h-3 w-3" /> Lentes cadastradas:
+                            </Label>
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                                {COMMON_LENS_BRANDS.map((brand) => (
+                                    <Button
+                                        key={brand.label}
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="justify-start text-xs h-10 bg-white hover:bg-bege-principal/10 border-bege-principal/30 text-marrom-acentuado whitespace-normal text-left px-2 leading-tight"
+                                        onClick={() => setFormData({ ...formData, name: brand.prefix + ' ' })}
+                                    >
+                                        {brand.label}
+                                    </Button>
+                                ))}
+                                <div className="col-span-2 flex gap-2 mt-1">
+                                    <Input
+                                        placeholder="Cadastrar nova marca..."
+                                        className="h-8 text-xs bg-white border-bege-principal/20 focus-visible:ring-bege-principal"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                const target = e.target as HTMLInputElement;
+                                                if (target.value.trim()) {
+                                                    setFormData({ ...formData, name: `Lente ${target.value.trim()} ` });
+                                                    target.value = '';
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Nome do Item</Label>
+                        <Input
+                            id="name"
+                            placeholder={formData.category === 'Lentes' ? "Ex: Lente ... +20.00" : "Ex: Colírio Hipromelose"}
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            required
+                        />
+                        {formData.category === 'Lentes' && (
+                            <p className="text-[10px] text-gray-400 italic">Dica: Inclua a marca e o grau (ex: +22.50)</p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

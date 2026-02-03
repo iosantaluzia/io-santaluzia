@@ -16,6 +16,7 @@ interface InventoryItem {
   status?: string;
 }
 
+
 export function EstoqueSection() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
