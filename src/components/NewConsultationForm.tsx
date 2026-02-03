@@ -3,47 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Save, User, TestTube, Calendar, FileText, Edit } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft, Save, TestTube } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/logger';
 import { toast } from 'sonner';
 import { PatientConsultations } from './PatientConsultations';
 import { getDoctorFullName } from '@/utils/doctorNames';
+import { calculateDetailedAge } from '@/utils/formatters';
 
-// Função para calcular idade detalhada em anos, meses e dias
-const calculateDetailedAge = (birthDate: string): string => {
-  const birth = new Date(birthDate);
-  const today = new Date();
+// Sub-components
+import { ConsultationPatientSummary } from './pacientes/ConsultationPatientSummary';
+import { PatientExamsList } from './pacientes/PatientExamsList';
 
-  let years = today.getFullYear() - birth.getFullYear();
-  let months = today.getMonth() - birth.getMonth();
-  let days = today.getDate() - birth.getDate();
-
-  // Ajustar se o mês atual for menor que o mês de nascimento
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
-
-  // Ajustar se o dia atual for menor que o dia de nascimento
-  if (days < 0) {
-    months--;
-    // Calcular dias do mês anterior
-    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const daysInLastMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-    days += daysInLastMonth;
-
-    // Se months ficou negativo após o ajuste, ajustar novamente
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-  }
-
-  return `${years} anos, ${months} meses, ${days} dias`;
-};
 
 interface Patient {
   id: string;
@@ -86,16 +58,6 @@ interface PatientExam {
   status: string;
 }
 
-const examTypeLabels: { [key: string]: string } = {
-  'pentacam': 'Pentacam',
-  'campimetria': 'Campimetria',
-  'topografia': 'Topografia de Córnea',
-  'microscopia_especular': 'Microscopia Especular',
-  'oct': 'OCT',
-  'retinografia': 'Retinografia',
-  'angiofluoresceinografia': 'Angiofluoresceinografia',
-  'ultrassom_ocular': 'Ultrassom Ocular'
-};
 
 export function NewConsultationForm({ patient, onBack, onSaved, existingConsultation, onEditPatient }: NewConsultationFormProps) {
   const { appUser } = useAuth();
@@ -171,7 +133,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
     try {
       // Obter nome completo do médico do appUser
       const doctorName = getDoctorFullName(appUser?.username);
-      
+
       // Usar data/hora atual
       const consultationDate = new Date().toISOString();
 
@@ -284,7 +246,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             </p>
           </div>
         </div>
-        <Button 
+        <Button
           type="submit"
           form="consultation-form"
           disabled={loading}
@@ -295,32 +257,10 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
         </Button>
       </div>
 
-      {/* Informações do Paciente */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="h-12 w-12 rounded-full bg-bege-principal flex items-center justify-center">
-              <User className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-cinza-escuro">{patient.name}</h3>
-              <p className="text-gray-600">CPF: {patient.cpf} • Nascimento: {new Date(patient.date_of_birth).toLocaleDateString('pt-BR')} ({calculateDetailedAge(patient.date_of_birth)})</p>
-            </div>
-          </div>
-          {onEditPatient && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onEditPatient(patient)}
-              className="bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white border-marrom-acentuado hover:border-marrom-acentuado/90"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar Paciente
-            </Button>
-          )}
-        </div>
-      </div>
+      <ConsultationPatientSummary
+        patient={patient}
+        onEditPatient={onEditPatient}
+      />
 
       {/* Formulário - Layout em duas colunas */}
       <form id="consultation-form" onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
@@ -337,86 +277,17 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             />
           </div>
 
-          {/* Coluna Direita - Exames do Paciente */}
-          <div className="lg:col-span-1">
-            <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 h-full">
-              <div className="flex items-center gap-2 mb-4">
-                <TestTube className="h-5 w-5 text-gray-600" />
-                <Label className="text-sm font-semibold text-gray-700">Exames Cadastrados</Label>
-              </div>
-              
-              {loadingExams ? (
-                <div className="flex justify-center items-center h-32">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-bege-principal"></div>
-                </div>
-              ) : exams.length > 0 ? (
-                <ScrollArea className="h-[500px] pr-4">
-                  <div className="space-y-3">
-                    {exams.map((exam) => (
-                      <div
-                        key={exam.id}
-                        className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <FileText className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm font-medium text-gray-800">
-                                {examTypeLabels[exam.exam_type] || exam.exam_type}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-                              <Calendar className="h-3 w-3" />
-                              <span>{new Date(exam.exam_date).toLocaleDateString('pt-BR')}</span>
-                              {exam.doctor_name && (
-                                <>
-                                  <span>•</span>
-                                  <span>{exam.doctor_name}</span>
-                                </>
-                              )}
-                            </div>
-                            {exam.description && (
-                              <p className="text-xs text-gray-600 mb-1 line-clamp-2">{exam.description}</p>
-                            )}
-                            {exam.results && (
-                              <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded mt-2 line-clamp-3">
-                                {exam.results}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="mt-2">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                            exam.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            exam.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                            exam.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {exam.status === 'completed' ? 'Concluído' :
-                             exam.status === 'in_progress' ? 'Em Andamento' :
-                             exam.status === 'pending' ? 'Pendente' :
-                             exam.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="text-center py-8">
-                  <TestTube className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">Nenhum exame cadastrado para este paciente.</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <PatientExamsList
+            exams={exams}
+            loading={loadingExams}
+          />
         </div>
       </form>
 
       {/* Histórico de Consultas */}
       <div className="mt-8 w-full overflow-x-hidden">
-        <PatientConsultations 
-          patientId={patient.id} 
+        <PatientConsultations
+          patientId={patient.id}
           onConsultationClick={(consultation) => {
             // Atualizar o formulário com os dados da consulta clicada
             setConsultationText(consultation.anamnesis || '');

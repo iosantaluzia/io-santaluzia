@@ -107,26 +107,24 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
           });
         }
 
-        // Buscar Estoque (dados mockados - você pode substituir por uma tabela real depois)
-        const stockData = [
-          { id: 1, item: 'Colírio Hipromelose', quantity: 5, minStock: 10, status: 'Baixo', category: 'Medicamentos' },
-          { id: 2, item: 'Lentes de Contato (-2.00)', quantity: 15, minStock: 20, status: 'Baixo', category: 'Lentes' },
-          { id: 3, item: 'Papel para Impressão', quantity: 50, minStock: 25, status: 'Normal', category: 'Material Escritório' },
-          { id: 4, item: 'Algodão Oftálmico', quantity: 2, minStock: 15, status: 'Crítico', category: 'Material Médico' },
-        ];
+        // Buscar Estoque
+        const { data: stockItems } = await supabase
+          .from('inventory')
+          .select('*')
+          .or(`name.ilike.%${searchLower}%,category.ilike.%${searchLower}%`)
+          .limit(5);
 
-        stockData.forEach(item => {
-          if (item.item.toLowerCase().includes(searchLower) || 
-              item.category.toLowerCase().includes(searchLower)) {
+        if (stockItems && stockItems.length > 0) {
+          stockItems.forEach(item => {
             allResults.push({
               type: 'stock',
-              id: item.id.toString(),
-              title: item.item,
-              subtitle: `${item.category} • Quantidade: ${item.quantity}`,
+              id: item.id,
+              title: item.name,
+              subtitle: `${item.category || 'Geral'} • Quantidade: ${item.quantity ?? 0}`,
               data: item
             });
-          }
-        });
+          });
+        }
 
         setResults(allResults);
       } catch (error) {

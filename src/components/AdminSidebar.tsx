@@ -1,11 +1,11 @@
 
 import React, { useMemo } from 'react';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  FileText, 
-  Boxes, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  FileText,
+  Boxes,
   HandCoins,
   Stethoscope,
   Mail,
@@ -33,7 +33,7 @@ const allSidebarItems = [
   { title: "Exames", url: "#exames", icon: FileText, roles: ['admin', 'doctor', 'secretary'] },
   { title: "Documentos", url: "#documentos", icon: FileCheck, roles: ['admin', 'doctor'] }, // Apenas médicos e admins
   { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor', 'secretary'] },
+  { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor'], allowedUsers: ['financeiro'] },
   { title: "Email", url: "#email", icon: Mail, roles: ['admin'], allowedUsers: ['financeiro'] }, // Só para financeiro
 ];
 
@@ -46,18 +46,16 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { appUser } = useAuth();
-  
+
   // Filtrar itens do sidebar baseado no role e username do usuário
   const sidebarItems = useMemo(() => {
     if (!appUser) return [];
-    
+
     return allSidebarItems.filter(item => {
-      // Se o item tem allowedUsers, verificar se o username está na lista
-      if (item.allowedUsers) {
-        return item.allowedUsers.includes(appUser.username);
-      }
-      // Caso contrário, verificar por role
-      return item.roles.includes(appUser.role);
+      const hasRole = item.roles.includes(appUser.role);
+      const isAllowedUser = item.allowedUsers?.includes(appUser.username);
+
+      return hasRole || isAllowedUser;
     });
   }, [appUser]);
 
@@ -79,11 +77,11 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
             <SidebarMenu>
               {sidebarItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     asChild
                     isActive={activeSection === item.url.replace('#', '')}
                   >
-                    <button 
+                    <button
                       onClick={() => handleSectionClick(item.url)}
                       className="w-full flex items-center"
                     >

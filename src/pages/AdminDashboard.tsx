@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Settings, User, LogOut, AlertTriangle, RotateCcw } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -11,11 +11,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger 
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
 import { LoginForm } from '@/components/LoginForm';
@@ -64,14 +64,14 @@ const AdminDashboard = () => {
       // Limpar estados locais primeiro
       setActiveSection('overview');
       setShowUserManagement(false);
-      
+
       // Fazer logout do Supabase
       await signOut();
-      
+
       // Aguardar um pouco mais para garantir que o logout seja completamente processado
       // e que o estado seja atualizado
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Forçar reload completo da página para garantir que tudo seja limpo
       // Usar replace para não deixar histórico e forçar reload completo
       // Adicionar timestamp para evitar cache
@@ -193,7 +193,7 @@ const AdminDashboard = () => {
         case 'overview':
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
         case 'agendamentos':
-          return <LazyComponents.AgendamentosSection 
+          return <LazyComponents.AgendamentosSection
             onSectionChange={setActiveSection}
             onOpenPatientConsultation={(patientName) => {
               // Não navegar mais para consultas - funcionalidade integrada em Pacientes
@@ -224,6 +224,7 @@ const AdminDashboard = () => {
         case 'estoque':
           return <LazyComponents.EstoqueSection />;
         case 'financeiro':
+          if (appUser?.role === 'secretary') return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
           return <LazyComponents.FinanceiroSection />;
         case 'email':
           return <LazyComponents.EmailSection />;
@@ -246,7 +247,7 @@ const AdminDashboard = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        
+
         <main className="flex-1 flex flex-col relative">
           {/* Header */}
           <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 sticky top-0 z-40">
@@ -256,7 +257,7 @@ const AdminDashboard = () => {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink 
+                    <BreadcrumbLink
                       className="cursor-pointer"
                       onClick={() => {
                         setActiveSection('overview');
@@ -283,7 +284,7 @@ const AdminDashboard = () => {
             {/* Seção Central: Busca Global */}
             <div className="flex-1 flex justify-center px-4">
               <div className="w-full max-w-2xl">
-                <GlobalSearch 
+                <GlobalSearch
                   onSectionChange={(section) => {
                     setActiveSection(section);
                     // Limpar estados de navegação quando mudar de seção manualmente
@@ -326,7 +327,7 @@ const AdminDashboard = () => {
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
               </button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-2 text-gray-600 hover:text-cinza-escuro">
@@ -381,7 +382,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </main>
-        
+
         {/* Chat flutuante para comunicação interna */}
         {isAuthenticated && appUser && (
           <FloatingChat currentUsername={appUser.username?.toLowerCase() || null} />

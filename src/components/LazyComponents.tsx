@@ -23,7 +23,7 @@ const ErrorFallback = ({ error, retry }: { error: Error; retry?: () => void }) =
     <p className="text-red-600 mb-4">Erro ao carregar seção</p>
     <p className="text-sm text-gray-500 mb-4">{error.message}</p>
     {retry && (
-      <button 
+      <button
         onClick={retry}
         className="px-4 py-2 bg-bege-principal text-white rounded hover:bg-marrom-acentuado"
       >
@@ -34,78 +34,84 @@ const ErrorFallback = ({ error, retry }: { error: Error; retry?: () => void }) =
 );
 
 export const LazyComponents = {
-  AgendamentosSection: ({ 
-    onSectionChange, 
+  AgendamentosSection: ({
+    onSectionChange,
     onOpenPatientConsultation,
     onOpenConsultationForPatient
-  }: { 
+  }: {
     onSectionChange?: (section: string) => void;
     onOpenPatientConsultation?: (patientName: string) => void;
     onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
   }) => (
     <Suspense fallback={<LoadingSpinner />}>
-      <AgendamentosSectionLazy 
+      <AgendamentosSectionLazy
         onSectionChange={onSectionChange}
         onOpenPatientConsultation={onOpenPatientConsultation}
         onOpenConsultationForPatient={onOpenConsultationForPatient}
       />
     </Suspense>
   ),
-  
+
   PacientesSection: ({
     patientToOpenConsultation,
+    patientIdToOpen,
     onConsultationOpened,
+    onPatientOpened,
     onSectionChange
   }: {
     patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
+    patientIdToOpen?: string | null;
     onConsultationOpened?: () => void;
+    onPatientOpened?: () => void;
     onSectionChange?: (section: string) => void;
   }) => (
     <Suspense fallback={<LoadingSpinner />}>
       <PacientesSectionLazy
         patientToOpenConsultation={patientToOpenConsultation}
+        patientIdToOpen={patientIdToOpen}
         onConsultationOpened={onConsultationOpened}
+        onPatientOpened={onPatientOpened}
         onSectionChange={onSectionChange}
       />
     </Suspense>
   ),
-  
+
   ExamesSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <ExamesSectionLazy />
     </Suspense>
   ),
-  
+
   DocumentsSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <DocumentsSectionLazy />
     </Suspense>
   ),
-  
+
   EstoqueSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <EstoqueSectionLazy />
     </Suspense>
   ),
-  
+
   FinanceiroSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <FinanceiroSectionLazy />
     </Suspense>
   ),
-  
+
   DashboardOverview: ({ onSectionChange }: { onSectionChange: (section: string) => void }) => (
     <Suspense fallback={<LoadingSpinner />}>
       <DashboardOverviewLazy onSectionChange={onSectionChange} />
     </Suspense>
   ),
-  
+
   UserManagement: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <UserManagementLazy />
     </Suspense>
   ),
-  
+
   EmailSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <EmailSectionLazy />
