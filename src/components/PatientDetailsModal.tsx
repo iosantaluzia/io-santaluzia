@@ -79,7 +79,7 @@ export function PatientDetailsModal({
   onOpenConsultationForPatient,
   onScheduleReturn
 }: PatientDetailsModalProps) {
-  const { user: appUser } = useAuth();
+  const { appUser } = useAuth();
   const isDoctor = appUser?.role === 'doctor' || appUser?.role === 'admin';
   const isSecretary = appUser?.role === 'secretary';
 
@@ -139,78 +139,83 @@ export function PatientDetailsModal({
   };
 
   const fetchPatientData = useCallback(async () => {
-    if (!patient.cpf) {
-      setEditingPatient({
-        name: patient.name,
-        cpf: '',
-        phone: patient.phone || '',
-        email: patient.email || '',
-        address: patient.address || '',
-        date_of_birth: patient.birthDate ? patient.birthDate.split('/').reverse().join('-') : ''
-      });
-      return null;
-    }
+    // 1. Priorizar busca pelo ID se disponível
+    if (patient.patientId) {
+      try {
+        const { data, error } = await supabase
+          .from('patients')
+          .select('id, name, cpf, phone, email, address, date_of_birth')
+          .eq('id', patient.patientId)
+          .maybeSingle();
 
-    try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('id, name, cpf, phone, email, address, date_of_birth')
-        .eq('cpf', patient.cpf)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data) {
-        setPatientId(data.id);
-        const parsedAddress = parseAddress(data.address || '');
-        setEditingPatient({
-          name: data.name,
-          cpf: data.cpf || '',
-          phone: data.phone || '',
-          email: data.email || '',
-          address: parsedAddress.address || data.address || '',
-          cep: parsedAddress.cep,
-          city: parsedAddress.city,
-          date_of_birth: data.date_of_birth || ''
-        });
-        return data.id;
+        if (data) {
+          setPatientId(data.id);
+          const parsedAddress = parseAddress(data.address || '');
+          setEditingPatient({
+            name: data.name,
+            cpf: data.cpf || '',
+            phone: data.phone || '',
+            email: data.email || '',
+            address: parsedAddress.address || data.address || '',
+            cep: parsedAddress.cep,
+            city: parsedAddress.city,
+            date_of_birth: data.date_of_birth || ''
+          });
+          return data.id;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar por ID:', error);
       }
-
-      // Fallback para os dados do prop se não encontrar no banco
-      const addressData = patient.address || '';
-      const parsedAddress = parseAddress(addressData);
-      setEditingPatient({
-        name: patient.name,
-        cpf: patient.cpf || '',
-        phone: patient.phone || '',
-        email: patient.email || '',
-        address: parsedAddress.address,
-        cep: parsedAddress.cep,
-        city: parsedAddress.city,
-        date_of_birth: patient.birthDate
-          ? patient.birthDate.split('/').reverse().join('-')
-          : ''
-      });
-      return null;
-    } catch (error) {
-      console.error('Erro ao buscar dados do paciente:', error);
-      // Em caso de erro, usar dados do prop
-      const addressData = patient.address || '';
-      const parsedAddress = parseAddress(addressData);
-      setEditingPatient({
-        name: patient.name,
-        cpf: patient.cpf || '',
-        phone: patient.phone || '',
-        email: patient.email || '',
-        address: parsedAddress.address,
-        cep: parsedAddress.cep,
-        city: parsedAddress.city,
-        date_of_birth: patient.birthDate
-          ? patient.birthDate.split('/').reverse().join('-')
-          : ''
-      });
-      return null;
     }
+
+    // 2. Fallback para CPF
+    if (patient.cpf) {
+      try {
+        const cleanCPF = patient.cpf.replace(/\D/g, '');
+        const { data, error } = await supabase
+          .from('patients')
+          .select('id, name, cpf, phone, email, address, date_of_birth')
+          .or(`cpf.eq."${patient.cpf}",cpf.eq."${cleanCPF}"`)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          setPatientId(data.id);
+          const parsedAddress = parseAddress(data.address || '');
+          setEditingPatient({
+            name: data.name,
+            cpf: data.cpf || '',
+            phone: data.phone || '',
+            email: data.email || '',
+            address: parsedAddress.address || data.address || '',
+            cep: parsedAddress.cep,
+            city: parsedAddress.city,
+            date_of_birth: data.date_of_birth || ''
+          });
+          return data.id;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar por CPF:', error);
+      }
+    }
+
+    // 3. Fallback final para os dados do prop
+    const addressData = patient.address || '';
+    const parsedAddress = parseAddress(addressData);
+    setEditingPatient({
+      name: patient.name,
+      cpf: patient.cpf || '',
+      phone: patient.phone || '',
+      email: patient.email || '',
+      address: parsedAddress.address,
+      cep: parsedAddress.cep,
+      city: parsedAddress.city,
+      date_of_birth: patient.birthDate
+        ? patient.birthDate.split('/').reverse().join('-')
+        : ''
+    });
+    return patient.patientId || null;
   }, [patient]);
 
   const fetchPatientHistory = useCallback(async () => {
@@ -241,7 +246,7 @@ export function PatientDetailsModal({
 
       // Buscar exames do paciente
       const { data: examsData, error: examsError } = await supabase
-        .from('exams')
+        .from('patient_exams')
         .select('id, exam_date, exam_type, doctor_name, status')
         .eq('patient_id', foundPatientId)
         .order('exam_date', { ascending: false })
@@ -454,18 +459,29 @@ export function PatientDetailsModal({
   };
 
   const isTodayAppointment = (): boolean => {
-    const today = new Date().toISOString().split('T')[0];
-    const appointmentDate = patient.appointmentDate
-      ? new Date(patient.appointmentDate).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0];
-    return today === appointmentDate;
+    const today = new Date();
+    const apptDate = patient.appointmentDate ? new Date(patient.appointmentDate) : new Date();
+
+    return (
+      today.getDate() === apptDate.getDate() &&
+      today.getMonth() === apptDate.getMonth() &&
+      today.getFullYear() === apptDate.getFullYear()
+    );
   };
 
   const canEditCurrentConsultation = (): boolean => {
     if (!consultations.some(c => c.status === 'in_progress' || c.status === 'completed')) return true;
-    const todayConsultation = consultations.find(c =>
-      new Date(c.consultation_date).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
-    );
+
+    const today = new Date();
+    const todayConsultation = consultations.find(c => {
+      const apptDate = new Date(c.consultation_date);
+      return (
+        apptDate.getDate() === today.getDate() &&
+        apptDate.getMonth() === today.getMonth() &&
+        apptDate.getFullYear() === today.getFullYear()
+      );
+    });
+
     if (!todayConsultation || !todayConsultation.started_at) return true;
     const startedAt = new Date(todayConsultation.started_at);
     const twelveHoursLater = new Date(startedAt.getTime() + 12 * 60 * 60 * 1000);
@@ -473,17 +489,29 @@ export function PatientDetailsModal({
   };
 
   const isConsultationStarted = (): boolean => {
-    return consultations.some(c =>
-      new Date(c.consultation_date).toISOString().split('T')[0] === new Date().toISOString().split('T')[0] &&
-      (c.status === 'in_progress' || c.status === 'completed' || c.status === 'in_attendance')
-    );
+    const today = new Date();
+    return consultations.some(c => {
+      const apptDate = new Date(c.consultation_date);
+      return (
+        apptDate.getDate() === today.getDate() &&
+        apptDate.getMonth() === today.getMonth() &&
+        apptDate.getFullYear() === today.getFullYear() &&
+        (c.status === 'in_progress' || c.status === 'completed' || c.status === 'in_attendance')
+      );
+    });
   };
 
   const handleStartCurrentConsultationAction = () => {
     if (!patientId || !onOpenConsultationForPatient) return;
-    const todayConsultation = consultations.find(c =>
-      new Date(c.consultation_date).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
-    );
+    const today = new Date();
+    const todayConsultation = consultations.find(c => {
+      const apptDate = new Date(c.consultation_date);
+      return (
+        apptDate.getDate() === today.getDate() &&
+        apptDate.getMonth() === today.getMonth() &&
+        apptDate.getFullYear() === today.getFullYear()
+      );
+    });
     onClose();
     onOpenConsultationForPatient(patientId, todayConsultation ? todayConsultation.id : patient.consultationId);
     if (onSectionChange) onSectionChange('pacientes');
