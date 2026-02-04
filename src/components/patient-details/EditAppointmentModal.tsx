@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
 
@@ -153,9 +153,39 @@ export const EditAppointmentModal = ({
                                         setEditingAppointment({ ...editingAppointment, amount: formatted });
                                     }}
                                     placeholder="0,00"
-                                    className="pl-10 h-10"
+                                    className="pl-10 pr-32 h-10"
                                     inputMode="numeric"
                                 />
+                                <Popover open={paymentMethodPopoverOpen} onOpenChange={setPaymentMethodPopoverOpen}>
+                                    <PopoverTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 z-10"
+                                        >
+                                            <span className="text-xs truncate max-w-[100px]">
+                                                {editingAppointment.payment_method || 'Meio de Pagamento'}
+                                            </span>
+                                            <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                                        </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-48 p-1 z-[100]" align="end">
+                                        <div className="flex flex-col">
+                                            {['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cheque', 'Débito'].map(method => (
+                                                <button
+                                                    key={method}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditingAppointment({ ...editingAppointment, payment_method: method });
+                                                        setPaymentMethodPopoverOpen(false);
+                                                    }}
+                                                    className="text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-sm transition-colors"
+                                                >
+                                                    {method}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         </div>
 

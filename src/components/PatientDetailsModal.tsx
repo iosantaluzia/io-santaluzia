@@ -350,6 +350,7 @@ export function PatientDetailsModal({
           appointmentType: data.appointment_type || (data.diagnosis === 'Exame' ? 'exame' : 'consulta'),
           amount: data.amount ? data.amount.toFixed(2).replace('.', ',') : '',
           payment_received: data.payment_received || false,
+          payment_method: data.payment_method || '',
           status: data.status,
           observations: data.observations || ''
         });
@@ -389,6 +390,7 @@ export function PatientDetailsModal({
           appointment_type: editingAppointment.appointmentType,
           amount: numericAmount,
           payment_received: editingAppointment.payment_received,
+          payment_method: editingAppointment.payment_method,
           status: editingAppointment.status,
           observations: editingAppointment.observations
         })
