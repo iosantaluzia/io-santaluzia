@@ -167,26 +167,26 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         }
       }
 
+      // Preparar dados do paciente
+      const patientData: any = {
+        name: validatedData.name,
+        phone: validatedData.phone,
+        email: validatedData.email || null,
+        address: validatedData.address || null
+      };
+
+      // Adicionar CPF apenas se foi fornecido
+      if (validatedData.cpf && validatedData.cpf.trim() !== '') {
+        patientData.cpf = validatedData.cpf;
+      }
+
+      // Adicionar data de nascimento apenas se foi fornecida
+      if (validatedData.date_of_birth && validatedData.date_of_birth.trim() !== '') {
+        patientData.date_of_birth = validatedData.date_of_birth;
+      }
+
       // Se não encontrou paciente existente, criar novo paciente
       if (!patientId) {
-        // Criar novo paciente - CPF e data de nascimento são opcionais
-        const patientData: any = {
-          name: validatedData.name,
-          phone: validatedData.phone,
-          email: validatedData.email || null,
-          address: validatedData.address || null
-        };
-
-        // Adicionar CPF apenas se foi fornecido
-        if (validatedData.cpf && validatedData.cpf.trim() !== '') {
-          patientData.cpf = validatedData.cpf;
-        }
-
-        // Adicionar data de nascimento apenas se foi fornecida
-        if (validatedData.date_of_birth && validatedData.date_of_birth.trim() !== '') {
-          patientData.date_of_birth = validatedData.date_of_birth;
-        }
-
         const { data: newPatient, error: patientError } = await (supabase as any)
           .from('patients')
           .insert(patientData)
@@ -200,6 +200,17 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         }
 
         patientId = newPatient.id;
+      } else {
+        // Paciente já existe, atualizar seus dados (incluindo data de nascimento)
+        const { error: updateError } = await (supabase as any)
+          .from('patients')
+          .update(patientData)
+          .eq('id', patientId);
+
+        if (updateError) {
+          logger.warn('Não foi possível atualizar dados do paciente:', updateError);
+          // Não bloquear o agendamento se a atualização falhar
+        }
       }
 
       // Criar consulta/agendamento usando a data selecionada no calendário
