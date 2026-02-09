@@ -14,6 +14,7 @@ interface AgendamentosSectionProps {
   onSectionChange?: (section: string) => void;
   onOpenPatientConsultation?: (patientName: string) => void;
   onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
+  onOpenPatientRecord?: (patientId: string) => void;
 }
 
 interface AppointmentSlot {
@@ -32,7 +33,7 @@ interface AppointmentSlot {
   consultationId?: string;
 }
 
-export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation, onOpenConsultationForPatient }: AgendamentosSectionProps) {
+export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation, onOpenConsultationForPatient, onOpenPatientRecord }: AgendamentosSectionProps) {
   const { appUser } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -664,6 +665,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           onPatientUpdate={() => fetchAppointments(selectedDate)}
           onSectionChange={onSectionChange}
           onOpenConsultationForPatient={onOpenConsultationForPatient}
+          onOpenPatientRecord={onOpenPatientRecord}
           onScheduleReturn={(patientData) => {
             setShowPatientDetails(false);
             setSelectedPatient(null);

@@ -19,12 +19,20 @@ import { BackupSection } from './pacientes/BackupSection';
 interface PacientesSectionProps {
   patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
   patientIdToOpen?: string | null;
+  patientIdToOpenRecord?: string | null;
   onConsultationOpened?: () => void;
   onPatientOpened?: () => void;
   onSectionChange?: (section: string) => void;
 }
 
-export function PacientesSection({ patientToOpenConsultation, patientIdToOpen, onConsultationOpened, onPatientOpened, onSectionChange }: PacientesSectionProps = {}) {
+export function PacientesSection({
+  patientToOpenConsultation,
+  patientIdToOpen,
+  patientIdToOpenRecord,
+  onConsultationOpened,
+  onPatientOpened,
+  onSectionChange
+}: PacientesSectionProps = {}) {
   const { appUser } = useAuth();
   const [patientSubSection, setPatientSubSection] = useState('prontuarios');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -142,7 +150,57 @@ export function PacientesSection({ patientToOpenConsultation, patientIdToOpen, o
     openConsultation();
   }, [patientToOpenConsultation, patients, onConsultationOpened]);
 
-  // Efeito para abrir automaticamente o prontuário quando patientIdToOpen for fornecido
+  // Efeito para abrir automaticamente o prontuário completo quando patientIdToOpenRecord for fornecido
+  useEffect(() => {
+    const openPatientRecord = async () => {
+      if (!patientIdToOpenRecord) return;
+
+      // Primeiro, tentar encontrar o paciente na lista atual
+      let patient = patients.find(p => p.id === patientIdToOpenRecord);
+
+      // Se não encontrou na lista, buscar diretamente do banco
+      if (!patient) {
+        try {
+          const { data, error } = await supabase
+            .from('patients')
+            .select('*')
+            .eq('id', patientIdToOpenRecord)
+            .single();
+
+          if (error) {
+            console.error('Erro ao buscar paciente:', error);
+            toast.error('Erro ao carregar dados do paciente');
+            return;
+          }
+
+          if (data) {
+            patient = data;
+            // Adicionar o paciente à lista se não estiver lá
+            if (!patients.find(p => p.id === patient.id)) {
+              setPatients(prev => [...prev, patient]);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar paciente:', error);
+          toast.error('Erro ao carregar dados do paciente');
+          return;
+        }
+      }
+
+      if (patient) {
+        setSelectedPatient(patient);
+
+        // Notificar que o prontuário foi aberto
+        if (onPatientOpened) {
+          onPatientOpened();
+        }
+      }
+    };
+
+    openPatientRecord();
+  }, [patientIdToOpenRecord, patients, onPatientOpened]);
+
+  // Efeito para abrir automaticamente o prontuário (modal) quando patientIdToOpen for fornecido
   useEffect(() => {
     const openPatient = async () => {
       if (!patientIdToOpen) return;

@@ -133,9 +133,9 @@ export function useAuth() {
 
   const fetchAppUser = async (authUserId: string) => {
     try {
-      // Timeout reduzido para 3 segundos
+      // Timeout aumentado para 10 segundos para evitar falsos positivos
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout')), 3000);
+        setTimeout(() => reject(new Error('Timeout')), 10000);
       });
 
       const queryPromise = supabase

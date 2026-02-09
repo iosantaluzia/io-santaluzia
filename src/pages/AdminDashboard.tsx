@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [patientToOpenConsultation, setPatientToOpenConsultation] = useState<{ patientId: string; consultationId?: string } | null>(null);
   const [patientIdToOpen, setPatientIdToOpen] = useState<string | null>(null);
+  const [patientIdToOpenRecord, setPatientIdToOpenRecord] = useState<string | null>(null);
   const [initialSectionSet, setInitialSectionSet] = useState(false);
 
   // Definir seção inicial quando appUser for carregado pela primeira vez
@@ -203,17 +204,24 @@ const AdminDashboard = () => {
               setPatientToOpenConsultation({ patientId, consultationId });
               setActiveSection('pacientes');
             }}
+            onOpenPatientRecord={(patientId) => {
+              setPatientIdToOpenRecord(patientId);
+              setActiveSection('pacientes');
+            }}
           />;
         case 'pacientes':
           return <LazyComponents.PacientesSection
             patientToOpenConsultation={patientToOpenConsultation}
             patientIdToOpen={patientIdToOpen}
+            patientIdToOpenRecord={patientIdToOpenRecord}
             onConsultationOpened={() => {
               setPatientToOpenConsultation(null);
               setPatientIdToOpen(null);
+              setPatientIdToOpenRecord(null);
             }}
             onPatientOpened={() => {
               setPatientIdToOpen(null);
+              setPatientIdToOpenRecord(null);
             }}
             onSectionChange={setActiveSection}
           />;

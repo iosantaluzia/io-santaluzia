@@ -34,6 +34,7 @@ interface PatientDetailsModalProps {
   onPatientUpdate?: () => void;
   onSectionChange?: (section: string) => void;
   onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
+  onOpenPatientRecord?: (patientId: string) => void;
   onScheduleReturn?: (patientData: {
     name?: string;
     cpf?: string;
@@ -77,6 +78,7 @@ export function PatientDetailsModal({
   onPatientUpdate,
   onSectionChange,
   onOpenConsultationForPatient,
+  onOpenPatientRecord,
   onScheduleReturn
 }: PatientDetailsModalProps) {
   const { appUser } = useAuth();
@@ -567,6 +569,8 @@ export function PatientDetailsModal({
                 handleCancel={handleCancelEdit}
                 saving={saving}
                 openWhatsApp={openWhatsApp}
+                onOpenPatientRecord={onOpenPatientRecord}
+                patientId={patientId}
               />
 
               {!isEditing && (

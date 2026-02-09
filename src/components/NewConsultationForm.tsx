@@ -65,6 +65,27 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
   const [consultationText, setConsultationText] = useState('');
   const [exams, setExams] = useState<PatientExam[]>([]);
   const [loadingExams, setLoadingExams] = useState(true);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Monitorar mudanças no texto
+  useEffect(() => {
+    if (consultationText !== (existingConsultation?.anamnesis || '')) {
+      setHasChanges(true);
+    }
+  }, [consultationText, existingConsultation]);
+
+  // Efeito para salvamento automático a cada 1 minuto
+  useEffect(() => {
+    if (!hasChanges || loading) return;
+
+    const autoSaveInterval = setInterval(() => {
+      console.log('Iniciando salvamento automático...');
+      handleSave(true); // true = silent save
+    }, 60000); // 1 minuto
+
+    return () => clearInterval(autoSaveInterval);
+  }, [hasChanges, consultationText, loading]);
 
   // Carregar dados da consulta existente quando fornecido
   useEffect(() => {
@@ -85,6 +106,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
 
           if (data?.anamnesis) {
             setConsultationText(data.anamnesis);
+            setHasChanges(false);
           }
         } catch (error) {
           console.error('Erro ao carregar consulta:', error);
@@ -92,6 +114,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
       } else if (existingConsultation?.anamnesis) {
         // Se a anamnese já foi fornecida, usar diretamente
         setConsultationText(existingConsultation.anamnesis);
+        setHasChanges(false);
       }
     };
 
@@ -126,24 +149,17 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  const handleSave = async (silent = false) => {
+    if (!silent) setSaving(true);
 
     try {
-      // Obter nome completo do médico do appUser
       const doctorName = getDoctorFullName(appUser?.username);
-
-      // Usar data/hora atual
       const consultationDate = new Date().toISOString();
-
       let consultationId: string | null = null;
 
-      // Se existe uma consulta existente fornecida, atualizar ela
       if (existingConsultation?.id) {
         consultationId = existingConsultation.id;
       } else {
-        // Verificar se existe uma consulta agendada para este paciente hoje
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
@@ -165,18 +181,13 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
         }
       }
 
-      // Timestamp de salvamento
       const savedAt = new Date().toISOString();
 
-      // Se encontrou uma consulta existente, atualizar ao invés de criar nova
       if (consultationId) {
-        // Ao atualizar uma consulta existente, NÃO alterar o consultation_date
-        // para preservar o horário de agendamento original
         const { error } = await supabase
           .from('consultations')
           .update({
             doctor_name: doctorName,
-            // consultation_date NÃO é incluído aqui para preservar o horário original
             anamnesis: consultationText || null,
             status: 'completed',
             saved_at: savedAt,
@@ -185,14 +196,10 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
           .eq('id', consultationId);
 
         if (error) {
-          logger.error('Erro ao atualizar consulta:', error);
-          toast.error('Erro ao atualizar consulta. Tente novamente.');
-          return;
+          if (!silent) toast.error('Erro ao salvar consulta.');
+          return false;
         }
-
-        toast.success('Consulta atualizada com sucesso!');
       } else {
-        // Criar nova consulta apenas se não houver consulta existente
         const { error } = await supabase
           .from('consultations')
           .insert({
@@ -206,22 +213,29 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
           });
 
         if (error) {
-          logger.error('Erro ao salvar consulta:', error);
-          toast.error('Erro ao salvar consulta. Tente novamente.');
-          return;
+          if (!silent) toast.error('Erro ao salvar consulta.');
+          return false;
         }
-
-        toast.success('Consulta salva com sucesso!');
       }
 
-      // Limpar formulário
+      setLastSaved(new Date());
+      setHasChanges(false);
+      if (!silent) toast.success('Consulta salva com sucesso!');
+      return true;
+    } catch (error) {
+      if (!silent) toast.error('Erro ao salvar consulta.');
+      return false;
+    } finally {
+      if (!silent) setSaving(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await handleSave();
+    if (success) {
       setConsultationText('');
       onSaved();
-    } catch (error) {
-      logger.error('Erro ao salvar consulta:', error);
-      toast.error('Erro ao salvar consulta. Tente novamente.');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -253,7 +267,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
           className="bg-bege-principal hover:bg-bege-principal/90 text-white flex items-center gap-2"
         >
           <Save className="h-4 w-4" />
-          {loading ? 'Salvando...' : 'Salvar Consulta'}
+          {loading ? 'Salvando...' : 'Salvar e Encerrar'}
         </Button>
       </div>
 
@@ -265,9 +279,29 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
       {/* Formulário - Layout em duas colunas */}
       <form id="consultation-form" onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna Esquerda - Campo de Texto da Consulta */}
           <div className="lg:col-span-2">
-            <Label className="text-sm font-semibold text-gray-700 mb-2 block">Consulta</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-semibold text-gray-700 block">Consulta</Label>
+              <div className="flex items-center gap-3">
+                {lastSaved && (
+                  <span className="text-xs text-gray-500 italic">
+                    Salvo em {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {hasChanges && ' (com alterações pendentes)'}
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  onClick={() => handleSave()}
+                  disabled={loading || !hasChanges}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 flex items-center gap-2 text-marrom-acentuado border-marrom-acentuado hover:bg-marrom-acentuado hover:text-white"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  Salvar
+                </Button>
+              </div>
+            </div>
             <Textarea
               value={consultationText}
               onChange={(e) => setConsultationText(e.target.value)}

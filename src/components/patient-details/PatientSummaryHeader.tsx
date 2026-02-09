@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { User, Phone, MessageCircle, Mail, Calendar, MapPin, Settings, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PatientSummaryHeaderProps {
     isEditing: boolean;
@@ -14,6 +14,8 @@ interface PatientSummaryHeaderProps {
     handleCancel: () => void;
     saving: boolean;
     openWhatsApp: (phone: string) => void;
+    onOpenPatientRecord?: (patientId: string) => void;
+    patientId: string | null;
 }
 
 export const PatientSummaryHeader = ({
@@ -25,8 +27,19 @@ export const PatientSummaryHeader = ({
     handleSave,
     handleCancel,
     saving,
-    openWhatsApp
+    openWhatsApp,
+    onOpenPatientRecord,
+    patientId
 }: PatientSummaryHeaderProps) => {
+    const { appUser } = useAuth();
+    const isDoctor = appUser?.role === 'doctor' || appUser?.role === 'admin';
+
+    const handleNameClick = () => {
+        if (isDoctor && !isEditing && onOpenPatientRecord && patientId) {
+            onOpenPatientRecord(patientId);
+        }
+    };
+
     return (
         <div className={`relative ${isEditing ? 'space-y-2' : 'space-y-3'}`}>
             {/* Botão de Editar */}
@@ -64,7 +77,13 @@ export const PatientSummaryHeader = ({
                     <div className="flex items-start gap-3">
                         <User className="h-4 w-4 text-gray-600 mt-1" />
                         <div>
-                            <p className="font-semibold text-marrom-acentuado">{editingPatient.name || patient.name}</p>
+                            <p
+                                className={`font-semibold text-marrom-acentuado ${isDoctor ? 'cursor-pointer hover:underline' : ''}`}
+                                onClick={handleNameClick}
+                                title={isDoctor ? "Clique para abrir prontuário completo" : ""}
+                            >
+                                {editingPatient.name || patient.name}
+                            </p>
                             {(editingPatient.cpf || patient.cpf) && (
                                 <p className="text-sm text-gray-600">CPF: {editingPatient.cpf || patient.cpf}</p>
                             )}

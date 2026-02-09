@@ -37,17 +37,20 @@ export const LazyComponents = {
   AgendamentosSection: ({
     onSectionChange,
     onOpenPatientConsultation,
-    onOpenConsultationForPatient
+    onOpenConsultationForPatient,
+    onOpenPatientRecord
   }: {
     onSectionChange?: (section: string) => void;
     onOpenPatientConsultation?: (patientName: string) => void;
     onOpenConsultationForPatient?: (patientId: string, consultationId?: string) => void;
+    onOpenPatientRecord?: (patientId: string) => void;
   }) => (
     <Suspense fallback={<LoadingSpinner />}>
       <AgendamentosSectionLazy
         onSectionChange={onSectionChange}
         onOpenPatientConsultation={onOpenPatientConsultation}
         onOpenConsultationForPatient={onOpenConsultationForPatient}
+        onOpenPatientRecord={onOpenPatientRecord}
       />
     </Suspense>
   ),
@@ -55,12 +58,14 @@ export const LazyComponents = {
   PacientesSection: ({
     patientToOpenConsultation,
     patientIdToOpen,
+    patientIdToOpenRecord,
     onConsultationOpened,
     onPatientOpened,
     onSectionChange
   }: {
     patientToOpenConsultation?: { patientId: string; consultationId?: string } | null;
     patientIdToOpen?: string | null;
+    patientIdToOpenRecord?: string | null;
     onConsultationOpened?: () => void;
     onPatientOpened?: () => void;
     onSectionChange?: (section: string) => void;
@@ -69,6 +74,7 @@ export const LazyComponents = {
       <PacientesSectionLazy
         patientToOpenConsultation={patientToOpenConsultation}
         patientIdToOpen={patientIdToOpen}
+        patientIdToOpenRecord={patientIdToOpenRecord}
         onConsultationOpened={onConsultationOpened}
         onPatientOpened={onPatientOpened}
         onSectionChange={onSectionChange}
