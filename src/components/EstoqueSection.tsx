@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Plus, Package, Loader2, Trash2, Edit2, RotateCcw, Minus } from 'lucide-react';
+import { AlertTriangle, Plus, Package, Loader2, Trash2, Edit2, RotateCcw, Minus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { InventoryItemModal } from './InventoryItemModal';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ export function EstoqueSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const categories = ['Todos', 'Colírios', 'Lentes', 'Escritório', 'Centro Cirúrgico', 'Consultório', 'Limpeza'];
 
@@ -133,9 +135,12 @@ export function EstoqueSection() {
   const criticalItems = items.filter(item => item.status === 'Crítico').length;
   const lowItems = items.filter(item => item.status === 'Baixo').length;
 
-  const filteredItems = selectedCategory === 'Todos'
-    ? items
-    : items.filter(item => item.category === selectedCategory);
+  const filteredItems = items.filter(item => {
+    const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   if (loading && items.length === 0) {
     return (
@@ -186,10 +191,21 @@ export function EstoqueSection() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <h3 className="text-xl font-semibold text-cinza-escuro">Inventário Atual</h3>
-            <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
+            <h3 className="text-xl font-semibold text-cinza-escuro whitespace-nowrap">Inventário</h3>
+
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Filtrar itens..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+              />
+            </div>
+
+            <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto max-w-full">
               {categories.map((cat) => (
                 <button
                   key={cat}
