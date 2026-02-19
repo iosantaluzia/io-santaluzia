@@ -46,7 +46,7 @@ const Home = () => {
     ];
 
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
+      setCurrentImageIndex((prevIndex) =>
         prevIndex === images.length - 1 ? 0 : prevIndex + 1
       );
     }, 5000); // Troca a imagem a cada 5 segundos
@@ -76,7 +76,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-24 md:pt-32">
+    <div className="min-h-screen pt-24 md:pt-32">
       <NavigationHeader showLogo={true} />
 
       {/* Hero Section */}
@@ -89,12 +89,12 @@ const Home = () => {
       >
         <div className="w-full">
           <div className="max-w-4xl mx-auto px-4 pb-8">
-          <div className="relative">
+            <div className="relative">
               {/* Logo acima do carrossel */}
               <div className="mb-6 flex justify-center">
-                <img 
-                  src="/uploads/logoiosantaluzia-removebg-preview.png" 
-                  alt="Instituto de Olhos Santa Luzia" 
+                <img
+                  src="/uploads/logoiosantaluzia-removebg-preview.png"
+                  alt="Instituto de Olhos Santa Luzia"
                   className="h-20 w-auto md:h-24 md:w-auto object-contain"
                 />
               </div>
@@ -109,20 +109,20 @@ const Home = () => {
                         src={img}
                         alt="Instituto de Olhos Santa Luzia"
                         className={`w-full h-full object-cover ${idx !== currentImageIndex ? 'hidden' : ''}`}
-                        style={{ 
-                          width: '100%', 
+                        style={{
+                          width: '100%',
                           height: isAnimatedImage ? '130%' : '100%',
-                          objectPosition: 'center' 
+                          objectPosition: 'center'
                         }}
                         initial={{ opacity: 0 }}
-                        animate={{ 
+                        animate={{
                           opacity: idx === currentImageIndex ? 1 : 0,
                           y: isAnimatedImage ? ['0%', '-15%', '0%'] : '0%',
                         }}
                         exit={{ opacity: 0 }}
-                        transition={{ 
+                        transition={{
                           opacity: { duration: 0.8 },
-                          y: isAnimatedImage ? { 
+                          y: isAnimatedImage ? {
                             duration: 15,
                             repeat: Infinity,
                             ease: "easeInOut"
@@ -144,9 +144,9 @@ const Home = () => {
                       {/* Title for all screen sizes */}
                       <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-medical-primary mb-6">
                         INSTITUTO DE OLHOS SANTA LUZIA
-            </h1>
-        </div>
-      </div>
+                      </h1>
+                    </div>
+                  </div>
 
                   {/* Desktop Content */}
                   <div className="hidden md:block max-w-2xl ml-0 px-4 self-start">
@@ -155,13 +155,13 @@ const Home = () => {
                         Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
                       </p>
                       <div className="flex flex-col sm:flex-row gap-4">
-                        <button 
+                        <button
                           onClick={() => window.open('https://wa.me/5566997215000?text=Olá! Gostaria de agendar uma consulta no Instituto de Olhos Santa Luzia.', '_blank')}
                           className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
                         >
                           AGENDE UMA CONSULTA
                         </button>
-                        <button 
+                        <button
                           onClick={handleContinueToSite}
                           className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
                         >
@@ -178,13 +178,13 @@ const Home = () => {
                         Nosso compromisso é proporcionar um serviço oftalmológico de excelência, atendendo a todas as suas necessidades visuais com cuidado e precisão. Desde 2014, estamos presentes em Sinop, Mato Grosso, oferecendo atendimento completo em oftalmologia.
                       </p>
                       <div className="flex flex-col gap-4">
-                        <button 
+                        <button
                           onClick={() => window.open('https://wa.me/5566997215000?text=Olá! Gostaria de agendar uma consulta no Instituto de Olhos Santa Luzia.', '_blank')}
                           className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
                         >
                           AGENDE UMA CONSULTA
                         </button>
-                        <button 
+                        <button
                           onClick={handleContinueToSite}
                           className="px-8 py-4 bg-medical-primary text-white rounded-lg font-semibold hover:bg-medical-primary/90 transition-colors"
                         >
@@ -201,7 +201,7 @@ const Home = () => {
       </motion.div>
 
       {/* IA Section - Manter largura original para SymptomChecker */}
-      <section id="ia" className="pt-20 md:pt-32 pb-8 md:pb-16 bg-background">
+      <section id="ia" className="pt-20 md:pt-32 pb-8 md:pb-16">
         <div className="max-w-4xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -213,7 +213,7 @@ const Home = () => {
               Análise Inteligente de Sintomas
             </h2>
             <div className="mt-8 flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-16 md:justify-center">
-              <motion.div 
+              <motion.div
                 className="flex-shrink-0 order-1 md:order-none"
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -240,14 +240,14 @@ const Home = () => {
 
 
       {/* Services Section */}
-      <div className="py-12 md:py-20 bg-background">
+      <div className="py-12 md:py-20">
         <div className="w-full px-4">
           <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-sans text-medical-primary mb-4 md:mb-6 px-4">
               O que <span className="text-medical-primary">oferecemos</span>
-              </h2>
-            </div>
-            
+            </h2>
+          </div>
+
           <div className="flex justify-center">
             <InteractiveCards />
           </div>
@@ -255,14 +255,14 @@ const Home = () => {
       </div>
 
       {/* Articles Section */}
-      <div className="py-12 md:py-20 bg-background">
+      <div className="py-12 md:py-20">
         <div className="w-full px-4">
           <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-sans text-medical-primary mb-4 md:mb-6 px-4">
               Últimos Artigos
             </h2>
           </div>
-          
+
           <div className="flex justify-center items-center mb-4 md:mb-8 px-4">
             <div className="flex space-x-2">
               <button
@@ -279,8 +279,8 @@ const Home = () => {
               </button>
             </div>
           </div>
-          
-          <div 
+
+          <div
             ref={scrollContainerRef}
             className="flex overflow-x-auto scrollbar-hide gap-4 md:gap-6 pb-4 px-4"
             style={{ scrollBehavior: 'smooth' }}
@@ -295,7 +295,7 @@ const Home = () => {
                 onClick={() => setSelectedArticle(article)}
               >
                 <div className="h-48 overflow-hidden">
-                  <img 
+                  <img
                     src={article.imagem}
                     alt={article.titulo}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
@@ -341,7 +341,7 @@ const Home = () => {
         }}
       />
       <FloatingWhatsAppButton />
-      
+
       {/* Article Modal */}
       {selectedArticle && (
         <ArticleModal

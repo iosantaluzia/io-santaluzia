@@ -144,11 +144,19 @@ export function FinanceiroSection() {
         const amount = Number(consultation.amount) || 0;
         const patientName = consultation.patients?.name || 'Paciente Desconhecido';
 
-        // Adicionar receita mensal
-        doctorsData[doctorKey].monthlyRevenue += amount;
+        // Check if the appointment is considered paid
+        // It's paid if explicitly marked as received OR if the appointment status is completed/realizado
+        const isPaid = consultation.payment_received ||
+          consultation.status === 'completed' ||
+          consultation.status === 'realizado';
 
-        // Adicionar pagamentos pendentes se não foi recebido
-        if (!consultation.payment_received) {
+        // Adicionar receita mensal apenas se foi pago/realizado
+        if (isPaid) {
+          doctorsData[doctorKey].monthlyRevenue += amount;
+        }
+
+        // Adicionar pagamentos pendentes APENAS se não foi pago e não foi realizado
+        if (!isPaid) {
           doctorsData[doctorKey].pendingPayments += amount;
         }
 
@@ -159,7 +167,8 @@ export function FinanceiroSection() {
           service: getServiceName(consultation.appointment_type, consultation.status),
           amount: amount,
           date: new Date(consultation.consultation_date).toLocaleDateString('pt-BR'),
-          status: consultation.payment_received ? 'Pago' : 'Pendente',
+          // Se foi realizado ou pago, status é Pago, senão Pendente
+          status: isPaid ? 'Pago' : 'Pendente',
           paymentMethod: consultation.payment_method,
           patientId: consultation.patient_id
         });
