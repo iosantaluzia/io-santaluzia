@@ -39,12 +39,18 @@ interface AppointmentSlot {
     consultationId?: string;
 }
 
+import { Trash2 } from 'lucide-react';
+import { Button } from '../ui/button';
+
+// ... (imports)
+
 interface AppointmentSlotItemProps {
     slot: AppointmentSlot;
     onPatientClick: (slot: AppointmentSlot) => void;
     onUpdateStatus: (consultationId: string, newStatus: string) => Promise<void>;
     openStatusPopover: string | null;
     setOpenStatusPopover: (id: string | null) => void;
+    onRemoveBlock?: (consultationId: string) => void;
 }
 
 export function AppointmentSlotItem({
@@ -52,7 +58,8 @@ export function AppointmentSlotItem({
     onPatientClick,
     onUpdateStatus,
     openStatusPopover,
-    setOpenStatusPopover
+    setOpenStatusPopover,
+    onRemoveBlock
 }: AppointmentSlotItemProps) {
     const handleStatusClick = (e: React.MouseEvent, status: string) => {
         e.stopPropagation();
@@ -60,6 +67,33 @@ export function AppointmentSlotItem({
             onUpdateStatus(slot.consultationId, status);
         }
     };
+
+    if (slot.status === 'blocked') {
+        return (
+            <div className="flex justify-between items-center p-3 mb-2 bg-gray-100 rounded-md shadow-sm border border-gray-200 opacity-80">
+                <div className="flex-1">
+                    <p className="font-medium text-gray-800">{slot.time}</p>
+                    <p className="text-sm font-semibold text-red-600">Horário Bloqueado</p>
+                    {slot.observations && (
+                        <p className="text-xs text-gray-500 italic mt-1">{slot.observations}</p>
+                    )}
+                </div>
+                {onRemoveBlock && slot.consultationId && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveBlock(slot.consultationId!);
+                        }}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div

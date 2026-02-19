@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Edit, X, Play, RotateCcw } from 'lucide-react';
+import { Calendar, Edit, X, Play, RotateCcw, FileText } from 'lucide-react';
 
 interface AppointmentDetailsProps {
     patient: any;
@@ -89,27 +89,47 @@ export const AppointmentDetails = ({
                 <Calendar className="h-4 w-4 text-gray-600" />
                 <span className="font-semibold text-gray-700">Agendamento:</span>
             </div>
-            {patient.time && (
-                <p className="text-sm text-gray-600 ml-6">Horário: {patient.time}</p>
-            )}
-            {patient.appointmentDate && (
-                <p className="text-sm text-gray-600 ml-6">
-                    Data: {new Date(patient.appointmentDate).toLocaleDateString('pt-BR')}
-                </p>
-            )}
-            {patient.appointmentType && (
-                <p className="text-sm text-gray-600 ml-6">
-                    Tipo: {patient.appointmentType === 'consulta' ? 'Consulta' :
-                        patient.appointmentType === 'retorno' ? 'Retorno' :
-                            patient.appointmentType === 'exame' ? 'Exame' :
-                                patient.appointmentType === 'pagamento_honorarios' ? 'Pagamento de Honorários' :
-                                    patient.appointmentType}
-                </p>
-            )}
-            <div className="ml-6 mt-1">
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold inline-block ${getStatusColor(patient.status)}`}>
-                    {translateStatus(patient.status)}
-                </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                <div className="space-y-1">
+                    {patient.time && (
+                        <p className="text-sm text-gray-600">Horário: {patient.time}</p>
+                    )}
+                    {patient.appointmentDate && (
+                        <p className="text-sm text-gray-600">
+                            Data: {new Date(patient.appointmentDate).toLocaleDateString('pt-BR')}
+                        </p>
+                    )}
+                </div>
+
+                <div className="space-y-1">
+                    {patient.appointmentType && (
+                        <p className="text-sm text-gray-600">
+                            Tipo: {patient.appointmentType === 'consulta' ? 'Consulta' :
+                                patient.appointmentType === 'retorno' ? 'Retorno' :
+                                    patient.appointmentType === 'exame' ? 'Exame' :
+                                        patient.appointmentType === 'pagamento_honorarios' ? 'Pagamento de Honorários' :
+                                            patient.appointmentType}
+                        </p>
+                    )}
+                    <div className="pt-1">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold inline-block ${getStatusColor(patient.status)}`}>
+                            {translateStatus(patient.status)}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Observações */}
+                {patient.observations && (
+                    <div className="col-span-1 md:col-span-2 mt-2 pt-2 border-t border-marrom-acentuado/20">
+                        <div className="flex items-start gap-2 mb-1">
+                            <FileText className="h-4 w-4 text-gray-600 mt-0.5" />
+                            <span className="font-semibold text-gray-700 text-sm">Observações:</span>
+                        </div>
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                            {patient.observations}
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );

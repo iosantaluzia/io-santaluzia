@@ -26,7 +26,7 @@ export function useRealtimeChat(currentUsername: string | null) {
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const channelRef = useRef<RealtimeChannel | null>(null);
   const presenceChannelRef = useRef<RealtimeChannel | null>(null);
   const currentUsernameRef = useRef<string | null>(null);
@@ -38,7 +38,7 @@ export function useRealtimeChat(currentUsername: string | null) {
     try {
       // Garantir que o username está em minúsculas
       const usernameLower = currentUsername.toLowerCase();
-      
+
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - MESSAGE_RETENTION_HOURS);
 
@@ -65,15 +65,15 @@ export function useRealtimeChat(currentUsername: string | null) {
       const allMessages = [
         ...(groupMessages || []),
         ...(privateMessages || [])
-      ].sort((a, b) => 
+      ].sort((a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
 
       setMessages(allMessages as ChatMessage[]);
       const unread = allMessages.filter(
-        msg => !msg.read && 
-        msg.from_username?.toLowerCase() !== usernameLower &&
-        (msg.message_type === 'group' || msg.to_username?.toLowerCase() === usernameLower)
+        msg => !msg.read &&
+          msg.from_username?.toLowerCase() !== usernameLower &&
+          (msg.message_type === 'group' || msg.to_username?.toLowerCase() === usernameLower)
       ).length;
 
       setUnreadCount(unread);
@@ -94,9 +94,9 @@ export function useRealtimeChat(currentUsername: string | null) {
 
     // Sempre recriar o canal para garantir que está funcionando
     // A verificação anterior estava impedindo a subscrição correta
-    console.log('🔄 Recriando canal Realtime para garantir conexão ativa');
+    // console.log('🔄 Recriando canal Realtime para garantir conexão ativa');
 
-    console.log('🔌 Configurando Realtime para usuário:', currentUsername);
+    // console.log('🔌 Configurando Realtime para usuário:', currentUsername);
     currentUsernameRef.current = currentUsername;
 
     // Garantir que o username está em minúsculas
@@ -104,7 +104,7 @@ export function useRealtimeChat(currentUsername: string | null) {
 
     // Limpar canais anteriores apenas se existirem
     if (channelRef.current) {
-      console.log('🧹 Limpando canal anterior...');
+      // console.log('🧹 Limpando canal anterior...');
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
@@ -116,7 +116,7 @@ export function useRealtimeChat(currentUsername: string | null) {
     // Canal compartilhado para mensagens: todos os usuários no mesmo canal para Broadcast em tempo real
     // Nome fixo para que quem envia faça broadcast e todos os inscritos recebam
     const channelName = 'internal_messages_live';
-    console.log('📡 Criando canal Realtime (compartilhado):', channelName);
+    // console.log('📡 Criando canal Realtime (compartilhado):', channelName);
 
     const addMessageIfRelevant = (newMessage: ChatMessage) => {
       const currentUsernameLower = currentUsername.toLowerCase();
@@ -145,7 +145,7 @@ export function useRealtimeChat(currentUsername: string | null) {
         (payload: { message?: ChatMessage; payload?: { message?: ChatMessage } }) => {
           const newMessage = payload?.message ?? payload?.payload?.message;
           if (!newMessage?.id) return;
-          console.log('📨 Nova mensagem recebida via Broadcast:', newMessage.id);
+          // console.log('📨 Nova mensagem recebida via Broadcast:', newMessage.id);
           addMessageIfRelevant(newMessage);
         }
       )
@@ -158,7 +158,7 @@ export function useRealtimeChat(currentUsername: string | null) {
         },
         (payload) => {
           const newMessage = payload.new as ChatMessage;
-          console.log('📨 Nova mensagem recebida via postgres_changes:', newMessage.id);
+          // console.log('📨 Nova mensagem recebida via postgres_changes:', newMessage.id);
           addMessageIfRelevant(newMessage);
         }
       )
@@ -177,10 +177,10 @@ export function useRealtimeChat(currentUsername: string | null) {
         }
       )
       .subscribe(async (status, err) => {
-        console.log('📡 Status da subscrição Realtime:', status, err);
+        // console.log('📡 Status da subscrição Realtime:', status, err);
         setIsConnected(status === 'SUBSCRIBED');
         if (status === 'SUBSCRIBED') {
-          console.log('✅ Conectado ao Realtime (Broadcast + postgres_changes)');
+          // console.log('✅ Conectado ao Realtime (Broadcast + postgres_changes)');
         } else if (status === 'CHANNEL_ERROR') {
           console.error('❌ Erro na conexão Realtime:', err);
           setIsConnected(false);
@@ -266,19 +266,19 @@ export function useRealtimeChat(currentUsername: string | null) {
       if (channelRef.current) {
         const channelState = channelRef.current.state;
         if (channelState !== 'joined' && channelState !== 'joining') {
-          console.warn('⚠️ Canal Realtime desconectado, tentando reconectar...');
+          // console.warn('⚠️ Canal Realtime desconectado, tentando reconectar...');
           setIsConnected(false);
           // Tentar reconectar
           channelRef.current.subscribe();
         } else {
-          console.log('✅ Canal Realtime ainda conectado:', channelState);
+          // console.log('✅ Canal Realtime ainda conectado:', channelState);
         }
       }
     }, 30000);
 
     // Limpeza ao desmontar
     return () => {
-      console.log('🧹 Limpando canais Realtime...');
+      // console.log('🧹 Limpando canais Realtime...');
       clearInterval(connectionCheckInterval);
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
@@ -302,13 +302,13 @@ export function useRealtimeChat(currentUsername: string | null) {
 
     const usernameLower = currentUsername.toLowerCase();
     const unread = messages.filter(
-      msg => !msg.read && 
-      (msg.from_username?.toLowerCase() || '') !== usernameLower &&
-      (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === usernameLower)
+      msg => !msg.read &&
+        (msg.from_username?.toLowerCase() || '') !== usernameLower &&
+        (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === usernameLower)
     ).length;
 
     setUnreadCount(unread);
-    console.log('📊 UnreadCount recalculado baseado em messages:', unread);
+    // console.log('📊 UnreadCount recalculado baseado em messages:', unread);
   }, [messages, currentUsername]);
 
   // Enviar mensagem
@@ -327,13 +327,13 @@ export function useRealtimeChat(currentUsername: string | null) {
     const toUsernameLower = type === 'private' ? (toUsername?.toLowerCase() || null) : null;
 
     try {
-      console.log('📤 Tentando enviar mensagem:', {
+      /* console.log('📤 Tentando enviar mensagem:', {
         from_username: usernameLower,
         to_username: toUsernameLower,
         message_type: type,
         message_length: message.trim().length,
         currentUsername_original: currentUsername
-      });
+      }); */
 
       const { data, error } = await supabase
         .from('internal_messages')
@@ -357,8 +357,6 @@ export function useRealtimeChat(currentUsername: string | null) {
         });
         throw error;
       }
-
-      console.log('✅ Mensagem enviada com sucesso:', data);
 
       const newMessage = data as ChatMessage;
 
@@ -400,12 +398,12 @@ export function useRealtimeChat(currentUsername: string | null) {
         const msgToLower = msg.to_username?.toLowerCase() || '';
         if (fromUsernameLower) {
           if (msgFromLower === fromUsernameLower &&
-              (msg.message_type === 'group' || msgToLower === usernameLower)) {
+            (msg.message_type === 'group' || msgToLower === usernameLower)) {
             return { ...msg, read: true };
           }
         } else {
           if (msgFromLower !== usernameLower &&
-              (msg.message_type === 'group' || msgToLower === usernameLower)) {
+            (msg.message_type === 'group' || msgToLower === usernameLower)) {
             return { ...msg, read: true };
           }
         }
@@ -443,12 +441,12 @@ export function useRealtimeChat(currentUsername: string | null) {
   const getMessagesBetween = useCallback((user1: string, user2: string) => {
     const user1Lower = user1.toLowerCase();
     const user2Lower = user2.toLowerCase();
-    
+
     return messages.filter(msg =>
       msg.message_type === 'private' &&
       ((msg.from_username?.toLowerCase() === user1Lower && msg.to_username?.toLowerCase() === user2Lower) ||
-       (msg.from_username?.toLowerCase() === user2Lower && msg.to_username?.toLowerCase() === user1Lower))
-    ).sort((a, b) => 
+        (msg.from_username?.toLowerCase() === user2Lower && msg.to_username?.toLowerCase() === user1Lower))
+    ).sort((a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
   }, [messages]);
@@ -457,12 +455,12 @@ export function useRealtimeChat(currentUsername: string | null) {
   const getUnreadCountFrom = useCallback((fromUsername: string) => {
     const fromUsernameLower = fromUsername.toLowerCase();
     const currentUsernameLower = currentUsername?.toLowerCase() || '';
-    
+
     return messages.filter(
       msg => !msg.read &&
-      (msg.from_username?.toLowerCase() || '') === fromUsernameLower &&
-      (msg.from_username?.toLowerCase() || '') !== currentUsernameLower &&
-      (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === currentUsernameLower)
+        (msg.from_username?.toLowerCase() || '') === fromUsernameLower &&
+        (msg.from_username?.toLowerCase() || '') !== currentUsernameLower &&
+        (msg.message_type === 'group' || (msg.to_username?.toLowerCase() || '') === currentUsernameLower)
     ).length;
   }, [messages, currentUsername]);
 

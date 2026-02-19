@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AppointmentSlotItem } from './AppointmentSlotItem';
+import { ScheduleBlockModal } from './ScheduleBlockModal';
 
 interface AppointmentSlot {
     time: string;
@@ -27,6 +28,9 @@ interface DoctorAgendaListProps {
     onUpdateStatus: (consultationId: string, newStatus: string) => Promise<void>;
     openStatusPopover: string | null;
     setOpenStatusPopover: (id: string | null) => void;
+    onBlockSchedule: (date: Date, startTime: string, endTime: string, reason: string) => void;
+    onRemoveBlock: (consultationId: string) => void;
+    selectedDate: Date;
 }
 
 export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps>(({
@@ -37,17 +41,27 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
     onPatientClick,
     onUpdateStatus,
     openStatusPopover,
-    setOpenStatusPopover
+    setOpenStatusPopover,
+    onBlockSchedule,
+    onRemoveBlock,
+    selectedDate
 }, ref) => {
     return (
         <div className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-cinza-escuro">{doctorName}</h3>
-                <img
-                    src={doctorPhoto}
-                    alt={doctorName}
-                    className="w-12 h-12 object-cover rounded-full border-2 border-white shadow-sm bg-amber-50"
-                />
+                <div className="flex items-center gap-2">
+                    <ScheduleBlockModal
+                        doctorName={doctorName}
+                        onBlock={onBlockSchedule}
+                        initialDate={selectedDate}
+                    />
+                    <img
+                        src={doctorPhoto}
+                        alt={doctorName}
+                        className="w-12 h-12 object-cover rounded-full border-2 border-white shadow-sm bg-amber-50"
+                    />
+                </div>
             </div>
             <ScrollArea ref={ref} className="h-[350px]">
                 {loading ? (
@@ -63,6 +77,7 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
                             onUpdateStatus={onUpdateStatus}
                             openStatusPopover={openStatusPopover}
                             setOpenStatusPopover={setOpenStatusPopover}
+                            onRemoveBlock={onRemoveBlock}
                         />
                     ))
                 ) : (

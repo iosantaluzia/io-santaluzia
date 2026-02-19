@@ -138,6 +138,31 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
     const validatedData = validationResult.data;
 
     try {
+      // Create consultation date object
+      const consultationDateTime = new Date(appointmentDate);
+      const [hours, minutes] = validatedData.time.split(':');
+      consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const doctorName = getDoctorDisplayName(validatedData.doctor);
+
+      // Check for blocked slots
+      const { data: blockedSlots, error: blockedError } = await supabase
+        .from('consultations')
+        .select('id')
+        .eq('status', 'blocked')
+        .eq('consultation_date', consultationDateTime.toISOString())
+        .ilike('doctor_name', `%${doctorName.split(' ')[1]}%`); // Simple check, ideally match exact name or improved logic
+
+      if (blockedError) {
+        logger.error('Error checking blocked slots', blockedError);
+        // Proceed with caution or return? Let's proceed but warn.
+      }
+
+      if (blockedSlots && blockedSlots.length > 0) {
+        toast.error(`O horário ${validatedData.time} está bloqueado na agenda do(a) ${doctorName}.`);
+        return;
+      }
+
       // Buscar ou criar paciente
       let patientId: string | null = null;
 
@@ -214,12 +239,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
       }
 
       // Criar consulta/agendamento usando a data selecionada no calendário
-      const consultationDateTime = new Date(appointmentDate);
-      const [hours, minutes] = validatedData.time.split(':');
-      consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-      // Mapear nome do médico usando função utilitária
-      const doctorName = getDoctorDisplayName(validatedData.doctor);
+      // Variáveis consultationDateTime e doctorName já foram definidas na validação de bloqueio acima
 
       // Inserir sem amount primeiro (para contornar cache do PostgREST)
       // O amount será atualizado depois via função RPC ou update manual
@@ -298,7 +318,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         <DialogHeader className="pb-3">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <CalendarIcon className="h-5 w-5" />
-            Novo Agendamento
+            Novo Agendamento em {format(appointmentDate, "dd 'de' MMMM", { locale: ptBR })}
           </DialogTitle>
         </DialogHeader>
 

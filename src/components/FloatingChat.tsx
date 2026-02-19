@@ -75,42 +75,42 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
     }
 
     const currentUsernameLower = currentUsername.toLowerCase();
-    
+
     // Encontrar mensagens não lidas que ainda não foram notificadas
     const unreadMessages = messages.filter(msg => {
       const msgFromLower = (msg.from_username || '').toLowerCase();
       const msgToLower = (msg.to_username || '').toLowerCase();
-      
-      return !msg.read && 
+
+      return !msg.read &&
         msgFromLower !== currentUsernameLower &&
         (msg.message_type === 'group' || msgToLower === currentUsernameLower) &&
         !notifiedMessageIdsRef.current.has(msg.id) &&
         !processedMessageIdsRef.current.has(msg.id);
     });
-    
+
     // Se houver novas mensagens não notificadas
     if (unreadMessages.length > 0) {
       console.log('🔔 Detectadas novas mensagens não notificadas:', unreadMessages.length);
-      
+
       // Ordenar por data mais recente
-      const sortedNewMessages = [...unreadMessages].sort((a, b) => 
+      const sortedNewMessages = [...unreadMessages].sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
-      
+
       // Mostrar toast apenas para a mensagem mais recente
       const latestMessage = sortedNewMessages[0];
       // Usar display_name se disponível, senão usar username
-      const senderDisplayName = allRegisteredUsers.find(u => 
+      const senderDisplayName = allRegisteredUsers.find(u =>
         u.username.toLowerCase() === latestMessage.from_username?.toLowerCase()
       )?.display_name || latestMessage.from_username;
-      const messagePreview = latestMessage.message.length > 50 
-        ? latestMessage.message.substring(0, 50) + '...' 
+      const messagePreview = latestMessage.message.length > 50
+        ? latestMessage.message.substring(0, 50) + '...'
         : latestMessage.message;
-      
+
       // Marcar como notificada e processada
       notifiedMessageIdsRef.current.add(latestMessage.id);
       processedMessageIdsRef.current.add(latestMessage.id);
-      
+
       // Tocar som de notificação (uma vez por mensagem)
       try {
         const audio = new Audio('/sound-messages.mp3');
@@ -122,13 +122,13 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
       } catch (error) {
         console.warn('⚠️ Erro ao criar áudio de notificação:', error);
       }
-      
+
       console.log('📢 Exibindo notificação toast para:', {
         id: latestMessage.id,
         from: senderDisplayName,
         type: latestMessage.message_type
       });
-      
+
       // Determinar qual conversa abrir ao clicar
       const conversationToOpen = latestMessage.message_type === 'group'
         ? null
@@ -169,8 +169,8 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm">
-                  {latestMessage.message_type === 'group' 
-                    ? `Nova mensagem de ${senderDisplayName}` 
+                  {latestMessage.message_type === 'group'
+                    ? `Nova mensagem de ${senderDisplayName}`
                     : `Mensagem de ${senderDisplayName}`}
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">
@@ -225,7 +225,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
         .select('username, display_name, role, approved')
         .eq('approved', true)
         .order('username', { ascending: true });
-      
+
       if (error) throw error;
       return data as AppUser[];
     },
@@ -254,8 +254,8 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
     const unreadMessages = messages.filter(msg => {
       const msgFromLower = (msg.from_username || '').toLowerCase();
       const msgToLower = (msg.to_username || '').toLowerCase();
-      
-      return !msg.read && 
+
+      return !msg.read &&
         msgFromLower !== currentUsernameLower &&
         (msg.message_type === 'group' || msgToLower === currentUsernameLower);
     });
@@ -263,17 +263,17 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
     if (unreadMessages.length === 0) return null;
 
     // Ordenar por data mais recente
-    const sortedUnread = [...unreadMessages].sort((a, b) => 
+    const sortedUnread = [...unreadMessages].sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
     const latestMessage = sortedUnread[0];
-    
+
     // Se for mensagem de grupo (todos), retornar null (para abrir em "Todos")
     if (latestMessage.message_type === 'group') {
       return null;
     }
-    
+
     // Se for mensagem privada, retornar o remetente
     return latestMessage.from_username;
   }, [messages, currentUsername]);
@@ -288,7 +288,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!newMessage.trim() || !currentUsername || isSending) {
       if (!currentUsername) {
         toast.error('Usuário não identificado. Faça login novamente.');
@@ -305,10 +305,10 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
         selectedUser,
         messageLength: newMessage.trim().length
       });
-      
+
       await sendMessage(newMessage.trim(), type, selectedUser || undefined);
       setNewMessage('');
-      
+
       if (selectedUser) {
         toast.success(`Mensagem enviada para ${selectedUser}`);
       } else {
@@ -318,7 +318,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
       console.error('❌ Erro ao enviar mensagem no FloatingChat:', error);
       const errorMessage = error?.message || 'Erro desconhecido ao enviar mensagem';
       toast.error(`Erro ao enviar mensagem: ${errorMessage}`);
-      
+
       // Log detalhado para debug
       if (error?.code) {
         console.error('Código do erro:', error.code);
@@ -405,11 +405,10 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
               setIsOpen(true);
             }}
             size="lg"
-            className={`rounded-full h-14 w-14 shadow-lg relative transition-colors ${
-              unreadCount > 0 
-                ? 'bg-orange-500 hover:bg-orange-600' 
-                : 'bg-medical-primary hover:bg-medical-primary/90'
-            }`}
+            className={`rounded-full h-14 w-14 shadow-lg relative transition-colors ${unreadCount > 0
+              ? 'bg-orange-500 hover:bg-orange-600'
+              : 'bg-medical-primary hover:bg-medical-primary/90'
+              }`}
           >
             <MessageCircle className="h-6 w-6 text-white" />
             {unreadCount > 0 && (
@@ -458,170 +457,171 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
             </CardHeader>
 
             <div className="flex flex-1 overflow-hidden">
-                  {/* Lista de usuários */}
-                  <div className="w-32 border-r flex-shrink-0 bg-gray-50">
-                    <ScrollArea className="h-full">
-                      <div className="p-2 space-y-1">
-                        <Button
-                          variant={selectedUser === null ? 'default' : 'ghost'}
-                          size="sm"
-                          className="w-full justify-start text-xs"
-                          onClick={() => {
-                            setSelectedUser(null);
-                            markAsRead(); // Marcar mensagens do grupo como lidas ao abrir "Todos"
-                          }}
-                        >
-                          <MessageCircle className="h-3 w-3 mr-1" />
-                          Todos
-                        </Button>
-                        <div className="border-t border-medical-primary/30 my-1" />
-                        {isLoadingUsers ? (
-                          <div className="flex items-center justify-center py-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-medical-primary" />
-                          </div>
-                        ) : (
-                          allUsers.map(username => {
-                            const user = onlineUsers.find(u => u.username === username);
-                            const registeredUser = allRegisteredUsers.find(u => u.username === username);
-                            const unread = getUnreadCountFrom(username);
-                            return (
-                              <Button
-                                key={username}
-                                variant={selectedUser === username ? 'default' : 'ghost'}
-                                size="sm"
-                                className="w-full justify-start text-xs relative"
-                                onClick={() => {
-                                  setSelectedUser(username);
-                                  markAsRead(username);
-                                }}
-                              >
-                                <div className="flex items-center gap-1 flex-1 min-w-0">
-                                  <span
-                                    className={`w-2 h-2 rounded-full ${
-                                      user?.isOnline ? 'bg-green-500' : 'bg-gray-300'
-                                    }`}
-                                  />
-                                  <span className="truncate">{getDisplayName(username)}</span>
-                                </div>
-                                {unread > 0 && (
-                                  <Badge className="ml-1 h-4 px-1 text-xs bg-red-500">
-                                    {unread > 9 ? '9+' : unread}
-                                  </Badge>
-                                )}
-                              </Button>
-                            );
-                          })
-                        )}
+              {/* Lista de usuários */}
+              <div className="w-32 border-r flex-shrink-0 bg-gray-50 flex flex-col">
+                <ScrollArea className="flex-1">
+                  <div className="p-2 space-y-1">
+                    <Button
+                      variant={selectedUser === null ? 'default' : 'ghost'}
+                      size="sm"
+                      className="w-full justify-start text-xs"
+                      onClick={() => {
+                        setSelectedUser(null);
+                        markAsRead(); // Marcar mensagens do grupo como lidas ao abrir "Todos"
+                      }}
+                    >
+                      <MessageCircle className="h-3 w-3 mr-1" />
+                      Todos
+                    </Button>
+                    <div className="border-t border-medical-primary/30 my-1" />
+                    {isLoadingUsers ? (
+                      <div className="flex items-center justify-center py-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-medical-primary" />
                       </div>
-                    </ScrollArea>
-                  </div>
-
-                  {/* Área de mensagens */}
-                  <div className="flex-1 flex flex-col min-w-0">
-                    <ScrollArea className="flex-1 p-4">
-                      {isLoading ? (
-                        <div className="flex items-center justify-center h-full">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-medical-primary" />
-                        </div>
-                      ) : Object.keys(groupedMessages).length === 0 ? (
-                        <div className="text-center text-gray-500 py-8">
-                          <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                          <p>Nenhuma mensagem ainda.</p>
-                          <p className="text-sm">Seja o primeiro a enviar uma mensagem!</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {Object.entries(groupedMessages).map(([date, dateMessages]) => (
-                            <div key={date}>
-                              <div className="text-center text-xs text-gray-500 mb-3 sticky top-0 bg-white py-1">
-                                {date}
-                              </div>
-                              {dateMessages.map((message) => {
-                                const isOwn = (message.from_username?.toLowerCase() || '') === (currentUsername?.toLowerCase() || '');
-                                return (
-                                  <div
-                                    key={message.id}
-                                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}
-                                  >
-                                    <div
-                                      className={`max-w-[80%] px-4 py-2 rounded-lg ${
-                                        isOwn
-                                          ? 'bg-medical-primary text-white'
-                                          : 'bg-gray-100 text-gray-900'
-                                      }`}
-                                    >
-                                      {!isOwn && (
-                                        <div className="text-xs font-semibold mb-1">
-                                          {getDisplayName(message.from_username)}
-                                        </div>
-                                      )}
-                                      <div className="text-sm whitespace-pre-wrap break-words">
-                                        {message.message}
-                                      </div>
-                                      <div
-                                        className={`text-xs mt-1 ${
-                                          isOwn ? 'text-white/70' : 'text-gray-500'
-                                        }`}
-                                      >
-                                        {formatTime(message.created_at)}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                    ) : (
+                      allUsers.map(username => {
+                        const user = onlineUsers.find(u => u.username === username);
+                        const registeredUser = allRegisteredUsers.find(u => u.username === username);
+                        const unread = getUnreadCountFrom(username);
+                        return (
+                          <Button
+                            key={username}
+                            variant={selectedUser === username ? 'default' : 'ghost'}
+                            size="sm"
+                            className="w-full justify-start text-xs relative"
+                            onClick={() => {
+                              setSelectedUser(username);
+                              markAsRead(username);
+                            }}
+                          >
+                            <div className="flex items-center gap-1 flex-1 min-w-0">
+                              <span
+                                className={`w-2 h-2 rounded-full ${user?.isOnline ? 'bg-green-500' : 'bg-gray-300'
+                                  }`}
+                              />
+                              <span className="truncate">{getDisplayName(username)}</span>
                             </div>
-                          ))}
-                          <div ref={messagesEndRef} />
-                        </div>
-                      )}
-                    </ScrollArea>
-
-                    {/* Input de mensagem */}
-                    <div className="border-t p-3 flex-shrink-0">
-                      <form onSubmit={handleSendMessage} className="flex gap-2">
-                        <Input
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          placeholder={
-                            selectedUser
-                              ? `Enviar mensagem para ${getDisplayName(selectedUser)}...`
-                              : 'Enviar mensagem para todos...'
-                          }
-                          disabled={isSending}
-                          className="flex-1"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey && !isSending && newMessage.trim()) {
-                              e.preventDefault();
-                              handleSendMessage(e as any);
-                            }
-                          }}
-                        />
-                        <Button
-                          type="submit"
-                          disabled={isSending || !newMessage.trim()}
-                          size="sm"
-                          className="bg-medical-primary text-white hover:bg-medical-primary/90"
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </form>
-                      {!isConnected && (
-                        <p className="text-xs text-yellow-600 mt-1">
-                          ⚠️ Reconectando ao chat... (você ainda pode enviar mensagens)
-                        </p>
-                      )}
-                      {isConnected && (
-                        <p className="text-xs text-green-600 mt-1">
-                          ✓ Conectado
-                        </p>
-                      )}
-                    </div>
+                            {unread > 0 && (
+                              <Badge className="ml-1 h-4 px-1 text-xs bg-red-500">
+                                {unread > 9 ? '9+' : unread}
+                              </Badge>
+                            )}
+                          </Button>
+                        );
+                      })
+                    )}
                   </div>
+                </ScrollArea>
+
+                <div className="p-2 border-t bg-gray-50 text-center">
+                  {!isConnected && (
+                    <p className="text-[10px] text-yellow-600 leading-tight">
+                      ⚠️ Reconectando...
+                    </p>
+                  )}
+                  {isConnected && (
+                    <p className="text-xs text-green-600 flex items-center justify-center gap-1">
+                      <span>✓</span> Conectado
+                    </p>
+                  )}
                 </div>
+              </div>
+
+              {/* Área de mensagens */}
+              <div className="flex-1 flex flex-col min-w-0">
+                <ScrollArea className="flex-1 p-4">
+                  {isLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-medical-primary" />
+                    </div>
+                  ) : Object.keys(groupedMessages).length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>Nenhuma mensagem ainda.</p>
+                      <p className="text-sm">Seja o primeiro a enviar uma mensagem!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {Object.entries(groupedMessages).map(([date, dateMessages]) => (
+                        <div key={date}>
+                          <div className="text-center text-xs text-gray-500 mb-3 sticky top-0 bg-white py-1">
+                            {date}
+                          </div>
+                          {dateMessages.map((message) => {
+                            const isOwn = (message.from_username?.toLowerCase() || '') === (currentUsername?.toLowerCase() || '');
+                            return (
+                              <div
+                                key={message.id}
+                                className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}
+                              >
+                                <div
+                                  className={`max-w-[80%] px-4 py-2 rounded-lg ${isOwn
+                                    ? 'bg-medical-primary text-white'
+                                    : 'bg-gray-100 text-gray-900'
+                                    }`}
+                                >
+                                  {!isOwn && (
+                                    <div className="text-xs font-semibold mb-1">
+                                      {getDisplayName(message.from_username)}
+                                    </div>
+                                  )}
+                                  <div className="text-sm whitespace-pre-wrap break-words">
+                                    {message.message}
+                                  </div>
+                                  <div
+                                    className={`text-xs mt-1 ${isOwn ? 'text-white/70' : 'text-gray-500'
+                                      }`}
+                                  >
+                                    {formatTime(message.created_at)}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </ScrollArea>
+
+                {/* Input de mensagem */}
+                <div className="border-t p-3 flex-shrink-0">
+                  <form onSubmit={handleSendMessage} className="flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder={
+                        selectedUser
+                          ? `Enviar mensagem para ${getDisplayName(selectedUser)}...`
+                          : 'Enviar mensagem para todos...'
+                      }
+                      disabled={isSending}
+                      className="flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && !isSending && newMessage.trim()) {
+                          e.preventDefault();
+                          handleSendMessage(e as any);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isSending || !newMessage.trim()}
+                      size="sm"
+                      className="bg-medical-primary text-white hover:bg-medical-primary/90"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </div>
           </Card>
         </div>
       )}
     </>
   );
 }
+
 

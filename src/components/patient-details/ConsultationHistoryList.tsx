@@ -9,6 +9,7 @@ interface Consultation {
     doctor_name: string;
     diagnosis?: string;
     status?: string;
+    observations?: string;
 }
 
 interface Exam {
@@ -82,6 +83,13 @@ export const ConsultationHistoryList = ({
                                             <p className="text-xs text-gray-600">{consultation.doctor_name}</p>
                                             {consultation.diagnosis && (
                                                 <p className="text-xs text-gray-500 mt-1">{consultation.diagnosis}</p>
+                                            )}
+                                            {consultation.observations && (
+                                                <p className="text-xs text-gray-500 mt-1 italic">
+                                                    {consultation.observations.length > 60
+                                                        ? `${consultation.observations.substring(0, 60)}...`
+                                                        : consultation.observations}
+                                                </p>
                                             )}
                                         </div>
                                     ))}

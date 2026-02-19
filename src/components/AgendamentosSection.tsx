@@ -69,7 +69,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const [timeSlotsFabiola, setTimeSlotsFabiola] = useState<AppointmentSlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [openStatusPopover, setOpenStatusPopover] = useState<string | null>(null);
-  const [monthAppointments, setMonthAppointments] = useState<{ [dateKey: string]: { hasMatheus: boolean; hasFabiola: boolean } }>({});
+  const [monthAppointments, setMonthAppointments] = useState<{ [dateKey: string]: { hasMatheus: boolean; hasFabiola: boolean; hasBlock: boolean; hasPatients: boolean } }>({});
   const [initialPatientData, setInitialPatientData] = useState<{
     name?: string;
     cpf?: string;
@@ -183,7 +183,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
       if (!consultations || consultations.length === 0) {
         // Se não houver dados no banco: limpar tudo
-        console.log('Nenhuma consulta encontrada, limpando slots');
+        // console.log('Nenhuma consulta encontrada, limpando slots');
         setTimeSlotsMatheus([]);
         setTimeSlotsFabiola([]);
         setLoading(false);
@@ -230,10 +230,89 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
         }
       });
 
+      // Função para agrupar slots bloqueados consecutivos
+      const groupBlockedSlots = (slots: AppointmentSlot[]): AppointmentSlot[] => {
+        if (slots.length === 0) return [];
+
+        const grouped: AppointmentSlot[] = [];
+        let currentBlock: { slot: AppointmentSlot; endTime: string } | null = null;
+
+        const getMinutes = (timeStr: string) => {
+          const [h, m] = timeStr.split(':').map(Number);
+          return h * 60 + m;
+        };
+
+        const formatTime = (minutes: number) => {
+          const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+          const m = (minutes % 60).toString().padStart(2, '0');
+          return `${h}:${m}`;
+        };
+
+        slots.forEach((slot, index) => {
+          if (slot.status === 'blocked') {
+            const slotStart = getMinutes(slot.time);
+
+            if (currentBlock) {
+              // Verifica se é consecutivo (30 min de diferença)
+              // Considerando que slots são de 30 min por padrão na criação do bloqueio
+              const prevEnd = getMinutes(currentBlock.endTime);
+
+              if (slotStart === prevEnd) {
+                // É consecutivo, estender o bloco
+                currentBlock.endTime = formatTime(slotStart + 30);
+
+                // Atualizar o texto do horário - verificando se é dia todo
+                const start = getMinutes(currentBlock.slot.time.split(' - ')[0]); // Pega o início original
+                const end = slotStart + 30;
+
+                // Se cobrir o dia todo (ex: 00:00 até 23:59 ou 08:00 ate 18:00 como "dia de trabalho")
+                // O usuário pediu "Dia todo" quando for o dia todo. 
+                // Vamos considerar dia todo se começar <= 08:00 e terminar >= 18:00? 
+                // Ou melhor, se for explicitamente 00:00 - 23:59.
+                // Mas o modal de bloqueio permite "Dia todo" setando 00:00 - 23:59.
+                // Vamos checar esse range.
+                if (start === 0 && end >= 1439) { // 23:59
+                  currentBlock.slot.time = "Dia todo";
+                } else {
+                  // Formato normal de intervalo
+                  currentBlock.slot.time = `${formatTime(start)} - ${formatTime(end)}`;
+                }
+                return; // Pula a adição deste slot pois foi mesclado
+              } else {
+                // Não é consecutivo, finaliza o anterior e inicia novo
+                grouped.push(currentBlock.slot);
+                currentBlock = { slot: { ...slot, time: `${slot.time} - ${formatTime(slotStart + 30)}` }, endTime: formatTime(slotStart + 30) };
+              }
+            } else {
+              // Início de um novo bloco
+              currentBlock = { slot: { ...slot, time: `${slot.time} - ${formatTime(slotStart + 30)}` }, endTime: formatTime(slotStart + 30) };
+            }
+          } else {
+            // Se tiver um bloco pendente, adiciona ele antes
+            if (currentBlock) {
+              grouped.push(currentBlock.slot);
+              currentBlock = null;
+            }
+            grouped.push(slot); // Adiciona slot normal
+          }
+        });
+
+        // Adicionar o último bloco se existir
+        if (currentBlock) {
+          grouped.push(currentBlock.slot);
+        }
+
+        return grouped;
+      };
+
+
       // Ordenar por horário
       matheusSlots.sort((a, b) => a.time.localeCompare(b.time));
       fabiolaSlots.sort((a, b) => a.time.localeCompare(b.time));
 
+      // Agrupar slots bloqueados
+      const groupedMatheus = groupBlockedSlots(matheusSlots);
+      const groupedFabiola = groupBlockedSlots(fabiolaSlots);
 
       // Limpar estados primeiro para garantir atualização
       setTimeSlotsMatheus([]);
@@ -243,8 +322,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       await new Promise(resolve => setTimeout(resolve, 0));
 
       // Atualizar com novos dados
-      setTimeSlotsMatheus(matheusSlots);
-      setTimeSlotsFabiola(fabiolaSlots);
+      setTimeSlotsMatheus(groupedMatheus);
+      setTimeSlotsFabiola(groupedFabiola);
 
     } finally {
       setLoading(false);
@@ -274,7 +353,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       // Buscar agendamentos do mês - médicos veem apenas os seus
       let query = supabase
         .from('consultations')
-        .select('consultation_date, doctor_name')
+        .select('consultation_date, doctor_name, status')
         .gte('consultation_date', startOfMonth.toISOString())
         .lte('consultation_date', endOfMonth.toISOString());
 
@@ -296,7 +375,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       }
 
       // Agrupar por data
-      const appointmentsByDate: { [dateKey: string]: { hasMatheus: boolean; hasFabiola: boolean } } = {};
+      const appointmentsByDate: { [dateKey: string]: { hasMatheus: boolean; hasFabiola: boolean; hasBlock: boolean; hasPatients: boolean } } = {};
 
       if (consultations) {
         consultations.forEach((consultation: any) => {
@@ -308,7 +387,13 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           const dateKey = `${year}-${month}-${day}`;
 
           if (!appointmentsByDate[dateKey]) {
-            appointmentsByDate[dateKey] = { hasMatheus: false, hasFabiola: false };
+            appointmentsByDate[dateKey] = { hasMatheus: false, hasFabiola: false, hasBlock: false, hasPatients: false };
+          }
+
+          if (consultation.status === 'blocked') {
+            appointmentsByDate[dateKey].hasBlock = true;
+          } else {
+            appointmentsByDate[dateKey].hasPatients = true;
           }
 
           const doctorName = consultation.doctor_name?.toLowerCase() || '';
@@ -437,6 +522,160 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     }
   };
 
+  const handleBlockSchedule = async (date: Date, startTime: string, endTime: string, reason: string) => {
+    // Wrapper para compatibilidade se necessário, mas idealmente usamos createBlock
+    // Identificar o médico com base no viewMode ou usuário logado
+    const doctorName = appUser?.role === 'doctor' ? appUser.username : (viewMode === 'matheus' ? 'Dr. Matheus' : (viewMode === 'fabiola' ? 'Dra. Fabíola' : ''));
+
+    if (!doctorName || viewMode === 'all') {
+      // Se não conseguir determinar o médico (ex: admin vendo tudo), não bloqueia
+      // Ou poderíamos disparar um toast pedindo para selecionar uma agenda específica
+      if (viewMode === 'all') {
+        toast.error("Selecione uma agenda específica (Matheus ou Fabíola) para bloquear horários.");
+        return;
+      }
+    }
+
+    if (doctorName) {
+      await createBlock(date, startTime, endTime, reason, doctorName);
+    }
+  };
+
+  // Função auxiliar para obter ou criar o paciente de bloqueio
+  const getOrCreateBlockPatient = async () => {
+    try {
+      const blockPatientName = "BLOQUEIO DE AGENDA";
+
+      // Tentar encontrar o paciente de bloqueio
+      const { data: existingPatient, error: searchError } = await supabase
+        .from('patients')
+        .select('id')
+        .eq('name', blockPatientName)
+        .maybeSingle();
+
+      if (searchError) throw searchError;
+
+      if (existingPatient) {
+        return existingPatient.id;
+      }
+
+      // Se não existir, criar novo
+      const { data: newPatient, error: createError } = await supabase
+        .from('patients')
+        .insert({
+          name: blockPatientName,
+          cpf: '000.000.000-00', // CPF fictício para passar na validação se houver
+          phone: '(00) 00000-0000',
+          date_of_birth: new Date().toISOString().split('T')[0]
+        })
+        .select('id')
+        .single();
+
+      if (createError) throw createError;
+
+      return newPatient.id;
+    } catch (error) {
+      console.error('Erro ao obter/criar paciente de bloqueio:', error);
+      throw error;
+    }
+  };
+
+  const createBlock = async (date: Date, startTime: string, endTime: string, reason: string, doctorName: string) => {
+    try {
+      // Obter ID do paciente de bloqueio para satisfazer a constraint NOT NULL
+      const blockPatientId = await getOrCreateBlockPatient();
+
+      // Converter horários para Date
+      const start = new Date(date);
+      const [sh, sm] = startTime.split(':').map(Number);
+      start.setHours(sh, sm, 0, 0);
+
+      const end = new Date(date);
+      const [eh, em] = endTime.split(':').map(Number);
+      end.setHours(eh, em, 0, 0);
+
+      // Gerar slots de 30 min entre inicio e fim
+      const slots = [];
+      let current = new Date(start);
+
+      // Se for o mesmo horário (ex: bloqueio de 1 slot), garantir que cria pelo menos um
+      if (current.getTime() === end.getTime()) {
+        slots.push(new Date(current));
+      } else {
+        while (current < end) {
+          slots.push(new Date(current));
+          current.setMinutes(current.getMinutes() + 30);
+        }
+      }
+
+      // Se a lista estiver vazia (fim antes do início), não faz nada
+      if (slots.length === 0) return;
+
+      // Verificar conflitos antes de bloquear
+      const { count: conflictCount, error: conflictError } = await supabase
+        .from('consultations')
+        .select('*', { count: 'exact', head: true })
+        .neq('status', 'blocked') // Ignorar outros bloqueios
+        .gte('consultation_date', start.toISOString())
+        .lt('consultation_date', end.toISOString())
+        .ilike('doctor_name', `%${doctorName.replace('Dr. ', '').replace('Dra. ', '')}%`);
+
+      if (conflictCount && conflictCount > 0) {
+        toast.warning(`Atenção: Existem ${conflictCount} agendamentos neste período! O bloqueio criará um conflito.`);
+      }
+
+      // Inserir bloqueios no Supabase
+      const { error } = await supabase
+        .from('consultations')
+        .insert(slots.map(slotTime => ({
+          doctor_name: doctorName,
+          consultation_date: slotTime.toISOString(),
+          status: 'blocked',
+          observations: reason,
+          patient_id: blockPatientId,
+          created_by: appUser?.username || 'sistema'
+        })));
+
+      if (error) throw error;
+
+      toast.success(`Bloqueio realizado para ${date.toLocaleDateString()}`);
+
+      // Atualizar a lista (pode ser otimizado para fazer apenas uma vez se for chamado em loop)
+      // Como o ScheduleBlockModal chama 'onBlock' em loop, vamos ter múltiplas chamadas aqui.
+      // O ideal seria fazer o refresh apenas no final, mas aqui não sabemos se é o último.
+      // O realtime deve cuidar da atualização visual, ou podemos forçar.
+      fetchAppointments(selectedDate);
+      // Se a data do bloqueio for a selecionada, refresh
+      if (date.toDateString() === selectedDate.toDateString()) {
+        fetchAppointments(selectedDate);
+      }
+      // Sempre atualizar o mês para mostrar as bolinhas/cores
+      fetchMonthAppointments(selectedDate);
+
+    } catch (error) {
+      console.error('Erro ao bloquear horário:', error);
+      toast.error('Erro ao bloquear horário: ' + (error as any).message);
+    }
+  };
+
+  const handleRemoveBlock = async (consultationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('consultations')
+        .delete()
+        .eq('id', consultationId);
+
+      if (error) throw error;
+
+      toast.success('Bloqueio removido');
+      fetchAppointments(selectedDate);
+      fetchMonthAppointments(selectedDate);
+    } catch (error) {
+      console.error('Erro ao remover bloqueio:', error);
+      toast.error('Erro ao remover bloqueio');
+    }
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   };
@@ -463,8 +702,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
   const monthName = selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   // Função para verificar quais médicos têm agendamentos em uma data
-  const getAppointmentsInfo = useCallback((date: Date | null): { hasMatheus: boolean; hasFabiola: boolean; hasAny: boolean } => {
-    if (!date) return { hasMatheus: false, hasFabiola: false, hasAny: false };
+  const getAppointmentsInfo = useCallback((date: Date | null): { hasMatheus: boolean; hasFabiola: boolean; hasAny: boolean; hasBlock: boolean; hasPatients: boolean } => {
+    if (!date) return { hasMatheus: false, hasFabiola: false, hasAny: false, hasBlock: false, hasPatients: false };
 
     // Verificar primeiro nos dados do mês carregados do banco
     const year = date.getFullYear();
@@ -475,7 +714,9 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       return {
         hasMatheus: monthAppointments[dateKey].hasMatheus,
         hasFabiola: monthAppointments[dateKey].hasFabiola,
-        hasAny: monthAppointments[dateKey].hasMatheus || monthAppointments[dateKey].hasFabiola
+        hasAny: monthAppointments[dateKey].hasMatheus || monthAppointments[dateKey].hasFabiola,
+        hasBlock: !!monthAppointments[dateKey].hasBlock,
+        hasPatients: !!monthAppointments[dateKey].hasPatients
       };
     }
 
@@ -486,11 +727,13 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       return {
         hasMatheus: timeSlotsMatheus.length > 0,
         hasFabiola: timeSlotsFabiola.length > 0,
-        hasAny: (timeSlotsMatheus.length > 0) || (timeSlotsFabiola.length > 0)
+        hasAny: (timeSlotsMatheus.length > 0) || (timeSlotsFabiola.length > 0),
+        hasBlock: timeSlotsMatheus.some(s => s.status === 'blocked') || timeSlotsFabiola.some(s => s.status === 'blocked'),
+        hasPatients: timeSlotsMatheus.some(s => s.status !== 'blocked') || timeSlotsFabiola.some(s => s.status !== 'blocked')
       };
     }
 
-    return { hasMatheus: false, hasFabiola: false, hasAny: false };
+    return { hasMatheus: false, hasFabiola: false, hasAny: false, hasBlock: false, hasPatients: false };
   }, [selectedDate, timeSlotsMatheus, timeSlotsFabiola, monthAppointments]);
 
   // Função para verificar se uma data tem consultas e retornar a cor (sempre vermelho quando há consultas)
@@ -616,10 +859,13 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
               doctorPhoto="/uploads/drmatheus.png"
               timeSlots={timeSlotsMatheus}
               loading={loading}
+              selectedDate={selectedDate}
               onPatientClick={handlePatientClick}
               onUpdateStatus={handleUpdateStatus}
               openStatusPopover={openStatusPopover}
               setOpenStatusPopover={setOpenStatusPopover}
+              onBlockSchedule={(d, s, e, r) => createBlock(d, s, e, r, 'Dr. Matheus')}
+              onRemoveBlock={handleRemoveBlock}
             />
           )}
 
@@ -630,10 +876,13 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
               doctorPhoto="/uploads/drafabiola.png"
               timeSlots={timeSlotsFabiola}
               loading={loading}
+              selectedDate={selectedDate}
               onPatientClick={handlePatientClick}
               onUpdateStatus={handleUpdateStatus}
               openStatusPopover={openStatusPopover}
               setOpenStatusPopover={setOpenStatusPopover}
+              onBlockSchedule={(d, s, e, r) => createBlock(d, s, e, r, 'Dra. Fabíola')}
+              onRemoveBlock={handleRemoveBlock}
             />
           )}
         </div>

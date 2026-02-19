@@ -55,8 +55,6 @@ export function PersonalNotes() {
     const [notes, setNotes] = useState<Note[]>([]);
     const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState('');
-    const [isAddingNew, setIsAddingNew] = useState(false);
-    const [newNoteContent, setNewNoteContent] = useState('');
     const [gridWidth, setGridWidth] = useState(1200);
     const gridContainerRef = useRef<HTMLDivElement>(null);
 
@@ -130,17 +128,12 @@ export function PersonalNotes() {
     };
 
     const handleAddNote = () => {
-        if (!newNoteContent.trim()) {
-            toast.error('A nota não pode estar vazia');
-            return;
-        }
-
         const maxY = notes.length > 0 ? Math.max(...notes.map(n => n.y + n.h)) : 0;
         const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
 
         const newNote: Note = {
             id: Date.now().toString(),
-            content: newNoteContent.trim(),
+            content: '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             color: randomColor.value,
@@ -155,9 +148,12 @@ export function PersonalNotes() {
 
         const updatedNotes = [...notes, newNote];
         saveNotes(updatedNotes);
-        setNewNoteContent('');
-        setIsAddingNew(false);
-        toast.success('Nota adicionada com sucesso!');
+
+        // Entrar automaticamente no modo de edição
+        setEditingNoteId(newNote.id);
+        setEditContent('');
+
+        toast.success('Nova nota criada!');
     };
 
     const handleEditNote = (noteId: string) => {
@@ -306,7 +302,7 @@ export function PersonalNotes() {
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-cinza-escuro">Minhas Notas</h2>
                 <Button
-                    onClick={() => setIsAddingNew(true)}
+                    onClick={handleAddNote}
                     size="sm"
                     className="bg-bege-principal hover:bg-marrom-acentuado text-white"
                 >
@@ -315,42 +311,8 @@ export function PersonalNotes() {
                 </Button>
             </div>
 
-            {/* Formulário de nova nota */}
-            {isAddingNew && (
-                <div className="bg-yellow-100 rounded-lg p-4 mb-4 shadow-lg border-2 border-yellow-200 max-w-md">
-                    <Textarea
-                        value={newNoteContent}
-                        onChange={(e) => setNewNoteContent(e.target.value)}
-                        placeholder="Digite sua nota aqui..."
-                        className="mb-3 min-h-[100px] resize-none bg-transparent border-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 placeholder:text-gray-500"
-                        autoFocus
-                    />
-                    <div className="flex gap-2 justify-end">
-                        <Button
-                            onClick={() => {
-                                setIsAddingNew(false);
-                                setNewNoteContent('');
-                            }}
-                            variant="outline"
-                            size="sm"
-                        >
-                            <X className="h-4 w-4 mr-1" />
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleAddNote}
-                            size="sm"
-                            className="bg-bege-principal hover:bg-marrom-acentuado text-white"
-                        >
-                            <Save className="h-4 w-4 mr-1" />
-                            Salvar
-                        </Button>
-                    </div>
-                </div>
-            )}
-
             {/* Grid de notas adesivas */}
-            {notes.length === 0 && !isAddingNew ? (
+            {notes.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                     <p className="text-sm">Nenhuma nota ainda.</p>
                     <p className="text-xs mt-1">Clique em "Nova Nota" para começar.</p>

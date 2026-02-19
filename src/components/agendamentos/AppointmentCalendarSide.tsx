@@ -37,34 +37,7 @@ export function AppointmentCalendarSide({
                     locale={ptBR}
                 />
             </div>
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal h-8 text-xs"
-                    >
-                        <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                        {appointmentDate ? (
-                            format(appointmentDate, "dd/MM/yyyy", { locale: ptBR })
-                        ) : (
-                            <span>Selecione</span>
-                        )}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                    <Calendar
-                        mode="single"
-                        selected={appointmentDate}
-                        onSelect={(date) => {
-                            if (date) {
-                                setAppointmentDate(date);
-                            }
-                        }}
-                        initialFocus
-                        locale={ptBR}
-                    />
-                </PopoverContent>
-            </Popover>
+
 
             {/* Campo de Observações */}
             <div className="mt-2">

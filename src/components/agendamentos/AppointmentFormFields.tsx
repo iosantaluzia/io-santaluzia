@@ -59,12 +59,21 @@ export function AppointmentFormFields({
                     <Label htmlFor="date_of_birth" className="text-xs font-medium leading-tight">Data Nascimento</Label>
                     <Input
                         id="date_of_birth"
-                        type="date"
+                        type="text"
                         value={formData.date_of_birth}
-                        onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                        onChange={(e) => {
+                            let value = e.target.value.replace(/\D/g, '');
+                            if (value.length > 8) value = value.slice(0, 8);
+                            if (value.length >= 5) {
+                                value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4);
+                            } else if (value.length >= 3) {
+                                value = value.slice(0, 2) + '/' + value.slice(2);
+                            }
+                            handleInputChange('date_of_birth', value);
+                        }}
                         placeholder="dd/mm/aaaa"
+                        maxLength={10}
                         className="h-8 text-xs mt-0.5"
-                        style={{ colorScheme: 'light' }}
                     />
                 </div>
                 <div>

@@ -12,7 +12,7 @@ export const cpfSchema = z.string()
   .refine((cpf) => {
     const numbers = cpf.replace(/\D/g, '');
     if (numbers.length !== 11) return false;
-    
+
     // Basic CPF validation algorithm
     let sum = 0;
     for (let i = 0; i < 9; i++) {
@@ -64,7 +64,7 @@ export const nameSchema = z.string()
 export const appointmentFormSchema = z.object({
   name: nameSchema, // Obrigatório
   cpf: cpfSchema.optional().or(z.literal('')),
-  phone: phoneSchema.optional().or(z.literal('')),
+  phone: z.union([phoneSchema, z.literal(''), z.string().length(0)]).optional(),
   date_of_birth: z.string().optional().or(z.literal('')),
   email: emailSchema.optional().or(z.literal('')),
   address: z.string().max(500, 'Endereço muito longo').optional(),
