@@ -11,10 +11,13 @@ import { toast } from 'sonner';
 import { PatientConsultations } from './PatientConsultations';
 import { getDoctorFullName } from '@/utils/doctorNames';
 import { calculateDetailedAge } from '@/utils/formatters';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Pill, FileCheck } from 'lucide-react';
 
 // Sub-components
 import { ConsultationPatientSummary } from './pacientes/ConsultationPatientSummary';
 import { PatientExamsList } from './pacientes/PatientExamsList';
+import { PrescriptionEditor } from './PrescriptionEditor';
 
 
 interface Patient {
@@ -349,10 +352,29 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             />
           </div>
 
-          <PatientExamsList
-            exams={exams}
-            loading={loadingExams}
-          />
+          <div className="lg:col-span-1 h-full flex flex-col">
+            <Tabs defaultValue="exames" className="w-full h-full flex flex-col">
+              <TabsList className="w-full grid grid-cols-2 mb-2">
+                <TabsTrigger value="exames" className="flex items-center gap-2 text-xs">
+                  <TestTube className="h-3 w-3" /> Exames Cadastrados
+                </TabsTrigger>
+                <TabsTrigger value="receita" className="flex items-center gap-2 text-xs">
+                  <Pill className="h-3 w-3" /> Gerar Receita
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="exames" className="flex-1 mt-0">
+                <PatientExamsList
+                  exams={exams}
+                  loading={loadingExams}
+                />
+              </TabsContent>
+
+              <TabsContent value="receita" className="flex-1 mt-0 bg-gray-50 rounded-lg border border-gray-200 p-4 h-full">
+                <PrescriptionEditor initialPatientName={patient.name} isCompact={true} />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </form>
 

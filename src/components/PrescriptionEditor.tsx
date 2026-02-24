@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Printer, Pill, Settings } from 'lucide-react';
 import { DocumentTemplate } from './DocumentsSection';
+import { supabase } from '@/integrations/supabase/client';
 import medicationsData from '@/data/medications.json';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
@@ -22,10 +23,29 @@ interface Medication {
 interface PrescriptionEditorProps {
     templates?: DocumentTemplate[];
     onOpenManager?: () => void;
+    initialPatientName?: string;
+    isCompact?: boolean;
 }
 
-export function PrescriptionEditor({ templates = [], onOpenManager }: PrescriptionEditorProps) {
-    const [patientName, setPatientName] = useState('');
+export function PrescriptionEditor({ templates = [], onOpenManager, initialPatientName = '', isCompact = false }: PrescriptionEditorProps) {
+    const [patientName, setPatientName] = useState(initialPatientName);
+    const [fetchedTemplates, setFetchedTemplates] = useState<DocumentTemplate[]>([]);
+
+    const activeTemplates = templates.length > 0 ? templates : fetchedTemplates;
+
+    useEffect(() => {
+        if (templates.length === 0) {
+            const fetchTemplates = async () => {
+                const { data } = await supabase
+                    .from('document_templates')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('name');
+                if (data) setFetchedTemplates(data as DocumentTemplate[]);
+            };
+            fetchTemplates();
+        }
+    }, [templates]);
     const [searchTerm, setSearchTerm] = useState('');
     const [prescriptionContent, setPrescriptionContent] = useState('');
     const [searchResults, setSearchResults] = useState<Medication[]>([]);
@@ -37,7 +57,7 @@ export function PrescriptionEditor({ templates = [], onOpenManager }: Prescripti
     const handleTemplateChange = (val: string) => {
         setSelectedTemplateId(val);
         if (val !== 'none') {
-            const t = templates.find(temp => temp.id === val);
+            const t = activeTemplates.find(temp => temp.id === val);
             if (t) {
                 setDocumentType(t.type);
                 let newContent = t.content;
@@ -107,9 +127,9 @@ export function PrescriptionEditor({ templates = [], onOpenManager }: Prescripti
     const currentDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
 
     return (
-        <div className="flex flex-col md:flex-row gap-6 h-full print:block print:w-full print:h-auto">
+        <div className={`flex flex-col ${isCompact ? '' : 'md:flex-row'} gap-6 h-full print:block print:w-full print:h-auto`}>
             {/* Lado Esquerdo - Controles (Não aparece na impressão) */}
-            <div className="w-full md:w-1/3 flex flex-col gap-6 print:hidden">
+            <div className={`w-full ${isCompact ? 'md:w-full' : 'md:w-1/3'} flex flex-col gap-6 print:hidden`}>
                 <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex-grow">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-semibold text-cinza-escuro flex items-center gap-2">
@@ -151,7 +171,7 @@ export function PrescriptionEditor({ templates = [], onOpenManager }: Prescripti
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="none">Em branco</SelectItem>
-                                        {templates.filter(t => t.type === documentType).map(t => (
+                                        {activeTemplates.filter(t => t.type === documentType).map(t => (
                                             <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -215,67 +235,69 @@ export function PrescriptionEditor({ templates = [], onOpenManager }: Prescripti
             </div>
 
             {/* Lado Direito - Visualização do Documento e Impressão */}
-            <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block">
+            <div className={`w-full ${isCompact ? 'md:w-full max-h-[400px]' : 'md:w-2/3'} bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block`}>
                 {/* Papel (A4 Aspect Ratio) */}
-                <div id="prescription-print-area" className="relative bg-white w-full max-w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden print:overflow-visible print:min-h-[26cm]">
+                <div className={`${isCompact ? 'transform scale-[0.6] origin-top mb-[-40%]' : ''} print:transform-none print:mb-0`}>
+                    <div id="prescription-print-area" className="relative bg-white w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden print:overflow-visible print:min-h-[26cm]">
 
-                    {/* Marca d'água no fundo da página inteira */}
-                    <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5 print:overflow-hidden">
-                        <img src="/uploads/circlebg.png" alt="" className="w-[85%] max-w-lg object-contain" />
-                    </div>
-                    <div className="relative z-10 flex flex-col h-full flex-grow p-10 px-14 md:px-20 print:p-10 print:px-24">
-                        {/* Cabeçalho do Documento */}
-                        <div className="flex flex-col items-center mb-10 w-full shrink-0">
-                            <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-[120px] object-contain mb-3" />
-                            <p className="text-[#857053] font-medium text-[13px] text-center tracking-wide leading-tight">
-                                • Córnea • Catarata • Ceratocone • Lentes de Contato<br />
-                                • Cirurgia Refrativa • Oftalmopediatria
-                            </p>
-                            <div className="w-full border-b-[1.5px] border-[#857053] mt-5"></div>
+                        {/* Marca d'água no fundo da página inteira */}
+                        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5 print:overflow-hidden">
+                            <img src="/uploads/circlebg.png" alt="" className="w-[85%] max-w-lg object-contain" />
                         </div>
-
-                        {/* Corpo da Receita */}
-                        <div className="flex-grow flex flex-col text-cinza-escuro print:px-8">
-                            <h2 className="text-xl font-bold text-center mb-8 uppercase tracking-widest text-[#161a1d]">
-                                {documentType === 'receituario' ? 'Receituário' :
-                                    documentType === 'solicitacao_exame' ? 'Solicitação de Exame' :
-                                        'Laudo Médico'}
-                            </h2>
-
-                            {patientName && (
-                                <div className="mb-6 flex items-end gap-2 text-[15px]">
-                                    <span className="font-semibold text-gray-800">Paciente:</span>
-                                    <span className="font-medium inline-block flex-1 border-b-[1px] border-gray-400 print:border-gray-800 border-dotted leading-none">{patientName}</span>
-                                </div>
-                            )}
-
-                            <Textarea
-                                value={prescriptionContent}
-                                onChange={(e) => setPrescriptionContent(e.target.value)}
-                                className="w-full flex-grow min-h-[400px] text-[15px] p-0 border-none focus-visible:ring-0 resize-none font-sans text-cinza-escuro bg-transparent leading-relaxed print:resize-none print:p-0 outline-none"
-                                placeholder="PARA USO EM CLÍNICA MÉDICA&#10;&#10;Adicione os medicamentos usando a busca ao lado ou digite livremente aqui..."
-                            />
-                        </div>
-
-                        {/* Assinatura, Data e Rodapé */}
-                        <div className="mt-8 shrink-0">
-                            <div className="flex justify-end pr-8 mb-6">
-                                <p className="text-cinza-escuro text-[15px]">{currentDate}</p>
+                        <div className="relative z-10 flex flex-col h-full flex-grow p-10 px-14 md:px-20 print:p-10 print:px-24">
+                            {/* Cabeçalho do Documento */}
+                            <div className="flex flex-col items-center mb-10 w-full shrink-0">
+                                <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-[120px] object-contain mb-3" />
+                                <p className="text-[#857053] font-medium text-[13px] text-center tracking-wide leading-tight">
+                                    • Córnea • Catarata • Ceratocone • Lentes de Contato<br />
+                                    • Cirurgia Refrativa • Oftalmopediatria
+                                </p>
+                                <div className="w-full border-b-[1.5px] border-[#857053] mt-5"></div>
                             </div>
 
-                            {/* Linha Fina Dourada/Marrom do rodapé */}
-                            <div className="w-full border-t-[1.5px] border-[#857053] mb-4"></div>
+                            {/* Corpo da Receita */}
+                            <div className="flex-grow flex flex-col text-cinza-escuro print:px-8">
+                                <h2 className="text-xl font-bold text-center mb-8 uppercase tracking-widest text-[#161a1d]">
+                                    {documentType === 'receituario' ? 'Receituário' :
+                                        documentType === 'solicitacao_exame' ? 'Solicitação de Exame' :
+                                            'Laudo Médico'}
+                                </h2>
 
-                            <div className="flex justify-between w-full text-[12px] text-[#6b583f] font-medium tracking-tight px-1">
-                                <div className="flex flex-col leading-snug">
-                                    <span className="font-bold text-[#5c4a30]">Avenida dos Tarumãs 930</span>
-                                    <span>Setor Residencial Sul • Sinop MT</span>
-                                    <span>Cep 78 550-001</span>
-                                    <span>(66) 3531-6381 • 99721-5000</span>
+                                {patientName && (
+                                    <div className="mb-6 flex items-end gap-2 text-[15px]">
+                                        <span className="font-semibold text-gray-800">Paciente:</span>
+                                        <span className="font-medium inline-block flex-1 border-b-[1px] border-gray-400 print:border-gray-800 border-dotted leading-none">{patientName}</span>
+                                    </div>
+                                )}
+
+                                <Textarea
+                                    value={prescriptionContent}
+                                    onChange={(e) => setPrescriptionContent(e.target.value)}
+                                    className="w-full flex-grow min-h-[400px] text-[15px] p-0 border-none focus-visible:ring-0 resize-none font-sans text-cinza-escuro bg-transparent leading-relaxed print:resize-none print:p-0 outline-none"
+                                    placeholder="PARA USO EM CLÍNICA MÉDICA&#10;&#10;Adicione os medicamentos usando a busca ao lado ou digite livremente aqui..."
+                                />
+                            </div>
+
+                            {/* Assinatura, Data e Rodapé */}
+                            <div className="mt-8 shrink-0">
+                                <div className="flex justify-end pr-8 mb-6">
+                                    <p className="text-cinza-escuro text-[15px]">{currentDate}</p>
                                 </div>
-                                <div className="flex flex-col text-right leading-snug mt-auto">
-                                    <span>@faroque</span>
-                                    <span>@matheusroqueoftalmo</span>
+
+                                {/* Linha Fina Dourada/Marrom do rodapé */}
+                                <div className="w-full border-t-[1.5px] border-[#857053] mb-4"></div>
+
+                                <div className="flex justify-between w-full text-[12px] text-[#6b583f] font-medium tracking-tight px-1">
+                                    <div className="flex flex-col leading-snug">
+                                        <span className="font-bold text-[#5c4a30]">Avenida dos Tarumãs 930</span>
+                                        <span>Setor Residencial Sul • Sinop MT</span>
+                                        <span>Cep 78 550-001</span>
+                                        <span>(66) 3531-6381 • 99721-5000</span>
+                                    </div>
+                                    <div className="flex flex-col text-right leading-snug mt-auto">
+                                        <span>@faroque</span>
+                                        <span>@matheusroqueoftalmo</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
