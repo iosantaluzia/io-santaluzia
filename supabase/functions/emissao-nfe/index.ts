@@ -16,13 +16,14 @@ serve(async (req) => {
 
     // 1. Ler a senha do certificado do .env baseada no emissor selecionado
     let certificadoSenha: string | undefined;
-    let tipoEmissorNome = 'Clínica Orgahealth (PJ)';
+    let tipoEmissorNome = '';
 
-    if (emissor === 'PF_FABIOLA') {
-      certificadoSenha = Deno.env.get("CERTIFICADO_PF_FABIOLA_SENHA");
-      tipoEmissorNome = 'Dra. Fabiola Roque (PF)';
+    if (emissor === 'PJ_INSTITUTO') {
+      certificadoSenha = Deno.env.get("CERTIFICADO_PJ_INSTITUTO_SENHA");
+      tipoEmissorNome = 'Instituto dos Olhos Santa Luzia (PJ)';
     } else {
-      certificadoSenha = Deno.env.get("CERTIFICADO_NFE_SENHA"); // Default/PJ
+      certificadoSenha = Deno.env.get("CERTIFICADO_PJ_MATHEUS_SENHA"); // Default/PJ_MATHEUS
+      tipoEmissorNome = 'Matheus Roque Serviços Médicos LTDA (PJ)';
     }
 
     if (!certificadoSenha || certificadoSenha === "COLOQUE_SUA_SENHA_AQUI" || certificadoSenha === "sua_senha_aqui") {

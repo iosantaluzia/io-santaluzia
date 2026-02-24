@@ -174,7 +174,7 @@ export function FinanceiroSection() {
         doctorsData[doctorKey].transactions.push({
           id: consultation.id,
           patient: patientName,
-          service: getServiceName(consultation.appointment_type, consultation.status),
+          service: getServiceName(consultation.appointment_type, consultation.status, consultation.payment_method),
           amount: amount,
           date: new Date(consultation.consultation_date).toLocaleDateString('pt-BR'),
           // Se foi realizado ou pago, status é Pago, senão Pendente
@@ -230,13 +230,13 @@ export function FinanceiroSection() {
     }
   };
 
-  const getServiceName = (appointmentType: string | null, status: string | null): string => {
+  const getServiceName = (appointmentType: string | null, status: string | null, paymentMethod?: string | null): string => {
     if (appointmentType) {
       switch (appointmentType) {
         case 'consulta': return 'Consulta Oftalmológica';
         case 'retorno': return 'Retorno';
         case 'exame': return 'Exame Oftalmológico';
-        case 'convenio': return 'Convênio';
+        case 'convenio': return paymentMethod ? `Convênio - ${paymentMethod}` : 'Convênio';
         case 'pagamento_honorarios': return 'Pagamento de Honorários';
         default: return appointmentType;
       }

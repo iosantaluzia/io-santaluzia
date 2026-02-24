@@ -64,5 +64,6 @@ export const appointmentTypeLabels: { [key: string]: string } = {
     'consulta': 'Consulta',
     'retorno': 'Retorno',
     'exame': 'Exame',
+    'convenio': 'Convênio',
     'pagamento_honorarios': 'Pagamento de Honorários'
 };

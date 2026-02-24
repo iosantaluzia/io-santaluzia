@@ -35,7 +35,7 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
         description: 'Consulta Oftalmológica',
         amount: defaultAmount ? defaultAmount.toString() : '',
         patientId: '',
-        emissorTipo: 'PJ',
+        emissorTipo: 'PJ_MATHEUS',
     });
 
     // Clicar fora para fechar resultados
@@ -159,8 +159,8 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
                                         <SelectValue placeholder="Selecione o emissor" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="PJ">Clínica Orgahealth (PJ) - Principal</SelectItem>
-                                        <SelectItem value="PF_FABIOLA">Dra. Fabiola Roque (PF)</SelectItem>
+                                        <SelectItem value="PJ_MATHEUS">Matheus Roque Serviços Médicos LTDA (PJ)</SelectItem>
+                                        <SelectItem value="PJ_INSTITUTO">Instituto dos Olhos Santa Luzia (PJ)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

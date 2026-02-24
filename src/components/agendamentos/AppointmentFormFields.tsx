@@ -137,70 +137,95 @@ export function AppointmentFormFields({
                             <SelectItem value="consulta">Consulta</SelectItem>
                             <SelectItem value="retorno">Retorno</SelectItem>
                             <SelectItem value="exame">Exame</SelectItem>
+                            <SelectItem value="convenio">Convênio</SelectItem>
                             <SelectItem value="pagamento_honorarios">Pagamento de Honorários</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div>
-                    <Label htmlFor="amount" className="text-xs font-medium leading-tight">Valor Pago (R$)</Label>
-                    <div className="flex items-end gap-2 mt-0.5">
-                        <div className="relative flex-1">
-                            <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">R$</span>
-                            <Input
-                                id="amount"
-                                type="text"
-                                value={formData.amount}
-                                onChange={(e) => {
-                                    const formatted = formatCurrencyInput(e.target.value);
-                                    handleInputChange('amount', formatted);
+                    {formData.appointmentType === 'convenio' ? (
+                        <>
+                            <Label htmlFor="convenio" className="text-xs font-medium leading-tight">Selecionar Convênio *</Label>
+                            <Select
+                                value={formData.payment_method}
+                                onValueChange={(value) => {
+                                    handleInputChange('payment_method', value);
+                                    handleInputChange('amount', '0'); // Convênios não têm valor na hora
                                 }}
-                                placeholder="0,00"
-                                className="h-8 text-xs pl-7 pr-24"
-                                inputMode="numeric"
-                            />
-                            <Popover open={paymentMethodPopoverOpen} onOpenChange={setPaymentMethodPopoverOpen}>
-                                <PopoverTrigger asChild>
-                                    <button
-                                        type="button"
-                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 z-10"
-                                    >
-                                        <span className="text-xs truncate max-w-[120px]">
-                                            {formData.payment_method || 'Meio de Pagamento'}
-                                        </span>
-                                        <ChevronDown className="h-3 w-3 flex-shrink-0" />
-                                    </button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-48 p-1 z-50" align="end">
-                                    <div className="flex flex-col">
-                                        {['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cheque', 'Débito'].map(method => (
+                            >
+                                <SelectTrigger className="h-8 text-xs mt-0.5 w-full">
+                                    <SelectValue placeholder="Selecione o convênio" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Unimed">Unimed</SelectItem>
+                                    <SelectItem value="Unimed 279">Unimed 279</SelectItem>
+                                    <SelectItem value="Unimed Intercâmbio">Unimed Intercâmbio</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </>
+                    ) : (
+                        <>
+                            <Label htmlFor="amount" className="text-xs font-medium leading-tight">Valor Pago (R$)</Label>
+                            <div className="flex items-end gap-2 mt-0.5">
+                                <div className="relative flex-1">
+                                    <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">R$</span>
+                                    <Input
+                                        id="amount"
+                                        type="text"
+                                        value={formData.amount}
+                                        onChange={(e) => {
+                                            const formatted = formatCurrencyInput(e.target.value);
+                                            handleInputChange('amount', formatted);
+                                        }}
+                                        placeholder="0,00"
+                                        className="h-8 text-xs pl-7 pr-24"
+                                        inputMode="numeric"
+                                    />
+                                    <Popover open={paymentMethodPopoverOpen} onOpenChange={setPaymentMethodPopoverOpen}>
+                                        <PopoverTrigger asChild>
                                             <button
-                                                key={method}
                                                 type="button"
-                                                onClick={() => {
-                                                    handleInputChange('payment_method', method);
-                                                    setPaymentMethodPopoverOpen(false);
-                                                }}
-                                                className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs hover:text-gray-700 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 z-10"
                                             >
-                                                {method}
+                                                <span className="text-xs truncate max-w-[120px]">
+                                                    {formData.payment_method || 'Meio de Pagamento'}
+                                                </span>
+                                                <ChevronDown className="h-3 w-3 flex-shrink-0" />
                                             </button>
-                                        ))}
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="flex items-center gap-1.5 pb-0.5">
-                            <Checkbox
-                                id="payment_received"
-                                checked={formData.payment_received}
-                                onCheckedChange={(checked) => handleInputChange('payment_received', checked === true)}
-                                className="h-3.5 w-3.5"
-                            />
-                            <Label htmlFor="payment_received" className="text-xs font-normal cursor-pointer leading-tight whitespace-nowrap">
-                                Pago
-                            </Label>
-                        </div>
-                    </div>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-48 p-1 z-50" align="end">
+                                            <div className="flex flex-col">
+                                                {['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cheque', 'Débito'].map(method => (
+                                                    <button
+                                                        key={method}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            handleInputChange('payment_method', method);
+                                                            setPaymentMethodPopoverOpen(false);
+                                                        }}
+                                                        className="text-left px-3 py-2 text-xs hover:bg-gray-100 rounded-sm transition-colors"
+                                                    >
+                                                        {method}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="flex items-center gap-1.5 pb-0.5">
+                                    <Checkbox
+                                        id="payment_received"
+                                        checked={formData.payment_received}
+                                        onCheckedChange={(checked) => handleInputChange('payment_received', checked === true)}
+                                        className="h-3.5 w-3.5"
+                                    />
+                                    <Label htmlFor="payment_received" className="text-xs font-normal cursor-pointer leading-tight whitespace-nowrap">
+                                        Pago
+                                    </Label>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
