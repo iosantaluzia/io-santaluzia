@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, FileText, Edit, Trash2, Copy, Search, X, Pill, TestTube, FileCheck } from 'lucide-react';
+import { Pill, TestTube, FileCheck, Search, Plus, Edit, Trash2, Copy, X, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -33,7 +33,10 @@ export function DocumentsSection() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<'receituarios' | 'exames' | 'laudos' | 'editor_receitas'>('editor_receitas');
+
+  const [isManagingMode, setIsManagingMode] = useState(false);
+  const [managerTab, setManagerTab] = useState<'receituarios' | 'exames' | 'laudos'>('receituarios');
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DocumentTemplate | null>(null);
@@ -51,7 +54,7 @@ export function DocumentsSection() {
 
   useEffect(() => {
     filterTemplates();
-  }, [templates, searchTerm, selectedCategory, activeTab]);
+  }, [templates, searchTerm, selectedCategory, managerTab]); // Changed activeTab to managerTab
 
   const fetchTemplates = async () => {
     try {
@@ -81,7 +84,7 @@ export function DocumentsSection() {
       'exames': 'solicitacao_exame',
       'laudos': 'declaracao'
     };
-    filtered = filtered.filter(t => t.type === typeMap[activeTab]);
+    filtered = filtered.filter(t => t.type === typeMap[managerTab]); // Changed activeTab to managerTab
 
     // Filtrar por categoria
     if (selectedCategory !== 'all') {
@@ -101,13 +104,13 @@ export function DocumentsSection() {
     setFilteredTemplates(filtered);
   };
 
-  const getCurrentType = (): 'receituario' | 'solicitacao_exame' | 'declaracao' => {
-    const typeMap: Record<string, 'receituario' | 'solicitacao_exame' | 'declaracao'> = {
-      'receituarios': 'receituario',
-      'exames': 'solicitacao_exame',
-      'laudos': 'declaracao'
-    };
-    return typeMap[activeTab];
+  const getCurrentType = () => {
+    switch (managerTab) {
+      case 'receituarios': return 'receituario';
+      case 'exames': return 'solicitacao_exame';
+      case 'laudos': return 'declaracao';
+      default: return 'receituario';
+    }
   };
 
   const handleCreate = async () => {
@@ -222,7 +225,7 @@ export function DocumentsSection() {
     };
     return Array.from(new Set(
       templates
-        .filter(t => t.type === typeMap[activeTab])
+        .filter(t => t.type === typeMap[managerTab])
         .map(t => t.category)
         .filter(Boolean)
     )) as string[];
@@ -256,381 +259,391 @@ export function DocumentsSection() {
   }
 
   return (
-    <div className={`p-6 space-y-6 ${activeTab === 'editor_receitas' ? 'print:p-0 print:space-y-0 print:bg-white' : ''}`}>
-      <div className="flex items-center justify-between print:hidden">
-        <div>
-          <h1 className="text-2xl font-bold text-cinza-escuro">Documentos</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Gerencie modelos de receituários, solicitações de exames e laudos
-          </p>
-        </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={(open) => {
-          setIsCreateModalOpen(open);
-          if (open) {
-            // Resetar formulário com tipo baseado na aba ativa quando abrir
-            setFormData({
-              name: '',
-              type: getCurrentType(),
-              content: '',
-              category: ''
-            });
-          } else {
-            resetForm();
-          }
-        }}>
-          <DialogTrigger asChild>
-            <Button className="bg-medical-primary hover:bg-medical-primary/90 text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Modelo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Criar Novo Modelo - {
-                  activeTab === 'receituarios' ? 'Receituário' :
-                    activeTab === 'exames' ? 'Solicitação de Exame' :
-                      'Laudo'
-                }
-              </DialogTitle>
-              <DialogDescription>
-                Crie um novo modelo de documento para uso nas consultas
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome do Modelo *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={
-                    activeTab === 'receituarios' ? 'Ex: Receituário Uveites' :
-                      activeTab === 'exames' ? 'Ex: Exames Uveites' :
-                        'Ex: Laudo Teste do Reflexo Vermelho'
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="category">Categoria (opcional)</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Ex: Uveites, Pós-operatório"
-                />
-              </div>
-              <div>
-                <Label htmlFor="content">Conteúdo *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Digite o conteúdo do modelo..."
-                  className="min-h-[300px] font-mono text-sm"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Use {'{PACIENTE}'} como placeholder para o nome do paciente
-                </p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => { setIsCreateModalOpen(false); resetForm(); }}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleCreate} className="bg-medical-primary hover:bg-medical-primary/90 text-white">
-                  Criar
-                </Button>
-              </div>
+    <div className={`p-6 space-y-6 ${!isManagingMode ? 'print:p-0 print:space-y-0 print:bg-white' : ''}`}>
+      {!isManagingMode ? (
+        <>
+          <div className="flex items-center justify-between print:hidden">
+            <div>
+              <h1 className="text-2xl font-bold text-cinza-escuro">Documentos</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Editor de Receitas e Laudos
+              </p>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Abas de Categorias */}
-      <Tabs value={activeTab} onValueChange={(value) => {
-        setActiveTab(value as 'receituarios' | 'exames' | 'laudos' | 'editor_receitas');
-        setSelectedCategory('all'); // Resetar categoria ao trocar de aba
-      }}>
-        <TabsList className="grid w-full grid-cols-4 print:hidden">
-          <TabsTrigger value="receituarios" className="flex items-center gap-2">
-            <Pill className="h-4 w-4" />
-            Receituários
-          </TabsTrigger>
-          <TabsTrigger value="exames" className="flex items-center gap-2">
-            <TestTube className="h-4 w-4" />
-            Exames
-          </TabsTrigger>
-          <TabsTrigger value="laudos" className="flex items-center gap-2">
-            <FileCheck className="h-4 w-4" />
-            Laudos
-          </TabsTrigger>
-          <TabsTrigger value="editor_receitas" className="flex items-center gap-2 text-medical-primary font-bold">
-            <Pill className="h-4 w-4" />
-            Editor de Receitas
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Filtros - Comum para todas as abas (se não for o editor) */}
-        {activeTab !== 'editor_receitas' && (
-          <div className="flex gap-4 items-end mt-4 print:hidden">
-            <div className="flex-1">
-              <Label htmlFor="search">Buscar</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  id="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar por nome, conteúdo ou categoria..."
-                  className="pl-10"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  >
-                    <X className="h-4 w-4 text-gray-400" />
-                  </button>
-                )}
-              </div>
-            </div>
-            {getCategoriesForCurrentTab().length > 0 && (
-              <div className="w-48">
-                <Label htmlFor="category-filter">Categoria</Label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {getCategoriesForCurrentTab().map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
           </div>
-        )}
+          <PrescriptionEditor templates={templates} onOpenManager={() => setIsManagingMode(true)} />
+        </>
+      ) : (
+        <>
+          <div className="flex items-center justify-between print:hidden">
+            <div>
+              <h1 className="text-xl font-bold text-cinza-escuro">Gerenciar Modelos</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Crie e edite seus modelos de documentos
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsManagingMode(false)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+              <Dialog open={isCreateModalOpen} onOpenChange={(open) => {
+                setIsCreateModalOpen(open);
+                if (open) {
+                  setFormData({
+                    name: '',
+                    type: getCurrentType(),
+                    content: '',
+                    category: ''
+                  });
+                } else {
+                  resetForm();
+                }
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="bg-medical-primary hover:bg-medical-primary/90 text-white">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Modelo
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      Criar Novo Modelo - {
+                        managerTab === 'receituarios' ? 'Receituário' :
+                          managerTab === 'exames' ? 'Solicitação de Exame' :
+                            'Laudo'
+                      }
+                    </DialogTitle>
+                    <DialogDescription>
+                      Crie um novo modelo de documento para uso nas consultas
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Nome do Modelo *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder={
+                          managerTab === 'receituarios' ? 'Ex: Receituário Uveites' :
+                            managerTab === 'exames' ? 'Ex: Exames Uveites' :
+                              'Ex: Laudo Teste do Reflexo Vermelho'
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Categoria (opcional)</Label>
+                      <Input
+                        id="category"
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        placeholder="Ex: Uveites, Pós-operatório"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="content">Conteúdo *</Label>
+                      <Textarea
+                        id="content"
+                        value={formData.content}
+                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        placeholder="Digite o conteúdo do modelo..."
+                        className="min-h-[300px] font-mono text-sm"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Use {'{PACIENTE}'} como placeholder para o nome do paciente
+                      </p>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => { setIsCreateModalOpen(false); resetForm(); }}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleCreate} className="bg-medical-primary hover:bg-medical-primary/90 text-white">
+                        Criar
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
 
-        {/* Conteúdo das Abas */}
-        <TabsContent value="receituarios" className="mt-6">
-          {filteredTemplates.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Pill className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600">Nenhum receituário encontrado</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {templates.filter(t => t.type === 'receituario').length === 0
-                    ? 'Crie seu primeiro modelo de receituário'
-                    : 'Tente ajustar os filtros de busca'}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
-                <Card key={template.id} className="flex flex-col">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {template.category && (
-                            <Badge className="bg-blue-100 text-blue-800">
-                              {template.category}
-                            </Badge>
-                          )}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
-                      <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
-                        {template.content.length > 200
-                          ? template.content.substring(0, 200) + '...'
-                          : template.content}
-                      </pre>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleCopy(template.content)}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copiar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(template)}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(template.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+          <Tabs value={managerTab} onValueChange={(value) => {
+            setManagerTab(value as 'receituarios' | 'exames' | 'laudos');
+            setSelectedCategory('all');
+          }}>
+            <TabsList className="grid w-full grid-cols-3 print:hidden">
+              <TabsTrigger value="receituarios" className="flex items-center gap-2">
+                <Pill className="h-4 w-4" />
+                Receituários
+              </TabsTrigger>
+              <TabsTrigger value="exames" className="flex items-center gap-2">
+                <TestTube className="h-4 w-4" />
+                Exames
+              </TabsTrigger>
+              <TabsTrigger value="laudos" className="flex items-center gap-2">
+                <FileCheck className="h-4 w-4" />
+                Laudos
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex gap-4 items-end mt-4 print:hidden">
+              <div className="flex-1">
+                <Label htmlFor="search">Buscar</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar por nome, conteúdo ou categoria..."
+                    className="pl-10"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    >
+                      <X className="h-4 w-4 text-gray-400" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              {getCategoriesForCurrentTab().length > 0 && (
+                <div className="w-48">
+                  <Label htmlFor="category-filter">Categoria</Label>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {getCategoriesForCurrentTab().map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Conteúdo das Abas */}
+            <TabsContent value="receituarios" className="mt-6">
+              {filteredTemplates.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Pill className="h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-600">Nenhum receituário encontrado</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {templates.filter(t => t.type === 'receituario').length === 0
+                        ? 'Crie seu primeiro modelo de receituário'
+                        : 'Tente ajustar os filtros de busca'}
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredTemplates.map((template) => (
+                    <Card key={template.id} className="flex flex-col">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{template.name}</CardTitle>
+                            <CardDescription className="mt-1">
+                              {template.category && (
+                                <Badge className="bg-blue-100 text-blue-800">
+                                  {template.category}
+                                </Badge>
+                              )}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex-1 flex flex-col">
+                        <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
+                          <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
+                            {template.content.length > 200
+                              ? template.content.substring(0, 200) + '...'
+                              : template.content}
+                          </pre>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleCopy(template.content)}
+                          >
+                            <Copy className="h-3 w-3 mr-1" />
+                            Copiar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(template)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(template.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
-        <TabsContent value="exames" className="mt-6">
-          {filteredTemplates.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <TestTube className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600">Nenhuma solicitação de exame encontrada</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {templates.filter(t => t.type === 'solicitacao_exame').length === 0
-                    ? 'Crie seu primeiro modelo de solicitação de exame'
-                    : 'Tente ajustar os filtros de busca'}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
-                <Card key={template.id} className="flex flex-col">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {template.category && (
-                            <Badge className="bg-green-100 text-green-800">
-                              {template.category}
-                            </Badge>
-                          )}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
-                      <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
-                        {template.content.length > 200
-                          ? template.content.substring(0, 200) + '...'
-                          : template.content}
-                      </pre>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleCopy(template.content)}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copiar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(template)}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(template.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+            <TabsContent value="exames" className="mt-6">
+              {filteredTemplates.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <TestTube className="h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-600">Nenhuma solicitação de exame encontrada</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {templates.filter(t => t.type === 'solicitacao_exame').length === 0
+                        ? 'Crie seu primeiro modelo de solicitação de exame'
+                        : 'Tente ajustar os filtros de busca'}
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredTemplates.map((template) => (
+                    <Card key={template.id} className="flex flex-col">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{template.name}</CardTitle>
+                            <CardDescription className="mt-1">
+                              {template.category && (
+                                <Badge className="bg-green-100 text-green-800">
+                                  {template.category}
+                                </Badge>
+                              )}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex-1 flex flex-col">
+                        <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
+                          <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
+                            {template.content.length > 200
+                              ? template.content.substring(0, 200) + '...'
+                              : template.content}
+                          </pre>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleCopy(template.content)}
+                          >
+                            <Copy className="h-3 w-3 mr-1" />
+                            Copiar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(template)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(template.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
-        <TabsContent value="laudos" className="mt-6">
-          {filteredTemplates.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileCheck className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600">Nenhum laudo encontrado</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {templates.filter(t => t.type === 'declaracao').length === 0
-                    ? 'Crie seu primeiro modelo de laudo'
-                    : 'Tente ajustar os filtros de busca'}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
-                <Card key={template.id} className="flex flex-col">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {template.category && (
-                            <Badge className="bg-purple-100 text-purple-800">
-                              {template.category}
-                            </Badge>
-                          )}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
-                      <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
-                        {template.content.length > 200
-                          ? template.content.substring(0, 200) + '...'
-                          : template.content}
-                      </pre>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleCopy(template.content)}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copiar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(template)}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(template.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+            <TabsContent value="laudos" className="mt-6">
+              {filteredTemplates.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <FileCheck className="h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-600">Nenhum laudo encontrado</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {templates.filter(t => t.type === 'declaracao').length === 0
+                        ? 'Crie seu primeiro modelo de laudo'
+                        : 'Tente ajustar os filtros de busca'}
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredTemplates.map((template) => (
+                    <Card key={template.id} className="flex flex-col">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{template.name}</CardTitle>
+                            <CardDescription className="mt-1">
+                              {template.category && (
+                                <Badge className="bg-purple-100 text-purple-800">
+                                  {template.category}
+                                </Badge>
+                              )}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex-1 flex flex-col">
+                        <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
+                          <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
+                            {template.content.length > 200
+                              ? template.content.substring(0, 200) + '...'
+                              : template.content}
+                          </pre>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleCopy(template.content)}
+                          >
+                            <Copy className="h-3 w-3 mr-1" />
+                            Copiar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(template)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(template.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
-        <TabsContent value="editor_receitas" className="mt-6 print:mt-0 print:border-none">
-          <PrescriptionEditor templates={templates} />
-        </TabsContent>
-      </Tabs>
+          </Tabs>
+        </>
+      )}
 
       {/* Modal de Edição */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Printer, Pill } from 'lucide-react';
+import { Search, Plus, Printer, Pill, Settings } from 'lucide-react';
 import { DocumentTemplate } from './DocumentsSection';
 import medicationsData from '@/data/medications.json';
 import { format } from 'date-fns';
@@ -21,9 +21,10 @@ interface Medication {
 
 interface PrescriptionEditorProps {
     templates?: DocumentTemplate[];
+    onOpenManager?: () => void;
 }
 
-export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) {
+export function PrescriptionEditor({ templates = [], onOpenManager }: PrescriptionEditorProps) {
     const [patientName, setPatientName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [prescriptionContent, setPrescriptionContent] = useState('');
@@ -109,11 +110,19 @@ export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) 
         <div className="flex flex-col md:flex-row gap-6 h-full print:block print:w-full print:h-auto">
             {/* Lado Esquerdo - Controles (Não aparece na impressão) */}
             <div className="w-full md:w-1/3 flex flex-col gap-6 print:hidden">
-                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                    <h2 className="text-lg font-semibold text-cinza-escuro mb-4 flex items-center gap-2">
-                        <Pill className="h-5 w-5 text-medical-primary" />
-                        Editor de Receita
-                    </h2>
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex-grow">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-semibold text-cinza-escuro flex items-center gap-2">
+                            <Pill className="h-5 w-5 text-medical-primary" />
+                            Editor de Receita
+                        </h2>
+                        {onOpenManager && (
+                            <Button variant="outline" size="sm" onClick={onOpenManager} className="text-gray-600 hover:text-medical-primary text-xs h-8">
+                                <Settings className="h-3 w-3 mr-1.5" />
+                                Modelos
+                            </Button>
+                        )}
+                    </div>
 
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
