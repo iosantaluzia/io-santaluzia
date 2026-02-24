@@ -208,14 +208,13 @@ export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) 
             {/* Lado Direito - Visualização do Documento e Impressão */}
             <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block">
                 {/* Papel (A4 Aspect Ratio) */}
-                <div id="prescription-print-area" className="relative bg-white w-full max-w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden">
+                <div id="prescription-print-area" className="relative bg-white w-full max-w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden print:overflow-visible">
 
                     {/* Marca d'água no fundo da página inteira */}
-                    <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5">
+                    <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5 print:overflow-hidden">
                         <img src="/uploads/circlebg.png" alt="" className="w-[85%] max-w-lg object-contain" />
                     </div>
-
-                    <div className="relative z-10 flex flex-col h-full flex-grow p-10 md:pt-14 md:pb-8 md:px-14 print:pt-14 print:pb-8 print:px-14">
+                    <div className="relative z-10 flex flex-col h-full flex-grow p-10 px-14 md:px-20 print:p-14 print:px-14">
                         {/* Cabeçalho do Documento */}
                         <div className="flex flex-col items-center mb-10 w-full">
                             <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-[120px] object-contain mb-3" />
@@ -223,7 +222,7 @@ export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) 
                                 • Córnea • Catarata • Ceratocone • Lentes de Contato<br />
                                 • Cirurgia Refrativa • Oftalmopediatria
                             </p>
-                            <div className="w-full h-[1.5px] bg-[#857053] mt-5"></div>
+                            <div className="w-full border-b-[1.5px] border-[#857053] mt-5"></div>
                         </div>
 
                         {/* Corpo da Receita */}
@@ -256,7 +255,7 @@ export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) 
                             </div>
 
                             {/* Linha Fina Dourada/Marrom do rodapé */}
-                            <div className="w-full h-[1.5px] bg-[#857053] mb-4"></div>
+                            <div className="w-full border-t-[1.5px] border-[#857053] mb-4"></div>
 
                             <div className="flex justify-between w-full text-[12px] text-[#6b583f] font-medium tracking-tight px-1">
                                 <div className="flex flex-col leading-snug">
