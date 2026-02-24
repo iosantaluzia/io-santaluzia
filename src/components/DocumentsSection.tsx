@@ -270,7 +270,7 @@ export function DocumentsSection() {
               </p>
             </div>
           </div>
-          <PrescriptionEditor templates={templates} onOpenManager={() => setIsManagingMode(true)} />
+          <PrescriptionEditor templates={templates} onOpenManager={() => setIsManagingMode(true)} previewScale={0.8} />
         </>
       ) : (
         <>

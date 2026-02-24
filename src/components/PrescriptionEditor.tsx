@@ -25,9 +25,10 @@ interface PrescriptionEditorProps {
     onOpenManager?: () => void;
     initialPatientName?: string;
     isCompact?: boolean;
+    previewScale?: number;
 }
 
-export function PrescriptionEditor({ templates = [], onOpenManager, initialPatientName = '', isCompact = false }: PrescriptionEditorProps) {
+export function PrescriptionEditor({ templates = [], onOpenManager, initialPatientName = '', isCompact = false, previewScale = 1 }: PrescriptionEditorProps) {
     const [patientName, setPatientName] = useState(initialPatientName);
     const [fetchedTemplates, setFetchedTemplates] = useState<DocumentTemplate[]>([]);
 
@@ -127,9 +128,9 @@ export function PrescriptionEditor({ templates = [], onOpenManager, initialPatie
     const currentDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
 
     return (
-        <div className={`flex flex-col ${isCompact ? '' : 'md:flex-row'} gap-6 h-full print:block print:w-full print:h-auto`}>
-            {/* Lado Esquerdo - Controles (Não aparece na impressão) */}
-            <div className={`w-full ${isCompact ? 'md:w-full' : 'md:w-1/3'} flex flex-col gap-6 print:hidden`}>
+        <div className={`flex flex-col ${isCompact ? '' : 'md:flex-row'} gap-6 h-full print:block print:w-full print:h-auto overflow-y-auto`}>
+            {/* Controles (Não aparece na impressão) */}
+            <div className={`w-full ${isCompact ? 'md:w-full' : 'md:w-1/3'} flex flex-col gap-6 print:hidden shrink-0`}>
                 <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex-grow">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-semibold text-cinza-escuro flex items-center gap-2">
@@ -145,7 +146,7 @@ export function PrescriptionEditor({ templates = [], onOpenManager, initialPatie
                     </div>
 
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className={`grid grid-cols-1 ${isCompact ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
                             <div className="space-y-1">
                                 <Label>Tipo de Documento</Label>
                                 <Select value={documentType} onValueChange={(val: any) => {
@@ -217,8 +218,8 @@ export function PrescriptionEditor({ templates = [], onOpenManager, initialPatie
                                                     <span className="font-semibold text-gray-900">{med.nome_comercial}</span>
                                                     <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{med.categoria}</span>
                                                 </div>
-                                                <div className="text-xs text-gray-600 truncate">{med.principio_ativo}</div>
-                                                <div className="text-xs text-gray-500 truncate mt-0.5">{med.posologia_padrao}</div>
+                                                <div className="text-xs text-gray-600 mt-0.5">{med.principio_ativo}</div>
+                                                <div className="text-xs text-gray-500 mt-1 leading-relaxed">{med.posologia_padrao}</div>
                                             </li>
                                         ))}
                                     </ul>
@@ -234,10 +235,17 @@ export function PrescriptionEditor({ templates = [], onOpenManager, initialPatie
                 </div>
             </div>
 
-            {/* Lado Direito - Visualização do Documento e Impressão */}
-            <div className={`w-full ${isCompact ? 'md:w-full max-h-[400px]' : 'md:w-2/3'} bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block`}>
+            {/* Lado Direito / Embaixo - Visualização do Documento e Impressão */}
+            <div className={`w-full ${isCompact ? 'md:w-full flex-grow' : 'md:w-2/3'} bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block`}>
                 {/* Papel (A4 Aspect Ratio) */}
-                <div className={`${isCompact ? 'transform scale-[0.6] origin-top mb-[-40%]' : ''} print:transform-none print:mb-0`}>
+                <div
+                    className={`${isCompact ? 'transform scale-[0.6] sm:scale-[0.7] lg:scale-[0.8] origin-top mb-[-40%] sm:mb-[-30%] lg:mb-[-20%]' : ''} print:transform-none print:mb-0`}
+                    style={!isCompact && previewScale !== 1 ? {
+                        transform: `scale(${previewScale})`,
+                        transformOrigin: 'top center',
+                        marginBottom: `${(previewScale - 1) * 100 * 2.97}px`
+                    } : undefined}
+                >
                     <div id="prescription-print-area" className="relative bg-white w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden print:overflow-visible print:min-h-[26cm]">
 
                         {/* Marca d'água no fundo da página inteira */}

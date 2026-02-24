@@ -11,14 +11,13 @@ import { toast } from 'sonner';
 import { PatientConsultations } from './PatientConsultations';
 import { getDoctorFullName } from '@/utils/doctorNames';
 import { calculateDetailedAge } from '@/utils/formatters';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Pill, FileCheck } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Pill } from 'lucide-react';
 
 // Sub-components
 import { ConsultationPatientSummary } from './pacientes/ConsultationPatientSummary';
 import { PatientExamsList } from './pacientes/PatientExamsList';
 import { PrescriptionEditor } from './PrescriptionEditor';
-
 
 interface Patient {
   id: string;
@@ -74,7 +73,7 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
   // Cronômetro da consulta
   const [startTime] = useState<Date>(new Date());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
     if (!isTimerRunning) return;
@@ -237,7 +236,6 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             consultation_date: consultationDate,
             anamnesis: consultationText || null,
             status: 'completed',
-            saved_at: savedAt,
             created_by: appUser?.username || 'sistema'
           });
 
@@ -316,10 +314,10 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
               <div className="flex items-center gap-3">
                 <Label className="text-sm font-semibold text-gray-700 block">Consulta</Label>
                 <div
-                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium font-mono border transition-colors ${isTimerRunning ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}
+                  className="flex items-center gap-1.5 text-sm font-mono text-gray-600"
                   title={isTimerRunning ? "Duração da consulta em andamento" : "Duração total da consulta"}
                 >
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-4 w-4 text-gray-400" />
                   {formatTimer(elapsedSeconds)}
                 </div>
               </div>
@@ -352,28 +350,27 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
             />
           </div>
 
-          <div className="lg:col-span-1 h-full flex flex-col">
-            <Tabs defaultValue="exames" className="w-full h-full flex flex-col">
-              <TabsList className="w-full grid grid-cols-2 mb-2">
-                <TabsTrigger value="exames" className="flex items-center gap-2 text-xs">
-                  <TestTube className="h-3 w-3" /> Exames Cadastrados
-                </TabsTrigger>
-                <TabsTrigger value="receita" className="flex items-center gap-2 text-xs">
-                  <Pill className="h-3 w-3" /> Gerar Receita
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="exames" className="flex-1 mt-0">
-                <PatientExamsList
-                  exams={exams}
-                  loading={loadingExams}
-                />
-              </TabsContent>
-
-              <TabsContent value="receita" className="flex-1 mt-0 bg-gray-50 rounded-lg border border-gray-200 p-4 h-full">
-                <PrescriptionEditor initialPatientName={patient.name} isCompact={true} />
-              </TabsContent>
-            </Tabs>
+          <div className="lg:col-span-1 flex flex-col">
+            <PatientExamsList
+              exams={exams}
+              loading={loadingExams}
+              patientId={patient.id}
+              generateReceiptButton={
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full bg-medical-primary hover:bg-medical-secondary text-white py-3 flex items-center gap-2 rounded-lg shadow-sm text-sm">
+                      <Pill className="h-4 w-4" />
+                      Gerar Receita / Documento
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-[1300px] w-[95vw] h-[90vh] p-0 border-none bg-transparent shadow-none [&>button]:right-6 [&>button]:top-6 [&>button]:text-gray-500 [&>button]:z-[60] [&>button]:bg-white [&>button]:border [&>button]:rounded-full [&>button]:w-8 [&>button]:h-8">
+                    <div className="w-full h-full bg-gray-100 rounded-xl shadow-2xl overflow-hidden relative">
+                      <PrescriptionEditor initialPatientName={patient.name} isCompact={false} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              }
+            />
           </div>
         </div>
       </form>

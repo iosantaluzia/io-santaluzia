@@ -2,9 +2,9 @@
     {
         "id": "1",
         "nome_comercial": "Vigamox",
-        "principio_ativo": "Cloridrato de Moxifloxacino",
+        "principio_ativo": "Cloridrato de Moxifloxacino 0,5%",
         "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
-        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 (uma) gota no olho afetado de 8 em 8 horas.",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 3 vezes ao dia por 7 dias.",
         "categoria": "Antibiótico"
     },
     {
@@ -28,55 +28,895 @@
         "nome_comercial": "Optive",
         "principio_ativo": "Carmelose Sódica + Glicerina",
         "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
-        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s), conforme necessário para alívio dos sintomas de olho seco.",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) conforme necessário para alívio dos sintomas de olho seco.",
         "categoria": "Lubrificante"
     },
     {
         "id": "5",
-        "nome_comercial": "Systane UL",
-        "principio_ativo": "Polietilenoglicol + Propilenoglicol",
-        "apresentacao": "Frasco de 15ml",
+        "nome_comercial": "Systane Ultra",
+        "principio_ativo": "Polietilenoglicol 400 + Propilenoglicol",
+        "apresentacao": "Frasco de 10ml ou monodoses",
         "posologia_padrao": "Uso Tópico Ocular: Instilar 1 ou 2 gotas no(s) olho(s) afetado(s) sempre que necessário.",
         "categoria": "Lubrificante"
     },
     {
         "id": "6",
+        "nome_comercial": "Systane Balance",
+        "principio_ativo": "Propilenoglicol 0,6%",
+        "apresentacao": "Frasco de 10ml (Emulsão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas em cada olho conforme necessário. Agitar bem antes de usar.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "7",
+        "nome_comercial": "Tears Naturale",
+        "principio_ativo": "Dextrana 70 + Hidroxipropilmetilcelulose 0,3%",
+        "apresentacao": "Frasco de 15ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) conforme necessidade.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "8",
+        "nome_comercial": "Refresh Tears",
+        "principio_ativo": "Carmelose Sódica 0,5%",
+        "apresentacao": "Frasco de 15ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas em cada olho afetado conforme necessário.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "9",
+        "nome_comercial": "Lacrifilm",
+        "principio_ativo": "Polivinilálcool 1,4%",
+        "apresentacao": "Frasco de 15ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 3 a 4 vezes ao dia ou conforme necessário.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "10",
+        "nome_comercial": "Hipersol",
+        "principio_ativo": "Hialuronato de Sódio 0,3%",
+        "apresentacao": "Frasco de 10ml (Solução Oftálmica Sem Conservantes)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho de 3 a 6 vezes ao dia.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "11",
         "nome_comercial": "Zypred",
-        "principio_ativo": "Gatifloxacino + Prednisolona",
+        "principio_ativo": "Gatifloxacino 0,3% + Prednisolona 1%",
         "apresentacao": "Frasco de 6ml",
         "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 4 vezes ao dia por 7 dias.",
         "categoria": "Corticoide + Antibiótico"
     },
     {
-        "id": "7",
+        "id": "12",
         "nome_comercial": "Pred Fort",
         "principio_ativo": "Acetato de Prednisolona 1%",
-        "apresentacao": "Frasco de 5ml",
-        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no saco conjuntival 2 a 4 vezes por dia. Durante 24 a 48 horas iniciais, a posologia pode ser aumentada com segurança para 2 gotas a cada hora.",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no saco conjuntival 2 a 4 vezes por dia. Nas primeiras 24-48h pode-se usar 1 gota a cada hora.",
         "categoria": "Corticoide"
     },
     {
-        "id": "8",
+        "id": "13",
+        "nome_comercial": "Ozurdex",
+        "principio_ativo": "Dexametasona 0,7 mg (implante intravítreo)",
+        "apresentacao": "Implante intravítreo biodegradável 0,7mg",
+        "posologia_padrao": "Uso Intravítreo: 1 implante no olho afetado. Reaplicação pode ser considerada após 6 meses.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "14",
+        "nome_comercial": "Combinil-Duo",
+        "principio_ativo": "Tobramicina 3mg/ml + Dexametasona 1mg/ml",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) a cada 4 a 6 horas.",
+        "categoria": "Corticoide + Antibiótico"
+    },
+    {
+        "id": "15",
+        "nome_comercial": "Tobradex",
+        "principio_ativo": "Tobramicina 0,3% + Dexametasona 0,1%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho afetado a cada 4 a 6 horas. Agitar bem antes de usar.",
+        "categoria": "Corticoide + Antibiótico"
+    },
+    {
+        "id": "16",
+        "nome_comercial": "Dexaflox",
+        "principio_ativo": "Dexametasona 1mg/ml + Levofloxacino 5mg/ml",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 4 vezes ao dia.",
+        "categoria": "Corticoide + Antibiótico"
+    },
+    {
+        "id": "17",
         "nome_comercial": "Combigan",
-        "principio_ativo": "Brimonidina + Timolol",
-        "apresentacao": "Frasco de 5ml",
-        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s), 2 vezes ao dia com intervalo de aproximadamente 12 horas.",
+        "principio_ativo": "Tartarato de Brimonidina 0,2% + Timolol 0,5%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 2 vezes ao dia, de manhã e à noite, com intervalo de 12 horas.",
         "categoria": "Antiglaucomatoso"
     },
     {
-        "id": "9",
-        "nome_comercial": "Nepodex",
-        "principio_ativo": "Nepafenaco 1mg/ml",
-        "apresentacao": "Frasco de 5ml",
-        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 3 vezes ao dia.",
-        "categoria": "Anti-inflamatório Não Esteroide (AINE)"
+        "id": "18",
+        "nome_comercial": "Lumigan",
+        "principio_ativo": "Bimatoprosta 0,01%",
+        "apresentacao": "Frasco de 3ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia, preferencialmente à noite.",
+        "categoria": "Antiglaucomatoso"
     },
     {
-        "id": "10",
+        "id": "19",
+        "nome_comercial": "Xalatan",
+        "principio_ativo": "Latanoprosta 0,005%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia, preferencialmente à noite.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "20",
+        "nome_comercial": "Travatan",
+        "principio_ativo": "Travoprosta 0,004%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia, à noite.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "21",
+        "nome_comercial": "Tapcom",
+        "principio_ativo": "Travoprosta 0,004% + Timolol 0,5%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia, preferencialmente à noite.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "22",
+        "nome_comercial": "Ganfort",
+        "principio_ativo": "Bimatoprosta 0,03% + Timolol 0,5%",
+        "apresentacao": "Frasco de 3ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia, pela manhã.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "23",
+        "nome_comercial": "Xalacom",
+        "principio_ativo": "Latanoprosta 0,005% + Timolol 0,5%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia, pela manhã.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "24",
+        "nome_comercial": "Timoptol",
+        "principio_ativo": "Maleato de Timolol 0,5%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 2 vezes ao dia.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "25",
+        "nome_comercial": "Alphagan P",
+        "principio_ativo": "Tartarato de Brimonidina 0,1% ou 0,15%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 3 vezes ao dia com intervalo de 8 horas.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "26",
+        "nome_comercial": "Trusopt",
+        "principio_ativo": "Cloridrato de Dorzolamida 2%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 3 vezes ao dia.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "27",
+        "nome_comercial": "Cosopt",
+        "principio_ativo": "Dorzolamida 2% + Timolol 0,5%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 2 vezes ao dia.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "28",
+        "nome_comercial": "Azarga",
+        "principio_ativo": "Brinzolamida 1% + Timolol 0,5%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 2 vezes ao dia. Agitar bem antes de usar.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "29",
+        "nome_comercial": "Rhopressa",
+        "principio_ativo": "Netarsudila 0,02%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia à noite.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "30",
+        "nome_comercial": "Vyzulta",
+        "principio_ativo": "Latanoprosteno Bunod 0,024%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) uma vez ao dia à noite.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "31",
+        "nome_comercial": "Nepodex",
+        "principio_ativo": "Nepafenaco 0,1%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 3 vezes ao dia. Iniciar 1 dia antes da cirurgia e manter por até 14 dias.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "32",
+        "nome_comercial": "Nevanac",
+        "principio_ativo": "Nepafenaco 0,3%",
+        "apresentacao": "Frasco de 3ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 1 vez ao dia. Iniciar 1 dia antes da cirurgia e manter por até 14 dias.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "33",
+        "nome_comercial": "Acular",
+        "principio_ativo": "Cetorolaco de Trometamina 0,5%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 4 vezes ao dia.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "34",
+        "nome_comercial": "Diclofen",
+        "principio_ativo": "Diclofenaco Sódico 0,1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 4 vezes ao dia.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "35",
         "nome_comercial": "Lovox",
-        "principio_ativo": "Levofloxacino 5mg/ml",
-        "apresentacao": "Frasco de 5ml",
-        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) a cada 2 horas no primeiro dia, em seguida a cada 4 horas do 3º ao 7º dia.",
+        "principio_ativo": "Levofloxacino 0,5%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado a cada 2 horas no 1º e 2º dia (acordado); depois a cada 4 horas do 3º ao 7º dia.",
         "categoria": "Antibiótico"
+    },
+    {
+        "id": "36",
+        "nome_comercial": "Ciloxan",
+        "principio_ativo": "Cloridrato de Ciprofloxacino 0,3%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (conjuntivite bacteriana): Instilar 1 a 2 gotas no olho afetado a cada 2 horas durante o dia por 2 dias; depois 1 a 2 gotas a cada 4 horas nos próximos 5 dias.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "37",
+        "nome_comercial": "Tobrex",
+        "principio_ativo": "Tobramicina 0,3%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho afetado a cada 4 horas. Nos casos graves, usar 2 gotas a cada hora.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "38",
+        "nome_comercial": "Zymar",
+        "principio_ativo": "Gatifloxacino 0,3%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado a cada 2 horas enquanto acordado (máx. 8 vezes/dia) no 1º dia; depois 1 gota 4 vezes/dia do 2º ao 7º dia.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "39",
+        "nome_comercial": "Zymaxid",
+        "principio_ativo": "Gatifloxacino 0,5%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado a cada 2 horas enquanto acordado no 1º dia (máx. 8x); depois 1 gota 2 vezes ao dia do 2º ao 7º dia.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "40",
+        "nome_comercial": "Floxatil",
+        "principio_ativo": "Ofloxacino 0,3%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho afetado a cada 2 a 4 horas por 2 dias; depois a cada 4 horas pelos próximos 5 dias.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "41",
+        "nome_comercial": "Gentrin",
+        "principio_ativo": "Sulfato de Gentamicina 0,3%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho afetado a cada 4 horas. Nos casos graves, usar de hora em hora.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "42",
+        "nome_comercial": "Ocuflox",
+        "principio_ativo": "Ofloxacino 0,3%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho afetado conforme protocolo de uso.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "43",
+        "nome_comercial": "Zovirax Oftálmico",
+        "principio_ativo": "Aciclovir 3%",
+        "apresentacao": "Bisnaga de 4,5g (Pomada Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Aplicar uma fita de aproximadamente 1cm de pomada na conjuntiva inferior do olho afetado 5 vezes ao dia a cada 4 horas. Manter por pelo menos 3 dias após cicatrização.",
+        "categoria": "Antiviral"
+    },
+    {
+        "id": "44",
+        "nome_comercial": "Aciclovir Comprimido",
+        "principio_ativo": "Aciclovir 400mg ou 800mg",
+        "apresentacao": "Caixa com 25 comprimidos",
+        "posologia_padrao": "Uso Oral (Herpes Zoster Oftálmico): Aciclovir 800mg 5 vezes ao dia por 7 a 10 dias. Iniciar o mais breve possível após o surgimento dos sintomas.",
+        "categoria": "Antiviral"
+    },
+    {
+        "id": "45",
+        "nome_comercial": "Valtrex",
+        "principio_ativo": "Valaciclovir 500mg",
+        "apresentacao": "Caixa com 42 comprimidos",
+        "posologia_padrao": "Uso Oral (Herpes Zoster Oftálmico): 1g (dois comprimidos de 500mg) 3 vezes ao dia por 7 dias.",
+        "categoria": "Antiviral"
+    },
+    {
+        "id": "46",
+        "nome_comercial": "Natacyn",
+        "principio_ativo": "Natamicina 5%",
+        "apresentacao": "Frasco de 15ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (ceratite fúngica): Instilar 1 gota a cada 1 a 2 horas por 3 a 4 dias; depois reduzir para 6 a 8 vezes ao dia.",
+        "categoria": "Antifúngico"
+    },
+    {
+        "id": "47",
+        "nome_comercial": "Alocril",
+        "principio_ativo": "Nedocromil Sódico 2%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas em cada olho 2 vezes ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "48",
+        "nome_comercial": "Zaditen",
+        "principio_ativo": "Fumarato de Cetotifeno 0,025%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho 2 vezes ao dia, de manhã e à noite.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "49",
+        "nome_comercial": "Patanol",
+        "principio_ativo": "Olopatadina 0,1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho afetado 2 vezes ao dia com intervalo de 6 a 8 horas.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "50",
+        "nome_comercial": "Pataday",
+        "principio_ativo": "Olopatadina 0,2%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho afetado 1 vez ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "51",
+        "nome_comercial": "Lastacaft",
+        "principio_ativo": "Alcaftadina 0,25%",
+        "apresentacao": "Frasco de 3ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho 1 vez ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "52",
+        "nome_comercial": "Bepreve",
+        "principio_ativo": "Cloridrato de Bepotastina 1,5%",
+        "apresentacao": "Frasco de 10ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho afetado 2 vezes ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "53",
+        "nome_comercial": "Livostin",
+        "principio_ativo": "Cloridrato de Levocabastina 0,05%",
+        "apresentacao": "Frasco de 4ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho afetado 4 vezes ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "54",
+        "nome_comercial": "Emadine",
+        "principio_ativo": "Difumarato de Emedastina 0,05%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) até 4 vezes ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "55",
+        "nome_comercial": "Cromoliocalm",
+        "principio_ativo": "Cromoglicato de Sódio 4%",
+        "apresentacao": "Frasco de 10ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 4 a 6 vezes ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "56",
+        "nome_comercial": "Midriacyl",
+        "principio_ativo": "Cloridrato de Tropicamida 1%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (midríase para exame): Instilar 1 a 2 gotas no(s) olho(s); pode repetir após 5 minutos. Efeito em 15-30 minutos.",
+        "categoria": "Midriático / Cicloplégico"
+    },
+    {
+        "id": "57",
+        "nome_comercial": "Tropicamida 0,5%",
+        "principio_ativo": "Cloridrato de Tropicamida 0,5%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho 15 a 20 minutos antes do exame. Pode repetir após 5 minutos.",
+        "categoria": "Midriático / Cicloplégico"
+    },
+    {
+        "id": "58",
+        "nome_comercial": "Ciclolux",
+        "principio_ativo": "Cloridrato de Ciclopentolato 1%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (cicloplégico para refração): Instilar 1 gota; repetir após 5 e 10 minutos. Aguardar 30 a 60 minutos.",
+        "categoria": "Midriático / Cicloplégico"
+    },
+    {
+        "id": "59",
+        "nome_comercial": "Cilpar",
+        "principio_ativo": "Sulfato de Atropina 1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 1 a 3 vezes ao dia conforme necessidade clínica.",
+        "categoria": "Midriático / Cicloplégico"
+    },
+    {
+        "id": "60",
+        "nome_comercial": "Fenilefrina 2,5%",
+        "principio_ativo": "Cloridrato de Fenilefrina 2,5%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (midríase para exame de segmento posterior): Instilar 1 gota; aguardar 10-15 minutos. Pode ser associado à tropicamida.",
+        "categoria": "Midriático / Cicloplégico"
+    },
+    {
+        "id": "61",
+        "nome_comercial": "Floromet",
+        "principio_ativo": "Fluorometolona 0,1%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 2 a 4 vezes ao dia.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "62",
+        "nome_comercial": "FML",
+        "principio_ativo": "Acetato de Fluorometolona 0,1%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no saco conjuntival inferior 2 a 4 vezes ao dia. Nos primeiros 24-48h pode-se aumentar para 1 gota a cada 2 horas.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "63",
+        "nome_comercial": "Lotemax",
+        "principio_ativo": "Loteprednol Etabonato 0,5%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 4 vezes ao dia. Agitar bem antes de usar.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "64",
+        "nome_comercial": "Dexapos",
+        "principio_ativo": "Dexametasona 0,1% (sem conservante)",
+        "apresentacao": "Colírio monodose 0,5ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no olho afetado 3 a 6 vezes ao dia conforme prescrição.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "65",
+        "nome_comercial": "Vitresolve",
+        "principio_ativo": "Ranibizumabe 10mg/ml",
+        "apresentacao": "Frasco-ampola para injeção intravítrea",
+        "posologia_padrao": "Uso Intravítreo: 0,5mg (0,05ml) por injeção no olho afetado. Administração mensal por 3 meses e depois conforme necessidade clínica.",
+        "categoria": "Anti-VEGF"
+    },
+    {
+        "id": "66",
+        "nome_comercial": "Lucentis",
+        "principio_ativo": "Ranibizumabe 10mg/ml",
+        "apresentacao": "Frasco-ampola 0,23ml para injeção intravítrea",
+        "posologia_padrao": "Uso Intravítreo: 0,5mg (0,05ml) por injeção. Dose mensal de ataque por 3 meses mínimo; depois conforme protocolo.",
+        "categoria": "Anti-VEGF"
+    },
+    {
+        "id": "67",
+        "nome_comercial": "Eylia",
+        "principio_ativo": "Aflibercepte 40mg/ml",
+        "apresentacao": "Frasco-ampola para injeção intravítrea",
+        "posologia_padrao": "Uso Intravítreo: 2mg (0,05ml) por injeção. Protocolo de injeção mensal por 3 meses; depois a cada 2 meses.",
+        "categoria": "Anti-VEGF"
+    },
+    {
+        "id": "68",
+        "nome_comercial": "Avastin (off-label)",
+        "principio_ativo": "Bevacizumabe 25mg/ml",
+        "apresentacao": "Frasco para injeção intravítrea (uso off-label)",
+        "posologia_padrao": "Uso Intravítreo (off-label): 1,25mg (0,05ml) por injeção no olho afetado. Frequência conforme protocolo e resposta clínica.",
+        "categoria": "Anti-VEGF"
+    },
+    {
+        "id": "69",
+        "nome_comercial": "Vabysmo",
+        "principio_ativo": "Faricimabe 120mg/ml",
+        "apresentacao": "Frasco-ampola para injeção intravítrea",
+        "posologia_padrao": "Uso Intravítreo: 6mg (0,05ml) por injeção. Quatro injeções mensais de ataque; depois período de tratamento flexível até 16 semanas.",
+        "categoria": "Anti-VEGF"
+    },
+    {
+        "id": "70",
+        "nome_comercial": "Restasis",
+        "principio_ativo": "Ciclosporina 0,05%",
+        "apresentacao": "Emulsão Oftálmica (monodoses)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho 2 vezes ao dia com intervalo de 12 horas. Agitar bem antes de usar. Mínimo 6 meses para resultado.",
+        "categoria": "Imunossupressor / Olho Seco"
+    },
+    {
+        "id": "71",
+        "nome_comercial": "Ikervis",
+        "principio_ativo": "Ciclosporina 1mg/ml",
+        "apresentacao": "Emulsão Oftálmica (colírio)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 1 vez ao dia à noite. Remover lentes de contato antes de usar.",
+        "categoria": "Imunossupressor / Olho Seco"
+    },
+    {
+        "id": "72",
+        "nome_comercial": "Eysuvis",
+        "principio_ativo": "Loteprednol Etabonato 0,25%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (olho seco agudo): Instilar 1 a 2 gotas em cada olho 4 vezes ao dia por 2 semanas.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "73",
+        "nome_comercial": "Xiidra",
+        "principio_ativo": "Lifitegraste 5%",
+        "apresentacao": "Solução Oftálmica (monodoses)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho 2 vezes ao dia com intervalo de 12 horas.",
+        "categoria": "Imunossupressor / Olho Seco"
+    },
+    {
+        "id": "74",
+        "nome_comercial": "Prednisona",
+        "principio_ativo": "Prednisona 20mg ou 5mg",
+        "apresentacao": "Caixa com 20 comprimidos",
+        "posologia_padrao": "Uso Oral: Dose variável conforme indicação. Para uveíte ou neurite óptica: 1 a 2mg/kg/dia (máximo 80mg/dia) por período determinado com retirada gradual.",
+        "categoria": "Corticoide Sistêmico"
+    },
+    {
+        "id": "75",
+        "nome_comercial": "Medrol",
+        "principio_ativo": "Metilprednisolona 4mg ou 16mg",
+        "apresentacao": "Caixa com 20 comprimidos",
+        "posologia_padrao": "Uso Oral: Dose conforme indicação. Para condições oftalmológicas inflamatórias: conforme protocolo do médico.",
+        "categoria": "Corticoide Sistêmico"
+    },
+    {
+        "id": "76",
+        "nome_comercial": "Cetorolaco Oral",
+        "principio_ativo": "Cetorolaco de Trometamina 10mg",
+        "apresentacao": "Caixa com 20 comprimidos",
+        "posologia_padrao": "Uso Oral: 1 comprimido a cada 4 a 6 horas. Máximo 40mg/dia. Não usar por mais de 5 dias.",
+        "categoria": "Anti-inflamatório (AINE) Sistêmico"
+    },
+    {
+        "id": "77",
+        "nome_comercial": "Diamox",
+        "principio_ativo": "Acetazolamida 250mg",
+        "apresentacao": "Caixa com 24 comprimidos",
+        "posologia_padrao": "Uso Oral (glaucoma agudo ou crônico): 250mg 2 a 4 vezes ao dia. Dose a ser ajustada pelo médico.",
+        "categoria": "Antiglaucomatoso Sistêmico"
+    },
+    {
+        "id": "78",
+        "nome_comercial": "Pilocarpina 2%",
+        "principio_ativo": "Nitrato de Pilocarpina 2%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 3 a 4 vezes ao dia.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "79",
+        "nome_comercial": "Mannitol IV",
+        "principio_ativo": "Manitol 20% (IV)",
+        "apresentacao": "Bolsa de 250ml (Solução para Infusão Intravenosa)",
+        "posologia_padrao": "Uso Intravenoso (emergência glaucoma agudo): 1 a 1,5g/kg por via IV em 30 a 60 minutos. Administração hospitalar.",
+        "categoria": "Antiglaucomatoso Sistêmico"
+    },
+    {
+        "id": "80",
+        "nome_comercial": "Glicerina Oral",
+        "principio_ativo": "Glicerina 50% Solução Oral",
+        "apresentacao": "Frasco de 500ml",
+        "posologia_padrao": "Uso Oral (emergência glaucoma agudo): 1 a 1,5g/kg diluída em suco de frutas, conforme orientação médica.",
+        "categoria": "Antiglaucomatoso Sistêmico"
+    },
+    {
+        "id": "81",
+        "nome_comercial": "Betadine Ocular",
+        "principio_ativo": "Iodo-Povidona 5% (Solução Oftálmica)",
+        "apresentacao": "Frasco de 30ml",
+        "posologia_padrao": "Uso Tópico Ocular (antissepsia pré-cirúrgica ou conjuntivite viral): Aplicar no saco conjuntival conforme protocolo cirúrgico ou 1 a 2 gotas 4 vezes ao dia.",
+        "categoria": "Antisséptico"
+    },
+    {
+        "id": "82",
+        "nome_comercial": "Tetracaína 0,5%",
+        "principio_ativo": "Cloridrato de Tetracaína 0,5%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (anestesia): Instilar 1 a 2 gotas no olho para procedimentos. Não usar repetidamente para alívio de dor.",
+        "categoria": "Anestésico Tópico"
+    },
+    {
+        "id": "83",
+        "nome_comercial": "Anestalcon",
+        "principio_ativo": "Cloridrato de Proximetacaína 0,5%",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (anestesia): Instilar 1 a 2 gotas no olho antes de procedimentos diagnósticos ou cirúrgicos.",
+        "categoria": "Anestésico Tópico"
+    },
+    {
+        "id": "84",
+        "nome_comercial": "Fluoresceína 1%",
+        "principio_ativo": "Fluoresceína Sódica 1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica) ou tiras impregnadas",
+        "posologia_padrao": "Uso Tópico Ocular (diagnóstico): Instilar 1 gota ou umedecer a tira de fluoresceína; observar na lâmpada de fenda com luz azul cobalto.",
+        "categoria": "Diagnóstico"
+    },
+    {
+        "id": "85",
+        "nome_comercial": "Rosa Bengala",
+        "principio_ativo": "Rosa Bengala 1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica) ou tiras impregnadas",
+        "posologia_padrao": "Uso Tópico Ocular (diagnóstico): Instilar 1 gota para avaliação de células mortas na superfície ocular, especialmente em ceratoconjuntivite seca.",
+        "categoria": "Diagnóstico"
+    },
+    {
+        "id": "86",
+        "nome_comercial": "Viscoat",
+        "principio_ativo": "Condroitim Sulfato + Hialuronato de Sódio",
+        "apresentacao": "Seringa de 0,5ml para uso intraocular",
+        "posologia_padrao": "Uso Intraocular (viscoelástico cirúrgico): Injetar câmara anterior durante cirurgia de catarata ou outros procedimentos intraoculares.",
+        "categoria": "Viscoelástico"
+    },
+    {
+        "id": "87",
+        "nome_comercial": "ProVisc",
+        "principio_ativo": "Hialuronato de Sódio 1% (alta pureza)",
+        "apresentacao": "Seringa de 0,85ml para uso intraocular",
+        "posologia_padrao": "Uso Intraocular (viscoelástico cirúrgico): Injetar câmara anterior durante procedimentos cirúrgicos intraoculares.",
+        "categoria": "Viscoelástico"
+    },
+    {
+        "id": "88",
+        "nome_comercial": "Miostat",
+        "principio_ativo": "Carbacol 0,01%",
+        "apresentacao": "Ampola de 1,5ml para uso intraocular",
+        "posologia_padrao": "Uso Intraocular (cirúrgico): Irrigar a câmara anterior para miose intraoperatória após implante de LIO.",
+        "categoria": "Miótico Cirúrgico"
+    },
+    {
+        "id": "89",
+        "nome_comercial": "BSS Plus",
+        "principio_ativo": "Solução Salina Balanceada Tamponada (BSS+)",
+        "apresentacao": "Frasco de 250ml ou 500ml para irrigação intraocular",
+        "posologia_padrao": "Uso Intraocular (cirúrgico): Solução de irrigação para uso durante cirurgias intraoculares.",
+        "categoria": "Solução de Irrigação"
+    },
+    {
+        "id": "90",
+        "nome_comercial": "Ozurdex (Uveíte)",
+        "principio_ativo": "Dexametasona 0,7mg (implante intravítreo)",
+        "apresentacao": "Implante intravítreo biodegradável",
+        "posologia_padrao": "Uso Intravítreo (uveíte não infecciosa): 1 implante no vítreo do olho afetado. Reaplicar conforme necessidade clínica a cada 3-6 meses.",
+        "categoria": "Corticoide Intravítreo"
+    },
+    {
+        "id": "91",
+        "nome_comercial": "Luxturna",
+        "principio_ativo": "Voretigeno Neparvovece (Terapia Gênica)",
+        "apresentacao": "Solução para administração sub-retiniana",
+        "posologia_padrao": "Uso Sub-retiniano: Dose única bilateral (com intervalo de 6 a 18 dias entre olhos). Uso hospitalar especializado.",
+        "categoria": "Terapia Gênica"
+    },
+    {
+        "id": "92",
+        "nome_comercial": "Lipiflow",
+        "principio_ativo": "Tratamento por expressão térmica das glândulas de meibômio",
+        "apresentacao": "Sistema de aquecimento/massagem palpebral",
+        "posologia_padrao": "Procedimento ambulatorial: Sessão única de 12 minutos por olho para disfunção de glândula de meibômio.",
+        "categoria": "Tratamento Blefarite/Olho Seco"
+    },
+    {
+        "id": "93",
+        "nome_comercial": "Tobradex ST",
+        "principio_ativo": "Tobramicina 0,3% + Dexametasona 0,05% (gel)",
+        "apresentacao": "Frasco de 2,5ml (Gel Oftálmico)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 4 vezes ao dia. A formulação gel mantém o contato ocular por mais tempo.",
+        "categoria": "Corticoide + Antibiótico"
+    },
+    {
+        "id": "94",
+        "nome_comercial": "Pomada Terramicina",
+        "principio_ativo": "Cloridrato de Oxitetraciclina + Polimixina B",
+        "apresentacao": "Bisnaga de 3,5g (Pomada Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Aplicar uma fita de pomada na conjuntiva inferior do olho afetado 2 a 4 vezes ao dia.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "95",
+        "nome_comercial": "Cloranfenicol Pomada",
+        "principio_ativo": "Cloranfenicol 1%",
+        "apresentacao": "Bisnaga de 3,5g (Pomada Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Aplicar uma fita de 1cm de pomada na conjuntiva inferior do olho afetado 3 a 4 vezes ao dia.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "96",
+        "nome_comercial": "Pomada de Atropina",
+        "principio_ativo": "Sulfato de Atropina 1%",
+        "apresentacao": "Bisnaga de 3,5g (Pomada Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Aplicar uma pequena quantidade na conjuntiva inferior 1 a 3 vezes ao dia conforme prescrição.",
+        "categoria": "Midriático / Cicloplégico"
+    },
+    {
+        "id": "97",
+        "nome_comercial": "Maxidex",
+        "principio_ativo": "Dexametasona 0,1%",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 4 a 6 vezes ao dia nas fases iniciais; reduzir gradualmente conforme melhora.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "98",
+        "nome_comercial": "Betoptic",
+        "principio_ativo": "Cloridrato de Betaxolol 0,5%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 2 vezes ao dia.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "99",
+        "nome_comercial": "Iopidine",
+        "principio_ativo": "Cloridrato de Apraclonidina 1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho 1 hora antes do procedimento a laser e 1 gota imediatamente após.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "100",
+        "nome_comercial": "Dorzol",
+        "principio_ativo": "Cloridrato de Dorzolamida 2%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 3 vezes ao dia.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "101",
+        "nome_comercial": "Prolensa",
+        "principio_ativo": "Bromfenaco 0,07%",
+        "apresentacao": "Frasco de 1,7ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho operado 1 vez ao dia iniciando 1 dia antes da cirurgia e continuando por 14 dias pós-operatório.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "102",
+        "nome_comercial": "Xibrom",
+        "principio_ativo": "Bromfenaco Sódico 0,09%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 2 vezes ao dia iniciando 1 dia antes da cirurgia.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "103",
+        "nome_comercial": "Indocid Oftálmico",
+        "principio_ativo": "Indometacina 0,1%",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 4 vezes ao dia.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "104",
+        "nome_comercial": "Suprofen",
+        "principio_ativo": "Suprofeno 1%",
+        "apresentacao": "Frasco de 2,5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular (profilaxia intraoperatória miose): Instilar 2 gotas a cada 4 horas nas 24h que precedem a cirurgia.",
+        "categoria": "Anti-inflamatório (AINE)"
+    },
+    {
+        "id": "105",
+        "nome_comercial": "Bactroban Nasal (demodex)",
+        "principio_ativo": "Mupirocina 2%",
+        "apresentacao": "Pomada nasal (uso off-label em cílios para blefarite por Demodex)",
+        "posologia_padrao": "Uso Tópico (off-label blefarite Demodex): Aplicar pequena quantidade na margem palpebral 1 vez ao dia à noite com cotonete. Uso por 4 a 6 semanas.",
+        "categoria": "Tratamento Blefarite"
+    },
+    {
+        "id": "106",
+        "nome_comercial": "Tea Tree Oil 50% (Blefarite)",
+        "principio_ativo": "Óleo de Melaleuca 50% em óleo de macadâmia",
+        "apresentacao": "Frasco para uso tópico palpebral",
+        "posologia_padrao": "Uso Tópico Palpebral (blefarite por Demodex): Aplicar com cotonete nas margens palpebrais e cílios 1 vez por semana. Evitar contato com o globo ocular.",
+        "categoria": "Tratamento Blefarite"
+    },
+    {
+        "id": "107",
+        "nome_comercial": "Cequa",
+        "principio_ativo": "Ciclosporina 0,09%",
+        "apresentacao": "Solução Oftálmica (monodoses)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho 2 vezes ao dia com intervalo de 12 horas.",
+        "categoria": "Imunossupressor / Olho Seco"
+    },
+    {
+        "id": "108",
+        "nome_comercial": "Isathal",
+        "principio_ativo": "Ácido Fusídico 10mg/g",
+        "apresentacao": "Bisnaga de 3,5g (Gel Oftálmico)",
+        "posologia_padrao": "Uso Tópico Ocular: Aplicar uma pequena quantidade (aprox. 1cm) na conjuntiva inferior 2 vezes ao dia por 7 dias.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "109",
+        "nome_comercial": "Azelastina 0,05%",
+        "principio_ativo": "Cloridrato de Azelastina 0,05%",
+        "apresentacao": "Frasco de 6ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho afetado 2 a 4 vezes ao dia.",
+        "categoria": "Antialérgico"
+    },
+    {
+        "id": "110",
+        "nome_comercial": "Vismodib",
+        "principio_ativo": "Bevacizumabe 25mg/ml (uso off-label intravítreo)",
+        "apresentacao": "Frasco para reenvase e injeção intravítrea",
+        "posologia_padrao": "Uso Intravítreo (DMRI, RD neovascular – off-label): 1,25mg/0,05ml. Frequência mensal ou conforme protocolo.",
+        "categoria": "Anti-VEGF"
+    },
+    {
+        "id": "111",
+        "nome_comercial": "Ciprofloxacino Oral",
+        "principio_ativo": "Ciprofloxacino 500mg",
+        "apresentacao": "Caixa com 14 comprimidos",
+        "posologia_padrao": "Uso Oral (infecções severas oculares, endoftalmite – pós-operatório): 500mg 2 vezes ao dia por 7 a 10 dias.",
+        "categoria": "Antibiótico Sistêmico"
+    },
+    {
+        "id": "112",
+        "nome_comercial": "Doxiciclina",
+        "principio_ativo": "Doxiciclina Monoidratada 100mg",
+        "apresentacao": "Caixa com 15 comprimidos",
+        "posologia_padrao": "Uso Oral (blefarite crônica, rosácea, tracoma): 100mg 1 a 2 vezes ao dia por 4 a 6 semanas; manutenção 50mg/dia.",
+        "categoria": "Antibiótico Sistêmico"
+    },
+    {
+        "id": "113",
+        "nome_comercial": "Azitromicina",
+        "principio_ativo": "Azitromicina 500mg",
+        "apresentacao": "Caixa com 6 comprimidos",
+        "posologia_ादrao": "Uso Oral (tracoma, clamídia ocular): 1g em dose única (adultos) ou conforme protocolo OMS.",
+        "categoria": "Antibiótico Sistêmico"
+    },
+    {
+        "id": "114",
+        "nome_comercial": "Azitromicina Oftálmica",
+        "principio_ativo": "Azitromicina 1,5%",
+        "apresentacao": "Frasco de 3ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota em cada olho afetado 2 vezes ao dia por 3 dias.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "115",
+        "nome_comercial": "Tacrolimus 0,03%",
+        "principio_ativo": "Tacrolimus 0,03% (uso off-label)",
+        "apresentacao": "Pomada manipulada para uso palpebral",
+        "posologia_padrao": "Uso Tópico Palpebral (dermatite/rosácea ocular – off-label): Aplicar fina camada na margem palpebral 2 vezes ao dia. Evitar contato direto com globo ocular.",
+        "categoria": "Imunossupressor Tópico"
     }
 ]
