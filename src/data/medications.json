@@ -1,0 +1,82 @@
+[
+    {
+        "id": "1",
+        "nome_comercial": "Vigamox",
+        "principio_ativo": "Cloridrato de Moxifloxacino",
+        "apresentacao": "Frasco de 5ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 (uma) gota no olho afetado de 8 em 8 horas.",
+        "categoria": "Antibiótico"
+    },
+    {
+        "id": "2",
+        "nome_comercial": "Maxitrol",
+        "principio_ativo": "Dexametasona + Neomicina + Polimixina B",
+        "apresentacao": "Frasco de 5ml (Suspensão Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Pingar 1 gota no(s) olho(s) afetado(s) 3 a 4 vezes ao dia.",
+        "categoria": "Corticoide + Antibiótico"
+    },
+    {
+        "id": "3",
+        "nome_comercial": "Hyabak",
+        "principio_ativo": "Hialuronato de Sódio 0,15%",
+        "apresentacao": "Frasco de 10ml (Solução Oftálmica Sem Conservantes)",
+        "posologia_padrao": "Uso Tópico Ocular: Pingar 1 gota em ambos os olhos de 4 a 6 vezes ao dia, ou quando sentir ressecamento.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "4",
+        "nome_comercial": "Optive",
+        "principio_ativo": "Carmelose Sódica + Glicerina",
+        "apresentacao": "Frasco de 15ml (Solução Oftálmica)",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s), conforme necessário para alívio dos sintomas de olho seco.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "5",
+        "nome_comercial": "Systane UL",
+        "principio_ativo": "Polietilenoglicol + Propilenoglicol",
+        "apresentacao": "Frasco de 15ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 ou 2 gotas no(s) olho(s) afetado(s) sempre que necessário.",
+        "categoria": "Lubrificante"
+    },
+    {
+        "id": "6",
+        "nome_comercial": "Zypred",
+        "principio_ativo": "Gatifloxacino + Prednisolona",
+        "apresentacao": "Frasco de 6ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no olho afetado 4 vezes ao dia por 7 dias.",
+        "categoria": "Corticoide + Antibiótico"
+    },
+    {
+        "id": "7",
+        "nome_comercial": "Pred Fort",
+        "principio_ativo": "Acetato de Prednisolona 1%",
+        "apresentacao": "Frasco de 5ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 a 2 gotas no saco conjuntival 2 a 4 vezes por dia. Durante 24 a 48 horas iniciais, a posologia pode ser aumentada com segurança para 2 gotas a cada hora.",
+        "categoria": "Corticoide"
+    },
+    {
+        "id": "8",
+        "nome_comercial": "Combigan",
+        "principio_ativo": "Brimonidina + Timolol",
+        "apresentacao": "Frasco de 5ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s), 2 vezes ao dia com intervalo de aproximadamente 12 horas.",
+        "categoria": "Antiglaucomatoso"
+    },
+    {
+        "id": "9",
+        "nome_comercial": "Nepodex",
+        "principio_ativo": "Nepafenaco 1mg/ml",
+        "apresentacao": "Frasco de 5ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) 3 vezes ao dia.",
+        "categoria": "Anti-inflamatório Não Esteroide (AINE)"
+    },
+    {
+        "id": "10",
+        "nome_comercial": "Lovox",
+        "principio_ativo": "Levofloxacino 5mg/ml",
+        "apresentacao": "Frasco de 5ml",
+        "posologia_padrao": "Uso Tópico Ocular: Instilar 1 gota no(s) olho(s) afetado(s) a cada 2 horas no primeiro dia, em seguida a cada 4 horas do 3º ao 7º dia.",
+        "categoria": "Antibiótico"
+    }
+]

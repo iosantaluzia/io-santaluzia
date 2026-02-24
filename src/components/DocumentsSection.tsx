@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { PrescriptionEditor } from './PrescriptionEditor';
 
 interface DocumentTemplate {
   id: string;
@@ -32,11 +33,11 @@ export function DocumentsSection() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<'receituarios' | 'exames' | 'laudos'>('receituarios');
+  const [activeTab, setActiveTab] = useState<'receituarios' | 'exames' | 'laudos' | 'editor_receitas'>('receituarios');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DocumentTemplate | null>(null);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     type: 'receituario' as 'receituario' | 'solicitacao_exame' | 'declaracao',
@@ -90,7 +91,7 @@ export function DocumentsSection() {
     // Filtrar por busca
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(t => 
+      filtered = filtered.filter(t =>
         t.name.toLowerCase().includes(term) ||
         t.content.toLowerCase().includes(term) ||
         (t.category && t.category.toLowerCase().includes(term))
@@ -255,8 +256,8 @@ export function DocumentsSection() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className={`p-6 space-y-6 ${activeTab === 'editor_receitas' ? 'print:p-0 print:space-y-0 print:bg-white' : ''}`}>
+      <div className="flex items-center justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-bold text-cinza-escuro">Documentos</h1>
           <p className="text-sm text-gray-600 mt-1">
@@ -288,8 +289,8 @@ export function DocumentsSection() {
               <DialogTitle>
                 Criar Novo Modelo - {
                   activeTab === 'receituarios' ? 'Receituário' :
-                  activeTab === 'exames' ? 'Solicitação de Exame' :
-                  'Laudo'
+                    activeTab === 'exames' ? 'Solicitação de Exame' :
+                      'Laudo'
                 }
               </DialogTitle>
               <DialogDescription>
@@ -305,8 +306,8 @@ export function DocumentsSection() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={
                     activeTab === 'receituarios' ? 'Ex: Receituário Uveites' :
-                    activeTab === 'exames' ? 'Ex: Exames Uveites' :
-                    'Ex: Laudo Teste do Reflexo Vermelho'
+                      activeTab === 'exames' ? 'Ex: Exames Uveites' :
+                        'Ex: Laudo Teste do Reflexo Vermelho'
                   }
                 />
               </div>
@@ -347,10 +348,10 @@ export function DocumentsSection() {
 
       {/* Abas de Categorias */}
       <Tabs value={activeTab} onValueChange={(value) => {
-        setActiveTab(value as 'receituarios' | 'exames' | 'laudos');
+        setActiveTab(value as 'receituarios' | 'exames' | 'laudos' | 'editor_receitas');
         setSelectedCategory('all'); // Resetar categoria ao trocar de aba
       }}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4 print:hidden">
           <TabsTrigger value="receituarios" className="flex items-center gap-2">
             <Pill className="h-4 w-4" />
             Receituários
@@ -363,48 +364,54 @@ export function DocumentsSection() {
             <FileCheck className="h-4 w-4" />
             Laudos
           </TabsTrigger>
+          <TabsTrigger value="editor_receitas" className="flex items-center gap-2 text-medical-primary font-bold">
+            <Pill className="h-4 w-4" />
+            Editor de Receitas
+          </TabsTrigger>
         </TabsList>
 
-        {/* Filtros - Comum para todas as abas */}
-        <div className="flex gap-4 items-end mt-4">
-          <div className="flex-1">
-            <Label htmlFor="search">Buscar</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                id="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por nome, conteúdo ou categoria..."
-                className="pl-10"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                >
-                  <X className="h-4 w-4 text-gray-400" />
-                </button>
-              )}
+        {/* Filtros - Comum para todas as abas (se não for o editor) */}
+        {activeTab !== 'editor_receitas' && (
+          <div className="flex gap-4 items-end mt-4 print:hidden">
+            <div className="flex-1">
+              <Label htmlFor="search">Buscar</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar por nome, conteúdo ou categoria..."
+                  className="pl-10"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  >
+                    <X className="h-4 w-4 text-gray-400" />
+                  </button>
+                )}
+              </div>
             </div>
+            {getCategoriesForCurrentTab().length > 0 && (
+              <div className="w-48">
+                <Label htmlFor="category-filter">Categoria</Label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {getCategoriesForCurrentTab().map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
-          {getCategoriesForCurrentTab().length > 0 && (
-            <div className="w-48">
-              <Label htmlFor="category-filter">Categoria</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {getCategoriesForCurrentTab().map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Conteúdo das Abas */}
         <TabsContent value="receituarios" className="mt-6">
@@ -414,8 +421,8 @@ export function DocumentsSection() {
                 <Pill className="h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-600">Nenhum receituário encontrado</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {templates.filter(t => t.type === 'receituario').length === 0 
-                    ? 'Crie seu primeiro modelo de receituário' 
+                  {templates.filter(t => t.type === 'receituario').length === 0
+                    ? 'Crie seu primeiro modelo de receituário'
                     : 'Tente ajustar os filtros de busca'}
                 </p>
               </CardContent>
@@ -441,8 +448,8 @@ export function DocumentsSection() {
                   <CardContent className="flex-1 flex flex-col">
                     <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
                       <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
-                        {template.content.length > 200 
-                          ? template.content.substring(0, 200) + '...' 
+                        {template.content.length > 200
+                          ? template.content.substring(0, 200) + '...'
                           : template.content}
                       </pre>
                     </div>
@@ -485,8 +492,8 @@ export function DocumentsSection() {
                 <TestTube className="h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-600">Nenhuma solicitação de exame encontrada</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {templates.filter(t => t.type === 'solicitacao_exame').length === 0 
-                    ? 'Crie seu primeiro modelo de solicitação de exame' 
+                  {templates.filter(t => t.type === 'solicitacao_exame').length === 0
+                    ? 'Crie seu primeiro modelo de solicitação de exame'
                     : 'Tente ajustar os filtros de busca'}
                 </p>
               </CardContent>
@@ -512,8 +519,8 @@ export function DocumentsSection() {
                   <CardContent className="flex-1 flex flex-col">
                     <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
                       <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
-                        {template.content.length > 200 
-                          ? template.content.substring(0, 200) + '...' 
+                        {template.content.length > 200
+                          ? template.content.substring(0, 200) + '...'
                           : template.content}
                       </pre>
                     </div>
@@ -556,8 +563,8 @@ export function DocumentsSection() {
                 <FileCheck className="h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-600">Nenhum laudo encontrado</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {templates.filter(t => t.type === 'declaracao').length === 0 
-                    ? 'Crie seu primeiro modelo de laudo' 
+                  {templates.filter(t => t.type === 'declaracao').length === 0
+                    ? 'Crie seu primeiro modelo de laudo'
                     : 'Tente ajustar os filtros de busca'}
                 </p>
               </CardContent>
@@ -583,8 +590,8 @@ export function DocumentsSection() {
                   <CardContent className="flex-1 flex flex-col">
                     <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-4 flex-1 overflow-hidden">
                       <pre className="whitespace-pre-wrap font-mono text-xs max-h-32 overflow-y-auto">
-                        {template.content.length > 200 
-                          ? template.content.substring(0, 200) + '...' 
+                        {template.content.length > 200
+                          ? template.content.substring(0, 200) + '...'
                           : template.content}
                       </pre>
                     </div>
@@ -618,6 +625,10 @@ export function DocumentsSection() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="editor_receitas" className="mt-6 print:mt-0 print:border-none">
+          <PrescriptionEditor />
         </TabsContent>
       </Tabs>
 
