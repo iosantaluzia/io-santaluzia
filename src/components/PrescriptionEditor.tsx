@@ -208,7 +208,7 @@ export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) 
             {/* Lado Direito - Visualização do Documento e Impressão */}
             <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block">
                 {/* Papel (A4 Aspect Ratio) */}
-                <div className="relative bg-white w-full max-w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:p-0 print:max-w-[21cm] flex flex-col font-sans overflow-hidden">
+                <div id="prescription-print-area" className="relative bg-white w-full max-w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden">
 
                     {/* Marca d'água no fundo da página inteira */}
                     <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5">
