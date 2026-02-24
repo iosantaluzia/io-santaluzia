@@ -53,12 +53,22 @@ export function PrescriptionEditor() {
     };
 
     const addMedicationToPrescription = (medication: Medication) => {
-        const newEntry = `
-Uso: ${medication.categoria === 'Uso Oral' ? 'Oral' : 'Tópico Ocular'}
-- ${medication.nome_comercial} (${medication.principio_ativo})
-  ${medication.apresentacao}
-  Posologia: ${medication.posologia_padrao}
-`;
+        // Conta quantos medicamentos já tem numerados
+        const lines = prescriptionContent.split('\n');
+        let count = 0;
+        lines.forEach(l => { if (l.match(/^\d+\)/)) count++; });
+        const num = count + 1;
+
+        // Tenta ser inteligente sobre a embalagem para formar "1 frasco", "1 unidade", etc.
+        let qtd = "1 unidade";
+        if (medication.apresentacao.toLowerCase().includes('frasco') || medication.apresentacao.toLowerCase().includes('solução')) qtd = "01 frasco";
+        if (medication.apresentacao.toLowerCase().includes('caixa') || medication.categoria === 'Uso Oral') qtd = "01 caixa";
+
+        const baseText = `${num}) ${medication.nome_comercial} (${medication.principio_ativo})`;
+        const padding = " ----------------------------------- ";
+
+        const newEntry = `${baseText}${padding}${qtd}\n${medication.posologia_padrao}\n\n`;
+
         setPrescriptionContent(prev => prev + newEntry);
         setSearchTerm('');
         setShowResults(false);
@@ -137,51 +147,78 @@ Uso: ${medication.categoria === 'Uso Oral' ? 'Oral' : 'Tópico Ocular'}
             </div>
 
             {/* Lado Direito - Visualização do Documento e Impressão */}
-            <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible">
+            <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block">
                 {/* Papel (A4 Aspect Ratio) */}
-                <div className="bg-white w-full max-w-[21cm] min-h-[29.7cm] p-10 md:p-16 shadow-lg border border-gray-200 print:shadow-none print:border-none print:p-0 print:max-w-full">
-                    {/* Cabeçalho do Documento */}
-                    <div className="border-b-2 border-medical-primary pb-6 mb-8 text-center flex flex-col items-center">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="h-12 w-12 bg-medical-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
-                                IO
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-bold text-cinza-escuro tracking-wide">Instituto dos Olhos Santa Luzia</h1>
-                                <p className="text-sm text-gray-500">Oftalmologia Clínica e Cirúrgica</p>
-                            </div>
-                        </div>
+                <div className="relative bg-white w-full max-w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:p-0 print:max-w-[21cm] flex flex-col font-sans overflow-hidden">
+
+                    {/* Marca d'água no fundo da página inteira */}
+                    <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5">
+                        <img src="/uploads/circlebg.png" alt="" className="w-[85%] max-w-lg object-contain" />
                     </div>
 
-                    {/* Corpo da Receita */}
-                    <div className="mb-8 min-h-[400px]">
-                        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex items-end gap-2 text-lg">
-                                <span className="font-semibold text-gray-800">Paciente:</span>
-                                <span className="border-b border-gray-400 font-medium px-2 min-w-[200px] inline-block">{patientName}</span>
-                            </div>
+                    <div className="relative z-10 flex flex-col h-full flex-grow p-10 md:pt-14 md:pb-8 md:px-14 print:pt-14 print:pb-8 print:px-14">
+                        {/* Cabeçalho do Documento */}
+                        <div className="flex flex-col items-center mb-10 w-full">
+                            <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-[120px] object-contain mb-3" />
+                            <p className="text-[#857053] font-medium text-[13px] text-center tracking-wide leading-tight">
+                                • Córnea • Catarata • Ceratocone • Lentes de Contato<br />
+                                • Cirurgia Refrativa • Oftalmopediatria
+                            </p>
+                            <div className="w-full h-[1.5px] bg-[#857053] mt-5"></div>
                         </div>
 
-                        <div className="mb-4">
-                            <h2 className="text-xl font-bold text-center mb-6 uppercase tracking-wider">Receituário Médico</h2>
+                        {/* Corpo da Receita */}
+                        <div className="flex-grow flex flex-col text-cinza-escuro">
+                            <h2 className="text-xl font-bold text-center mb-8 uppercase tracking-widest text-[#161a1d]">Receituário</h2>
+
+                            {patientName && (
+                                <div className="mb-6 flex items-end gap-2 text-[15px]">
+                                    <span className="font-semibold text-gray-800">Paciente:</span>
+                                    <span className="font-medium inline-block flex-1">{patientName}</span>
+                                </div>
+                            )}
 
                             <Textarea
                                 value={prescriptionContent}
                                 onChange={(e) => setPrescriptionContent(e.target.value)}
-                                className="w-full min-h-[300px] text-base p-4 border-gray-200 focus:border-medical-primary focus:ring-medical-primary resize-y print:border-none print:resize-none print:p-0"
-                                placeholder="Adicione os medicamentos usando a busca ao lado ou digite livremente aqui..."
+                                className="w-full flex-grow min-h-[400px] text-[15px] p-0 border-none focus-visible:ring-0 resize-none font-sans text-cinza-escuro bg-transparent leading-relaxed print:resize-none print:p-0 outline-none"
+                                placeholder="PARA USO EM CLÍNICA MÉDICA&#10;&#10;Adicione os medicamentos usando a busca ao lado ou digite livremente aqui..."
                             />
                         </div>
-                    </div>
 
-                    {/* Rodapé do Documento */}
-                    <div className="mt-auto pt-20 flex flex-col items-center">
-                        <div className="w-64 border-t border-gray-800 mb-2"></div>
-                        <p className="text-sm font-semibold text-gray-800">Assinatura / Carimbo do Médico</p>
-                        <p className="text-xs text-gray-500 mt-6 text-center">
-                            Sinop/MT, {currentDate}<br />
-                            Avenida Julio Campos, 1234 - Centro
-                        </p>
+                        {/* Assinatura, Data e Rodapé */}
+                        <div className="mt-8 shrink-0">
+                            <div className="flex flex-col items-end pr-8 mb-4">
+                                {/* Assinatura Visual Emulada */}
+                                <div className="h-20 w-48 flex items-end justify-center mb-1 relative text-cinza-escuro">
+                                    <span className="text-3xl font-signature -mb-2 absolute bottom-2 opacity-80" style={{ fontFamily: "'Cedarville Cursive', 'Brush Script MT', cursive" }}>Matheus Roque</span>
+                                </div>
+                                <div className="border-t border-cinza-escuro w-56 mb-1 text-center pt-1">
+                                    <p className="font-bold text-[13px] text-cinza-escuro">Dr. Matheus Cieslak Roque</p>
+                                    <p className="font-bold text-[13px] text-cinza-escuro">CRM – MT 14548</p>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end pr-8 mb-6">
+                                <p className="text-cinza-escuro text-[15px]">{currentDate}</p>
+                            </div>
+
+                            {/* Linha Fina Dourada/Marrom do rodapé */}
+                            <div className="w-full h-[1.5px] bg-[#857053] mb-4"></div>
+
+                            <div className="flex justify-between w-full text-[12px] text-[#6b583f] font-medium tracking-tight px-1">
+                                <div className="flex flex-col leading-snug">
+                                    <span className="font-bold text-[#5c4a30]">Avenida dos Tarumãs 930</span>
+                                    <span>Setor Residencial Sul • Sinop MT</span>
+                                    <span>Cep 78 550-001</span>
+                                    <span>(66) 3531-6381 • 99721-5000</span>
+                                </div>
+                                <div className="flex flex-col text-right leading-snug mt-auto">
+                                    <span>@faroque</span>
+                                    <span>@matheusroqueoftalmo</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
