@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Printer, Pill } from 'lucide-react';
+import { DocumentTemplate } from './DocumentsSection';
 import medicationsData from '@/data/medications.json';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
@@ -17,13 +19,36 @@ interface Medication {
     categoria: string;
 }
 
-export function PrescriptionEditor() {
+interface PrescriptionEditorProps {
+    templates?: DocumentTemplate[];
+}
+
+export function PrescriptionEditor({ templates = [] }: PrescriptionEditorProps) {
     const [patientName, setPatientName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [prescriptionContent, setPrescriptionContent] = useState('');
     const [searchResults, setSearchResults] = useState<Medication[]>([]);
     const [showResults, setShowResults] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
+    const [documentType, setDocumentType] = useState<'receituario' | 'solicitacao_exame' | 'declaracao'>('receituario');
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string>('none');
+
+    const handleTemplateChange = (val: string) => {
+        setSelectedTemplateId(val);
+        if (val !== 'none') {
+            const t = templates.find(temp => temp.id === val);
+            if (t) {
+                setDocumentType(t.type);
+                let newContent = t.content;
+                if (patientName) {
+                    newContent = newContent.replace(/{PACIENTE}/g, patientName);
+                } else {
+                    newContent = newContent.replace(/{PACIENTE}/g, '________________________');
+                }
+                setPrescriptionContent(newContent);
+            }
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -91,6 +116,40 @@ export function PrescriptionEditor() {
                     </h2>
 
                     <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <Label>Tipo de Documento</Label>
+                                <Select value={documentType} onValueChange={(val: any) => {
+                                    setDocumentType(val);
+                                    setSelectedTemplateId('none');
+                                }}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="receituario">Receituário</SelectItem>
+                                        <SelectItem value="solicitacao_exame">Exames</SelectItem>
+                                        <SelectItem value="declaracao">Laudo/Declaração</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label>Modelo Pré-pronto</Label>
+                                <Select value={selectedTemplateId} onValueChange={handleTemplateChange}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione um modelo..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">Em branco</SelectItem>
+                                        {templates.filter(t => t.type === documentType).map(t => (
+                                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
                         <div>
                             <Label htmlFor="patientName">Nome do Paciente</Label>
                             <Input
@@ -169,7 +228,11 @@ export function PrescriptionEditor() {
 
                         {/* Corpo da Receita */}
                         <div className="flex-grow flex flex-col text-cinza-escuro">
-                            <h2 className="text-xl font-bold text-center mb-8 uppercase tracking-widest text-[#161a1d]">Receituário</h2>
+                            <h2 className="text-xl font-bold text-center mb-8 uppercase tracking-widest text-[#161a1d]">
+                                {documentType === 'receituario' ? 'Receituário' :
+                                    documentType === 'solicitacao_exame' ? 'Solicitação de Exame' :
+                                        'Laudo Médico'}
+                            </h2>
 
                             {patientName && (
                                 <div className="mb-6 flex items-end gap-2 text-[15px]">

@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { PrescriptionEditor } from './PrescriptionEditor';
 
-interface DocumentTemplate {
+export interface DocumentTemplate {
   id: string;
   name: string;
   type: 'receituario' | 'solicitacao_exame' | 'declaracao';
@@ -33,7 +33,7 @@ export function DocumentsSection() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<'receituarios' | 'exames' | 'laudos' | 'editor_receitas'>('receituarios');
+  const [activeTab, setActiveTab] = useState<'receituarios' | 'exames' | 'laudos' | 'editor_receitas'>('editor_receitas');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DocumentTemplate | null>(null);
@@ -628,7 +628,7 @@ export function DocumentsSection() {
         </TabsContent>
 
         <TabsContent value="editor_receitas" className="mt-6 print:mt-0 print:border-none">
-          <PrescriptionEditor />
+          <PrescriptionEditor templates={templates} />
         </TabsContent>
       </Tabs>
 
