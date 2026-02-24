@@ -188,17 +188,6 @@ export function PrescriptionEditor() {
 
                         {/* Assinatura, Data e Rodapé */}
                         <div className="mt-8 shrink-0">
-                            <div className="flex flex-col items-end pr-8 mb-4">
-                                {/* Assinatura Visual Emulada */}
-                                <div className="h-20 w-48 flex items-end justify-center mb-1 relative text-cinza-escuro">
-                                    <span className="text-3xl font-signature -mb-2 absolute bottom-2 opacity-80" style={{ fontFamily: "'Cedarville Cursive', 'Brush Script MT', cursive" }}>Matheus Roque</span>
-                                </div>
-                                <div className="border-t border-cinza-escuro w-56 mb-1 text-center pt-1">
-                                    <p className="font-bold text-[13px] text-cinza-escuro">Dr. Matheus Cieslak Roque</p>
-                                    <p className="font-bold text-[13px] text-cinza-escuro">CRM – MT 14548</p>
-                                </div>
-                            </div>
-
                             <div className="flex justify-end pr-8 mb-6">
                                 <p className="text-cinza-escuro text-[15px]">{currentDate}</p>
                             </div>
