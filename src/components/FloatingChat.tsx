@@ -32,12 +32,9 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
   const previousMessagesLengthRef = useRef(0);
   const notifiedMessageIdsRef = useRef<Set<string>>(new Set());
 
-  // Debug: Log quando o username mudar
+  // Inicializar chat (silencioso)
   useEffect(() => {
-    if (currentUsername) {
-      console.log('💬 FloatingChat inicializado para usuário:', currentUsername);
-      console.log('💬 Username em minúsculas:', currentUsername.toLowerCase());
-    } else {
+    if (!currentUsername) {
       console.warn('⚠️ FloatingChat sem currentUsername');
     }
   }, [currentUsername]);
