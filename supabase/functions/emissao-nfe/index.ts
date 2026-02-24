@@ -12,17 +12,26 @@ serve(async (req) => {
   }
 
   try {
-    const { paciente, documento, servico, descricao, valor } = await req.json()
+    const { paciente, documento, servico, descricao, valor, emissor } = await req.json()
 
-    // 1. Ler a senha do certificado do .env
-    const certificadoSenha = Deno.env.get("CERTIFICADO_NFE_SENHA")
+    // 1. Ler a senha do certificado do .env baseada no emissor selecionado
+    let certificadoSenha: string | undefined;
+    let tipoEmissorNome = 'Clínica Orgahealth (PJ)';
 
-    if (!certificadoSenha || certificadoSenha === "COLOQUE_SUA_SENHA_AQUI") {
-      throw new Error("A senha do certificado digital não foi configurada.")
+    if (emissor === 'PF_FABIOLA') {
+      certificadoSenha = Deno.env.get("CERTIFICADO_PF_FABIOLA_SENHA");
+      tipoEmissorNome = 'Dra. Fabiola Roque (PF)';
+    } else {
+      certificadoSenha = Deno.env.get("CERTIFICADO_NFE_SENHA"); // Default/PJ
+    }
+
+    if (!certificadoSenha || certificadoSenha === "COLOQUE_SUA_SENHA_AQUI" || certificadoSenha === "sua_senha_aqui") {
+      throw new Error(`A senha do certificado digital para o emissor ${tipoEmissorNome} não foi configurada.`)
     }
 
     console.log(`[LOG] Iniciando emissão para: ${paciente}`);
-    console.log(`[LOG] Lendo arquivo PFX virtual e descriptografando com senha: ***`);
+    console.log(`[LOG] Emissor selecionado: ${tipoEmissorNome}`);
+    console.log(`[LOG] Lendo arquivo PFX correspondente e descriptografando com senha: ***`);
 
     // Aqui entraria o código real de leitura do PFX usando Deno.readFile ou Supabase Storage
     // Exemplo: const pfxBase64 = await Deno.readFile("../../MATHEUS ROQUE SERVICOS MEDICOS LTDA.pfx");
@@ -57,11 +66,12 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error("[ERRO]", error.message);
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+    console.error("[ERRO]", errorMessage);
     return new Response(
       JSON.stringify({
         erro: "Falha na Emissão da Nota Fiscal Eletrônica",
-        detalhe: error.message
+        detalhe: errorMessage
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

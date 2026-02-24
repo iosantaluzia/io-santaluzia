@@ -35,6 +35,7 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
         description: 'Consulta Oftalmológica',
         amount: defaultAmount ? defaultAmount.toString() : '',
         patientId: '',
+        emissorTipo: 'PJ',
     });
 
     // Clicar fora para fechar resultados
@@ -110,7 +111,8 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
                     documento: formData.documentNumber,
                     servico: formData.serviceCode,
                     descricao: formData.description,
-                    valor: Number(formData.amount)
+                    valor: Number(formData.amount),
+                    emissor: formData.emissorTipo,
                 }
             });
 
@@ -148,6 +150,21 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
                         </DialogHeader>
 
                         <div className="grid gap-4 py-4 overflow-visible">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="emissor" className="text-right">
+                                    Emissor
+                                </Label>
+                                <Select value={formData.emissorTipo} onValueChange={(val) => handleInputChange('emissorTipo', val)}>
+                                    <SelectTrigger className="col-span-3 font-semibold text-bege-principal bg-bege-principal/5 border-bege-principal/20">
+                                        <SelectValue placeholder="Selecione o emissor" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="PJ">Clínica Orgahealth (PJ) - Principal</SelectItem>
+                                        <SelectItem value="PF_FABIOLA">Dra. Fabiola Roque (PF)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="grid grid-cols-4 items-center gap-4 relative" ref={searchRef}>
                                 <Label htmlFor="name" className="text-right">
                                     Tomador
