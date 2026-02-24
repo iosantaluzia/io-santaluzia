@@ -46,6 +46,42 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
     onRemoveBlock,
     selectedDate
 }, ref) => {
+
+    // Gerar horários padrão: 07:30 às 17:30 (intervalos de 30 min)
+    const standardTimes: string[] = [];
+    for (let h = 7; h <= 17; h++) {
+        if (h === 7) {
+            standardTimes.push('07:30');
+        } else {
+            standardTimes.push(`${h.toString().padStart(2, '0')}:00`);
+            standardTimes.push(`${h.toString().padStart(2, '0')}:30`);
+        }
+    }
+
+    // Organizar/Interpolar agendamentos nos horários
+    const groupedSlots: Record<string, AppointmentSlot[]> = {};
+    timeSlots.forEach(slot => {
+        if (!groupedSlots[slot.time]) groupedSlots[slot.time] = [];
+        groupedSlots[slot.time].push(slot);
+    });
+
+    const allTimesSet = new Set([...standardTimes, ...Object.keys(groupedSlots)]);
+    const sortedTimes = Array.from(allTimesSet).sort();
+
+    const displaySlots: AppointmentSlot[] = [];
+    sortedTimes.forEach(time => {
+        if (groupedSlots[time] && groupedSlots[time].length > 0) {
+            displaySlots.push(...groupedSlots[time]);
+        } else if (standardTimes.includes(time)) {
+            // Gerar o slot de horário vazio
+            displaySlots.push({
+                time,
+                name: 'Horário Livre',
+                status: 'available',
+                consultationId: `available-${time}` // mock id to prevent react key warning
+            });
+        }
+    });
     return (
         <div className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -68,10 +104,10 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
                     <div className="flex justify-center items-center h-full">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-bege-principal"></div>
                     </div>
-                ) : timeSlots.length > 0 ? (
-                    timeSlots.map((slot, idx) => (
+                ) : displaySlots.length > 0 ? (
+                    displaySlots.map((slot, idx) => (
                         <AppointmentSlotItem
-                            key={slot.consultationId || idx}
+                            key={slot.consultationId || `${slot.time}-${idx}`}
                             slot={slot}
                             onPatientClick={onPatientClick}
                             onUpdateStatus={onUpdateStatus}
@@ -82,7 +118,7 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
                     ))
                 ) : (
                     <div className="flex flex-col items-center justify-center h-20 text-gray-500">
-                        <p className="text-sm">Nenhum agendamento</p>
+                        <p className="text-sm">Nenhuma faixa de horário para hoje</p>
                     </div>
                 )}
             </ScrollArea>

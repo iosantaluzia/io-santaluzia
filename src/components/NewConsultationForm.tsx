@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Save, TestTube } from 'lucide-react';
+import { ArrowLeft, Save, TestTube, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/logger';
@@ -67,6 +67,32 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
   const [loadingExams, setLoadingExams] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Cronômetro da consulta
+  const [startTime] = useState<Date>(new Date());
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+
+  useEffect(() => {
+    if (!isTimerRunning) return;
+
+    // Atualiza a cada 1 segundo
+    const timer = setInterval(() => {
+      setElapsedSeconds(Math.floor((new Date().getTime() - startTime.getTime()) / 1000));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [startTime, isTimerRunning]);
+
+  const formatTimer = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   // Monitorar mudanças no texto
   useEffect(() => {
@@ -232,10 +258,13 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsTimerRunning(false); // Pára o cronômetro ao iniciar o salvamento final
     const success = await handleSave();
     if (success) {
       setConsultationText('');
       onSaved();
+    } else {
+      setIsTimerRunning(true); // Retoma se falhar
     }
   };
 
@@ -281,7 +310,16 @@ export function NewConsultationForm({ patient, onBack, onSaved, existingConsulta
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-semibold text-gray-700 block">Consulta</Label>
+              <div className="flex items-center gap-3">
+                <Label className="text-sm font-semibold text-gray-700 block">Consulta</Label>
+                <div
+                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium font-mono border transition-colors ${isTimerRunning ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}
+                  title={isTimerRunning ? "Duração da consulta em andamento" : "Duração total da consulta"}
+                >
+                  <Clock className="h-3.5 w-3.5" />
+                  {formatTimer(elapsedSeconds)}
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 {lastSaved && (
                   <span className="text-xs text-gray-500 italic">

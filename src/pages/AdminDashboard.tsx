@@ -338,9 +338,17 @@ const AdminDashboard = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="p-2 text-gray-600 hover:text-cinza-escuro">
-                    <Settings className="h-5 w-5" />
-                  </Button>
+                  <button className="flex items-center space-x-2 hover:opacity-80 transition-opacity focus:outline-none text-left">
+                    <div className="h-8 w-8 rounded-full bg-bege-principal flex items-center justify-center">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-cinza-escuro capitalize">{appUser?.username}</span>
+                      <span className="text-xs text-gray-500">
+                        {getRoleName(appUser?.role || '')}
+                      </span>
+                    </div>
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {/* Apenas Matheus e secretaria podem gerenciar usuários */}
@@ -356,18 +364,6 @@ const AdminDashboard = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-bege-principal flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-cinza-escuro capitalize">{appUser?.username}</span>
-                  <span className="text-xs text-gray-500">
-                    {getRoleName(appUser?.role || '')}
-                  </span>
-                </div>
-              </div>
             </div>
           </header>
 

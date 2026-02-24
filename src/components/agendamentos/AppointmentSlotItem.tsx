@@ -71,12 +71,14 @@ export function AppointmentSlotItem({
     if (slot.status === 'blocked') {
         return (
             <div className="flex justify-between items-center p-3 mb-2 bg-gray-100 rounded-md shadow-sm border border-gray-200 opacity-80">
-                <div className="flex-1">
+                <div className="flex-1 flex items-center gap-4">
                     <p className="font-medium text-gray-800">{slot.time}</p>
-                    <p className="text-sm font-semibold text-red-600">Horário Bloqueado</p>
-                    {slot.observations && (
-                        <p className="text-xs text-gray-500 italic mt-1">{slot.observations}</p>
-                    )}
+                    <div className="flex flex-col">
+                        <p className="text-sm font-semibold text-red-600">Horário Bloqueado</p>
+                        {slot.observations && (
+                            <p className="text-xs text-gray-500 italic mt-0.5">{slot.observations}</p>
+                        )}
+                    </div>
                 </div>
                 {onRemoveBlock && slot.consultationId && (
                     <Button
@@ -95,25 +97,38 @@ export function AppointmentSlotItem({
         );
     }
 
+    if (slot.status === 'available') {
+        return (
+            <div className="flex justify-between items-center p-3 mb-2 bg-transparent rounded-md border border-gray-200 border-dashed cursor-default">
+                <div className="flex-1 flex gap-4 items-center">
+                    <p className="font-medium text-gray-400">{slot.time}</p>
+                    <p className="text-sm font-medium text-gray-400">{slot.name}</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div
             onClick={() => onPatientClick(slot)}
             className="flex justify-between items-center p-3 mb-2 bg-white rounded-md shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors relative"
         >
-            <div className="flex-1">
+            <div className="flex-1 flex items-center gap-4">
                 <p className="font-medium text-gray-800">{slot.time}</p>
-                <p className="text-sm text-gray-600 hover:text-medical-primary transition-colors">{slot.name}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                    {slot.appointmentType && (
-                        <p className="text-xs text-gray-500">
-                            {appointmentTypeLabels[slot.appointmentType] || slot.appointmentType}
-                        </p>
-                    )}
-                    {slot.observations && (
-                        <p className="text-xs text-gray-600 italic truncate max-w-[150px]" title={slot.observations}>
-                            📝 {slot.observations}
-                        </p>
-                    )}
+                <div className="flex flex-col">
+                    <p className="text-sm text-gray-600 hover:text-medical-primary transition-colors font-medium">{slot.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                        {slot.appointmentType && (
+                            <p className="text-xs text-gray-500">
+                                {appointmentTypeLabels[slot.appointmentType] || slot.appointmentType}
+                            </p>
+                        )}
+                        {slot.observations && (
+                            <p className="text-xs text-gray-600 italic truncate max-w-[150px]" title={slot.observations}>
+                                📝 {slot.observations}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
             {slot.consultationId ? (

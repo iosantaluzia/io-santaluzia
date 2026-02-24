@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DateRange } from 'react-day-picker';
 import { TrendingUp, DollarSign, Calendar, FileText, Filter, User, Loader2, ChevronDown, Receipt, LineChart, CreditCard, Wallet } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { PatientDetailsModal } from './PatientDetailsModal';
+import { NfeEmissionModal } from './NfeEmissionModal';
+import { NfeList } from './NfeList';
 import { toast } from 'sonner';
 
 interface FinancialData {
@@ -42,6 +45,7 @@ export function FinanceiroSection() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedPatientForModal, setSelectedPatientForModal] = useState<any>(null);
   const [showPatientDetailsModal, setShowPatientDetailsModal] = useState(false);
+  const [isNfeModalOpen, setIsNfeModalOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date())
@@ -399,7 +403,7 @@ export function FinanceiroSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <button
           className="bg-bege-principal/10 p-4 rounded-lg shadow-sm border border-bege-principal/20 flex flex-col items-center justify-center gap-3 hover:bg-bege-principal hover:text-white transition-colors text-bege-principal group min-h-[140px]"
-          onClick={() => toast.info('Em breve: Configuração para emissão automática de Nota Fiscal diretamente pelo sistema.')}
+          onClick={() => setIsNfeModalOpen(true)}
         >
           <Receipt className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="font-semibold text-center leading-tight">Emitir Notas<br />Fiscais</span>
@@ -421,201 +425,226 @@ export function FinanceiroSection() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
-            <h3 className="text-xl font-semibold text-cinza-escuro whitespace-nowrap">
-              Transações Recentes
-              {selectedDoctor !== 'all' && currentFinancialData.name && (
-                <span className="text-sm font-normal text-gray-600 ml-2">- {currentFinancialData.name}</span>
-              )}
-            </h3>
+      <Tabs defaultValue="transacoes" className="w-full">
+        <TabsList className="mb-6 gap-2 bg-transparent">
+          <TabsTrigger
+            value="transacoes"
+            className="data-[state=active]:bg-bege-principal data-[state=active]:text-white data-[state=inactive]:bg-gray-100 px-6 py-2.5 rounded-md font-medium text-sm transition-all"
+          >
+            Histórico Financeiro
+          </TabsTrigger>
+          <TabsTrigger
+            value="notas"
+            className="data-[state=active]:bg-bege-principal data-[state=active]:text-white data-[state=inactive]:bg-gray-100 px-6 py-2.5 rounded-md font-medium text-sm transition-all"
+          >
+            Notas Fiscais Emitidas
+          </TabsTrigger>
+        </TabsList>
 
-            <div className="relative w-full sm:w-64">
-              <input
-                type="text"
-                placeholder="Buscar paciente, serviço ou operadora..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400"
-              />
-              <svg
-                className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </div>
+        <TabsContent value="notas" className="mt-0">
+          <div className="mb-6">
+            <NfeList />
           </div>
+        </TabsContent>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-gray-100 rounded-md p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs h-8"
-                onClick={setCurrentMonth}
-              >
-                Mês Atual
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs h-8"
-                onClick={setLastMonth}
-              >
-                Último Mês
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs h-8"
-                onClick={setLastYear}
-              >
-                Último Ano
-              </Button>
-            </div>
+        <TabsContent value="transacoes" className="mt-0">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                <h3 className="text-xl font-semibold text-cinza-escuro whitespace-nowrap">
+                  Transações Recentes
+                  {selectedDoctor !== 'all' && currentFinancialData.name && (
+                    <span className="text-sm font-normal text-gray-600 ml-2">- {currentFinancialData.name}</span>
+                  )}
+                </h3>
 
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "justify-start text-left font-normal h-9",
-                    !dateRange && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {dateRange?.from ? (
-                    dateRange.to ? (
-                      <>
-                        {format(dateRange.from, "dd/MM/yyyy")} -{" "}
-                        {format(dateRange.to, "dd/MM/yyyy")}
-                      </>
-                    ) : (
-                      format(dateRange.from, "dd/MM/yyyy")
-                    )
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end" onInteractOutside={(e) => {
-                // Se estiver carregando dados, permitir que o calendário fique aberto
-                // mas geralmente o comportamento padrão de fechar ao clicar fora é esperado
-              }}>
-                <CalendarComponent
-                  initialFocus
-                  mode="range"
-                  defaultMonth={dateRange?.from}
-                  selected={dateRange}
-                  onSelect={(range) => {
-                    setDateRange(range);
-                    // Se o intervalo estiver completo (tem from e to), opcionalmente podemos fechar
-                    // mas o usuário pediu para permanecer aberto. Vou deixar aberto.
-                  }}
-                  numberOfMonths={2}
-                  locale={ptBR}
-                />
-                <div className="p-2 border-t border-gray-100 flex justify-end">
-                  <Button size="sm" onClick={() => setCalendarOpen(false)}>
-                    Concluído
+                <div className="relative w-full sm:w-64">
+                  <input
+                    type="text"
+                    placeholder="Buscar paciente, serviço ou operadora..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400"
+                  />
+                  <svg
+                    className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center bg-gray-100 rounded-md p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-8"
+                    onClick={setCurrentMonth}
+                  >
+                    Mês Atual
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-8"
+                    onClick={setLastMonth}
+                  >
+                    Último Mês
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-8"
+                    onClick={setLastYear}
+                  >
+                    Último Ano
                   </Button>
                 </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="min-w-full bg-white rounded-md">
-            <thead>
-              <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-                <th className="py-3 px-6 text-left">Paciente</th>
-                <th className="py-3 px-6 text-left">Serviço</th>
-                <th className="py-3 px-6 text-left text-blue-600">Convênio</th>
-                <th className="py-3 px-6 text-right">Valor</th>
-                <th className="py-3 px-6 text-center">Pagamento</th>
-                <th className="py-3 px-6 text-center">Data</th>
-                <th className="py-3 px-6 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-600 text-sm font-light">
-              {currentFinancialData.transactions
-                .filter(t =>
-                  t.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  t.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  (t.insurance_name && t.insurance_name.toLowerCase().includes(searchTerm.toLowerCase()))
-                )
-                .map(transaction => (
-                  <tr
-                    key={transaction.id}
-                    className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleTransactionClick(transaction)}
-                  >
-                    <td className="py-3 px-6 text-left font-medium">{transaction.patient}</td>
-                    <td className="py-3 px-6 text-left">{transaction.service}</td>
-                    <td className="py-3 px-6 text-left">
-                      {transaction.insurance_name ? (
-                        <span className="text-blue-600 font-medium">{transaction.insurance_name}</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "justify-start text-left font-normal h-9",
+                        !dateRange && "text-muted-foreground"
                       )}
-                    </td>
-                    <td className="py-3 px-6 text-right font-semibold">{formatCurrency(transaction.amount)}</td>
-                    <td className="py-3 px-6 text-center">
-                      {transaction.paymentMethod ? (
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${transaction.paymentMethod.toLowerCase() === 'dinheiro'
-                          ? 'bg-green-100 text-green-800 border border-green-200'
-                          : 'bg-blue-100 text-blue-800'
-                          }`}>
-                          {transaction.paymentMethod}
-                        </span>
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "dd/MM/yyyy")} -{" "}
+                            {format(dateRange.to, "dd/MM/yyyy")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "dd/MM/yyyy")
+                        )
                       ) : (
-                        <span className="text-gray-400 text-xs">-</span>
+                        <span>Selecione uma data</span>
                       )}
-                    </td>
-                    <td className="py-3 px-6 text-center">{transaction.date}</td>
-                    <td className="py-3 px-6 text-center">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                        ${transaction.status === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {transaction.status}
-                      </span>
-                    </td>
+                      <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end" onInteractOutside={(e) => {
+                    // Se estiver carregando dados, permitir que o calendário fique aberto
+                    // mas geralmente o comportamento padrão de fechar ao clicar fora é esperado
+                  }}>
+                    <CalendarComponent
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={dateRange}
+                      onSelect={(range) => {
+                        setDateRange(range);
+                        // Se o intervalo estiver completo (tem from e to), opcionalmente podemos fechar
+                        // mas o usuário pediu para permanecer aberto. Vou deixar aberto.
+                      }}
+                      numberOfMonths={2}
+                      locale={ptBR}
+                    />
+                    <div className="p-2 border-t border-gray-100 flex justify-end">
+                      <Button size="sm" onClick={() => setCalendarOpen(false)}>
+                        Concluído
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto max-h-96 overflow-y-auto">
+              <table className="min-w-full bg-white rounded-md">
+                <thead>
+                  <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                    <th className="py-3 px-6 text-left">Paciente</th>
+                    <th className="py-3 px-6 text-left">Serviço</th>
+                    <th className="py-3 px-6 text-left text-blue-600">Convênio</th>
+                    <th className="py-3 px-6 text-right">Valor</th>
+                    <th className="py-3 px-6 text-center">Pagamento</th>
+                    <th className="py-3 px-6 text-center">Data</th>
+                    <th className="py-3 px-6 text-center">Status</th>
                   </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="text-gray-600 text-sm font-light">
+                  {currentFinancialData.transactions
+                    .filter(t =>
+                      t.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      t.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      (t.insurance_name && t.insurance_name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    )
+                    .map(transaction => (
+                      <tr
+                        key={transaction.id}
+                        className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleTransactionClick(transaction)}
+                      >
+                        <td className="py-3 px-6 text-left font-medium">{transaction.patient}</td>
+                        <td className="py-3 px-6 text-left">{transaction.service}</td>
+                        <td className="py-3 px-6 text-left">
+                          {transaction.insurance_name ? (
+                            <span className="text-blue-600 font-medium">{transaction.insurance_name}</span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-6 text-right font-semibold">{formatCurrency(transaction.amount)}</td>
+                        <td className="py-3 px-6 text-center">
+                          {transaction.paymentMethod ? (
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${transaction.paymentMethod.toLowerCase() === 'dinheiro'
+                              ? 'bg-green-100 text-green-800 border border-green-200'
+                              : 'bg-blue-100 text-blue-800'
+                              }`}>
+                              {transaction.paymentMethod}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-xs">-</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-6 text-center">{transaction.date}</td>
+                        <td className="py-3 px-6 text-center">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                        ${transaction.status === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {transaction.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
 
-        {/* Resumo do Período */}
-        <div className="mt-6 p-4 bg-bege-principal/10 border border-bege-principal/20 rounded-md">
-          <h4 className="text-lg font-semibold text-cinza-escuro mb-2">Resumo do Período</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Total Faturado:</p>
-              <p className="font-bold text-cinza-escuro">{formatCurrency(currentFinancialData.monthlyRevenue)}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Recebido:</p>
-              <p className="font-bold text-green-600">{formatCurrency(currentFinancialData.monthlyRevenue - currentFinancialData.pendingPayments)}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">A Receber:</p>
-              <p className="font-bold text-yellow-600">{formatCurrency(currentFinancialData.pendingPayments)}</p>
+            {/* Resumo do Período */}
+            <div className="mt-6 p-4 bg-bege-principal/10 border border-bege-principal/20 rounded-md">
+              <h4 className="text-lg font-semibold text-cinza-escuro mb-2">Resumo do Período</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Total Faturado:</p>
+                  <p className="font-bold text-cinza-escuro">{formatCurrency(currentFinancialData.monthlyRevenue)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Recebido:</p>
+                  <p className="font-bold text-green-600">{formatCurrency(currentFinancialData.monthlyRevenue - currentFinancialData.pendingPayments)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">A Receber:</p>
+                  <p className="font-bold text-yellow-600">{formatCurrency(currentFinancialData.pendingPayments)}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
 
       {showPatientDetailsModal && selectedPatientForModal && (
         <PatientDetailsModal
@@ -630,6 +659,12 @@ export function FinanceiroSection() {
           onPatientUpdate={fetchFinancialData}
         />
       )}
+
+      {/* Modal de Emissão de NFe */}
+      <NfeEmissionModal
+        isOpen={isNfeModalOpen}
+        onClose={() => setIsNfeModalOpen(false)}
+      />
     </div>
   );
 }

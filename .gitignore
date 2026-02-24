@@ -36,3 +36,7 @@ CONFIGURACAO_TWILIO.md
 release/
 dist/
 build/
+
+# Certificados Digitais
+*.pfx
+*.p12
