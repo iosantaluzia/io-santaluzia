@@ -2,6 +2,9 @@ import React, { forwardRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AppointmentSlotItem } from './AppointmentSlotItem';
 import { ScheduleBlockModal } from './ScheduleBlockModal';
+import { Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 interface AppointmentSlot {
     time: string;
@@ -46,6 +49,7 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
     onRemoveBlock,
     selectedDate
 }, ref) => {
+    const [hideFreeSlots, setHideFreeSlots] = useState(false);
 
     // Gerar horários padrão: 07:30 às 17:30 (intervalos de 30 min)
     const standardTimes: string[] = [];
@@ -82,11 +86,28 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
             });
         }
     });
+
+    const finalDisplaySlots = hideFreeSlots
+        ? displaySlots.filter(s => s.status !== 'available')
+        : displaySlots;
+
     return (
         <div className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-cinza-escuro">{doctorName}</h3>
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setHideFreeSlots(!hideFreeSlots)}
+                        className={`h-9 w-9 transition-all ${hideFreeSlots
+                                ? 'bg-bege-principal/10 border-bege-principal text-bege-principal shadow-sm'
+                                : 'text-gray-400 hover:text-bege-principal'
+                            }`}
+                        title={hideFreeSlots ? "Mostrar horários livres" : "Ocultar horários livres"}
+                    >
+                        {hideFreeSlots ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
                     <ScheduleBlockModal
                         doctorName={doctorName}
                         onBlock={onBlockSchedule}
@@ -104,8 +125,8 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
                     <div className="flex justify-center items-center h-full">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-bege-principal"></div>
                     </div>
-                ) : displaySlots.length > 0 ? (
-                    displaySlots.map((slot, idx) => (
+                ) : finalDisplaySlots.length > 0 ? (
+                    finalDisplaySlots.map((slot, idx) => (
                         <AppointmentSlotItem
                             key={slot.consultationId || `${slot.time}-${idx}`}
                             slot={slot}

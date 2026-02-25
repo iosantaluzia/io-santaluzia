@@ -93,7 +93,7 @@ export function UserAuthSetup() {
       <CardContent className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">
-            Senha para financeiro@iosantaluzia.com
+            Senha para financeiro@iosantaluzia.com.br
           </label>
           <Input
             type="password"
@@ -102,7 +102,7 @@ export function UserAuthSetup() {
             placeholder="Digite a senha"
           />
         </div>
-        <Button 
+        <Button
           onClick={createFinanceiroAuth}
           disabled={isCreating || !password}
           className="w-full"

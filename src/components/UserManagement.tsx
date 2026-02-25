@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { Edit, Save, X, Trash2, Plus } from 'lucide-react';
+import { Edit, Save, X, Trash2, Plus, User } from 'lucide-react';
 
 interface AppUser {
   id: string;
@@ -21,6 +21,7 @@ interface AppUser {
   auth_user_id: string | null;
   created_at: string;
   last_login: string | null;
+  avatar_url?: string | null;
 }
 
 export function UserManagement() {
@@ -30,15 +31,17 @@ export function UserManagement() {
   const [editFormData, setEditFormData] = useState({ username: '', display_name: '', password: '' });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUserFormData, setNewUserFormData] = useState({ 
-    username: '', 
+  const [newUserFormData, setNewUserFormData] = useState({
+    username: '',
     display_name: '',
-    password: '', 
-    role: 'secretary' as 'admin' | 'doctor' | 'secretary' | 'financeiro' 
+    password: '',
+    role: 'secretary' as 'admin' | 'doctor' | 'secretary' | 'financeiro'
   });
-  
+
   // Verificar se o usuário tem permissão (apenas matheus e secretaria)
   const canManageUsers = appUser?.username?.toLowerCase() === 'matheus' || appUser?.username?.toLowerCase() === 'secretaria';
+
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'doctor' | 'secretary' | 'financeiro'>('all');
 
   // Buscar usuários
   const { data: users = [], isLoading } = useQuery({
@@ -48,9 +51,9 @@ export function UserManagement() {
         .from('app_users')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      return data as AppUser[];
+      return (data as unknown) as AppUser[];
     },
   });
 
@@ -69,7 +72,7 @@ export function UserManagement() {
         .from('app_users')
         .delete()
         .eq('id', userId);
-      
+
       if (error) throw error;
 
       // Se houver auth_user_id, tentar deletar do auth.users também
@@ -99,8 +102,8 @@ export function UserManagement() {
   // Criar novo usuário
   const createUserMutation = useMutation({
     mutationFn: async ({ username, display_name, password, role }: { username: string; display_name?: string; password: string; role: 'admin' | 'doctor' | 'secretary' | 'financeiro' }) => {
-      const email = `${username}@iosantaluzia.com`;
-      
+      const email = `${username}@iosantaluzia.com.br`;
+
       // Verificar se o username já existe
       const { data: existingUser } = await supabase
         .from('app_users')
@@ -125,7 +128,7 @@ export function UserManagement() {
           approved: true,
           auth_user_id: null,
           created_by: appUser?.username || 'system'
-        })
+        } as any)
         .select()
         .single();
 
@@ -156,7 +159,7 @@ export function UserManagement() {
         } catch (deleteError) {
           console.error('Erro ao limpar registro de app_users após falha:', deleteError);
         }
-        
+
         if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
           throw new Error('Email já está em uso. Use um username diferente.');
         }
@@ -190,7 +193,7 @@ export function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['app_users'] });
       setShowAddUser(false);
-      setNewUserFormData({ username: '', password: '', role: 'secretary' });
+      setNewUserFormData({ username: '', display_name: '', password: '', role: 'secretary' });
       toast.success('Usuário criado com sucesso');
     },
     onError: (error: any) => {
@@ -222,12 +225,12 @@ export function UserManagement() {
         .from('app_users')
         .update(updateData)
         .eq('id', userId);
-      
+
       if (appUserError) throw appUserError;
 
       // Se o username mudou e o usuário tem auth_user_id, atualizar email no auth.users via função SQL
       if (currentUser.auth_user_id && username !== currentUser.username) {
-        const newEmail = `${username}@iosantaluzia.com`;
+        const newEmail = `${username}@iosantaluzia.com.br`;
         try {
           // Atualizar email usando função SQL
           const { error: emailError } = await (supabase as any).rpc('update_user_email', {
@@ -281,16 +284,16 @@ export function UserManagement() {
 
   const handleEditUser = (user: AppUser) => {
     setEditingUser(user);
-    setEditFormData({ 
-      username: user.username, 
-      display_name: user.display_name || '', 
-      password: '' 
+    setEditFormData({
+      username: user.username,
+      display_name: user.display_name || '',
+      password: ''
     });
   };
 
   const handleSaveEdit = () => {
     if (!editingUser) return;
-    
+
     if (!editFormData.username.trim()) {
       toast.error('O username não pode estar vazio');
       return;
@@ -363,7 +366,7 @@ export function UserManagement() {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-cinza-escuro">Gerenciamento de Usuários</h2>
-        <Button 
+        <Button
           onClick={() => setShowAddUser(true)}
           className="bg-medical-primary text-white hover:bg-medical-primary/90"
         >
@@ -372,57 +375,97 @@ export function UserManagement() {
         </Button>
       </div>
 
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button
+          variant={roleFilter === 'all' ? 'default' : 'outline'}
+          onClick={() => setRoleFilter('all')}
+          size="sm"
+          className="rounded-full px-4"
+        >
+          Todos
+        </Button>
+        <Button
+          variant={roleFilter === 'doctor' ? 'default' : 'outline'}
+          onClick={() => setRoleFilter('doctor')}
+          size="sm"
+          className="rounded-full px-4"
+        >
+          Médicos
+        </Button>
+        <Button
+          variant={roleFilter === 'secretary' ? 'default' : 'outline'}
+          onClick={() => setRoleFilter('secretary')}
+          size="sm"
+          className="rounded-full px-4"
+        >
+          Secretárias
+        </Button>
+        <Button
+          variant={roleFilter === 'financeiro' ? 'default' : 'outline'}
+          onClick={() => setRoleFilter('financeiro')}
+          size="sm"
+          className="rounded-full px-4"
+        >
+          Financeiro
+        </Button>
+        <Button
+          variant={roleFilter === 'admin' ? 'default' : 'outline'}
+          onClick={() => setRoleFilter('admin')}
+          size="sm"
+          className="rounded-full px-4"
+        >
+          Administradores
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {users.map((user) => (
-          <Card key={user.id} className="flex flex-col">
-            <CardContent className="p-4 flex flex-col flex-1">
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{user.username}</h3>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge className={getRoleBadgeColor(user.role)}>
-                        {getRoleLabel(user.role)}
-                      </Badge>
-                      <Badge variant={user.approved ? "default" : "destructive"}>
-                        {user.approved ? "Aprovado" : "Pendente"}
-                      </Badge>
-                      {user.auth_user_id ? (
-                        <Badge variant="outline" className="text-green-600 border-green-200">
-                          ✓ Auth Configurado
+        {users
+          .filter(user => roleFilter === 'all' || user.role === roleFilter)
+          .map((user) => (
+            <Card key={user.id || user.username} className="flex flex-col">
+              <CardContent className="p-4 flex flex-col flex-1">
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-start gap-4">
+                    <div className="h-16 w-16 rounded-2xl border-2 border-bege-principal/20 bg-white shadow-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img
+                        src={user.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${user.username}&backgroundColor=b6e3f4`}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-1">{user.display_name || user.username}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge className={getRoleBadgeColor(user.role)}>
+                          {getRoleLabel(user.role)}
                         </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-orange-600 border-orange-200">
-                          ⚠ Auth Pendente
-                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col space-y-2 mt-auto">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditUser(user)}
+                      disabled={editUserMutation.isPending}
+                      className="w-full"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+
+                    <div className="text-xs text-gray-600 pt-2 border-t">
+                      <p>Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
+                      {user.last_login && (
+                        <p className="mt-1">Último login: {new Date(user.last_login).toLocaleString('pt-BR')}</p>
                       )}
                     </div>
                   </div>
                 </div>
-                
-                <div className="flex flex-col space-y-2 mt-auto">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditUser(user)}
-                    disabled={editUserMutation.isPending}
-                    className="w-full"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  
-                  <div className="text-xs text-gray-600 pt-2 border-t">
-                    <p>Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
-                    {user.last_login && (
-                      <p className="mt-1">Último login: {new Date(user.last_login).toLocaleString('pt-BR')}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
       </div>
 
       {/* Modal de Edição de Usuário */}
@@ -434,7 +477,13 @@ export function UserManagement() {
               Altere o username e/ou senha do usuário. Deixe a senha em branco para não alterá-la.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveEdit();
+            }}
+            className="space-y-4 mt-4"
+          >
             <div>
               <Label htmlFor="edit-username">Username (Login)</Label>
               <Input
@@ -477,6 +526,7 @@ export function UserManagement() {
             </div>
             <div className="flex justify-between items-center pt-4 border-t">
               <Button
+                type="button"
                 variant="destructive"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={editUserMutation.isPending || deleteUserMutation.isPending}
@@ -486,6 +536,7 @@ export function UserManagement() {
               </Button>
               <div className="flex space-x-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={handleCancelEdit}
                   disabled={editUserMutation.isPending || deleteUserMutation.isPending}
@@ -494,7 +545,7 @@ export function UserManagement() {
                   Cancelar
                 </Button>
                 <Button
-                  onClick={handleSaveEdit}
+                  type="submit"
                   disabled={editUserMutation.isPending || deleteUserMutation.isPending}
                 >
                   <Save className="h-4 w-4 mr-1" />
@@ -502,7 +553,7 @@ export function UserManagement() {
                 </Button>
               </div>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -515,7 +566,26 @@ export function UserManagement() {
               Crie um novo usuário com login e permissões para o dashboard.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!newUserFormData.username.trim()) {
+                toast.error('O username é obrigatório');
+                return;
+              }
+              if (!newUserFormData.password.trim() || newUserFormData.password.length < 6) {
+                toast.error('A senha deve ter pelo menos 6 caracteres');
+                return;
+              }
+              createUserMutation.mutate({
+                username: newUserFormData.username.trim(),
+                display_name: newUserFormData.display_name.trim() || undefined,
+                password: newUserFormData.password,
+                role: newUserFormData.role
+              });
+            }}
+            className="space-y-4 mt-4"
+          >
             <div>
               <Label htmlFor="new-username">Username (Login) *</Label>
               <Input
@@ -526,7 +596,7 @@ export function UserManagement() {
                 disabled={createUserMutation.isPending}
               />
               <p className="text-xs text-gray-500 mt-1">
-                O email será gerado automaticamente como: {newUserFormData.username || 'username'}@iosantaluzia.com
+                O email será gerado automaticamente como: {newUserFormData.username || 'username'}@iosantaluzia.com.br
               </p>
             </div>
             <div>
@@ -570,6 +640,7 @@ export function UserManagement() {
             </div>
             <div className="flex justify-end space-x-2 pt-4 border-t">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => {
                   setShowAddUser(false);
@@ -581,22 +652,7 @@ export function UserManagement() {
                 Cancelar
               </Button>
               <Button
-                onClick={() => {
-                  if (!newUserFormData.username.trim()) {
-                    toast.error('O username é obrigatório');
-                    return;
-                  }
-                  if (!newUserFormData.password.trim() || newUserFormData.password.length < 6) {
-                    toast.error('A senha deve ter pelo menos 6 caracteres');
-                    return;
-                  }
-                  createUserMutation.mutate({
-                    username: newUserFormData.username.trim(),
-                    display_name: newUserFormData.display_name.trim() || undefined,
-                    password: newUserFormData.password,
-                    role: newUserFormData.role
-                  });
-                }}
+                type="submit"
                 disabled={createUserMutation.isPending}
                 className="bg-medical-primary text-white hover:bg-medical-primary/90"
               >
@@ -604,7 +660,7 @@ export function UserManagement() {
                 {createUserMutation.isPending ? 'Criando...' : 'Criar Usuário'}
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 

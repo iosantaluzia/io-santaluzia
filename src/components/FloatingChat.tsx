@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageCircle, X, Send, Users } from 'lucide-react';
+import { MessageCircle, X, Send, Users, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -14,8 +14,9 @@ interface AppUser {
   id: string;
   username: string;
   display_name: string | null;
-  role: 'admin' | 'doctor' | 'secretary';
+  role: 'admin' | 'doctor' | 'secretary' | 'financeiro';
   approved: boolean;
+  avatar_url?: string | null;
 }
 
 interface FloatingChatProps {
@@ -219,7 +220,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('app_users')
-        .select('username, display_name, role, approved')
+        .select('username, display_name, role, approved, avatar_url')
         .eq('approved', true)
         .order('username', { ascending: true });
 
@@ -233,6 +234,16 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
     if (!username) return 'Usuário';
     const user = allRegisteredUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
     return user?.display_name || user?.username || username;
+  };
+
+  const getRoleLabel = (role: string | undefined) => {
+    switch (role) {
+      case 'admin': return 'Administrador';
+      case 'doctor': return 'Médico';
+      case 'secretary': return 'Secretária';
+      case 'financeiro': return 'Financeiro';
+      default: return role || '';
+    }
   };
 
   // Scroll para a última mensagem
@@ -424,7 +435,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
 
       {/* Janela de chat */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 h-[600px] flex flex-col">
+        <div className="fixed bottom-6 right-6 z-50 w-[520px] h-[600px] flex flex-col">
           <Card className="flex flex-col h-full shadow-2xl rounded-t-lg overflow-hidden">
             <CardHeader className="flex-shrink-0 pb-3 bg-medical-primary border-b-0 rounded-t-lg">
               <div className="flex items-center justify-between">
@@ -455,7 +466,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Lista de usuários */}
-              <div className="w-32 border-r flex-shrink-0 bg-gray-50 flex flex-col">
+              <div className="w-48 border-r flex-shrink-0 bg-gray-50 flex flex-col">
                 <ScrollArea className="flex-1">
                   <div className="p-2 space-y-1">
                     <Button
@@ -480,30 +491,45 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                         const user = onlineUsers.find(u => u.username === username);
                         const registeredUser = allRegisteredUsers.find(u => u.username === username);
                         const unread = getUnreadCountFrom(username);
+                        const getAvatarUrl = (user: AppUser) => {
+                          if (user.avatar_url) return user.avatar_url;
+                          // Avatar determinístico baseado no username para quem não tem
+                          return `https://api.dicebear.com/9.x/micah/svg?seed=${user.username}&backgroundColor=b6e3f4`;
+                        };
+
                         return (
-                          <Button
+                          <button
                             key={username}
-                            variant={selectedUser === username ? 'default' : 'ghost'}
-                            size="sm"
-                            className="w-full justify-start text-xs relative"
                             onClick={() => {
                               setSelectedUser(username);
                               markAsRead(username);
                             }}
+                            className={`w-full flex items-center gap-2 p-2 rounded-lg text-xs transition-colors hover:bg-gray-100 relative ${selectedUser === username ? 'bg-medical-primary/10 font-semibold text-medical-primary' : 'text-gray-600'
+                              }`}
                           >
-                            <div className="flex items-center gap-1 flex-1 min-w-0">
+                            <div className="relative flex-shrink-0">
+                              <div className="h-8 w-8 rounded-lg bg-white border border-gray-100 overflow-hidden flex items-center justify-center shadow-sm">
+                                <img
+                                  src={getAvatarUrl(registeredUser!)}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
                               <span
-                                className={`w-2 h-2 rounded-full ${user?.isOnline ? 'bg-green-500' : 'bg-gray-300'
+                                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${user?.isOnline ? 'bg-green-500' : 'bg-gray-300'
                                   }`}
                               />
-                              <span className="truncate">{getDisplayName(username)}</span>
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <div className="truncate font-medium">{getDisplayName(username)}</div>
+                              <div className="text-[10px] opacity-70 truncate capitalize">{getRoleLabel(registeredUser?.role)}</div>
                             </div>
                             {unread > 0 && (
-                              <Badge className="ml-1 h-4 px-1 text-xs bg-red-500">
+                              <Badge className="h-4 px-1 text-[10px] bg-red-500 min-w-[1.2rem] flex items-center justify-center">
                                 {unread > 9 ? '9+' : unread}
                               </Badge>
                             )}
-                          </Button>
+                          </button>
                         );
                       })
                     )}
@@ -549,24 +575,35 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                             return (
                               <div
                                 key={message.id}
-                                className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}
+                                className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}
                               >
+                                {!isOwn && (
+                                  <div className="flex-shrink-0 mr-2 mt-auto">
+                                    <div className="h-8 w-8 rounded-lg border border-gray-200 bg-white overflow-hidden flex items-center justify-center">
+                                      {(() => {
+                                        const sender = allRegisteredUsers.find(u => u.username.toLowerCase() === message.from_username?.toLowerCase());
+                                        const avatar = sender?.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${message.from_username || 'anonymous'}&backgroundColor=b6e3f4`;
+                                        return <img src={avatar} alt="" className="w-full h-full object-cover" />;
+                                      })()}
+                                    </div>
+                                  </div>
+                                )}
                                 <div
-                                  className={`max-w-[80%] px-4 py-2 rounded-lg ${isOwn
-                                    ? 'bg-medical-primary text-white'
-                                    : 'bg-gray-100 text-gray-900'
+                                  className={`max-w-[75%] px-4 py-2 rounded-2xl shadow-sm ${isOwn
+                                    ? 'bg-medical-primary text-white rounded-tr-none'
+                                    : 'bg-gray-100 text-gray-900 rounded-tl-none'
                                     }`}
                                 >
                                   {!isOwn && (
-                                    <div className="text-xs font-semibold mb-1">
+                                    <div className="text-[10px] uppercase tracking-wider font-bold mb-1 opacity-70">
                                       {getDisplayName(message.from_username)}
                                     </div>
                                   )}
-                                  <div className="text-sm whitespace-pre-wrap break-words">
+                                  <div className="text-sm whitespace-pre-wrap break-words leading-relaxed">
                                     {message.message}
                                   </div>
                                   <div
-                                    className={`text-xs mt-1 ${isOwn ? 'text-white/70' : 'text-gray-500'
+                                    className={`text-[10px] mt-1 text-right ${isOwn ? 'text-white/70' : 'text-gray-500'
                                       }`}
                                   >
                                     {formatTime(message.created_at)}

@@ -10,6 +10,8 @@ import { WaitlistModal } from './WaitlistModal';
 import { UsefulCodesModal } from './UsefulCodesModal';
 import { AppointmentForm } from './AppointmentForm';
 import { PersonalNotes } from './PersonalNotes';
+import { useAuth } from '@/hooks/useAuth';
+import { User } from 'lucide-react';
 
 interface DashboardOverviewProps {
   onSectionChange: (section: string) => void;
@@ -19,6 +21,7 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
   const [showWaitlist, setShowWaitlist] = useState(false);
   const [showUsefulCodes, setShowUsefulCodes] = useState(false);
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const { appUser } = useAuth();
 
 
   return (
@@ -46,10 +49,19 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
 
             {/* Seção Superior: Título, Status e Informações */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="flex items-center space-x-2 mb-2">
-                <h1 className="text-5xl font-black text-cinza-escuro">Painel Clínico</h1>
-                <div className="items-center rounded-md px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-cinza-escuro border border-bege-principal/10 hidden md:flex">
-                  <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse mr-1"></span>Online
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="h-12 w-12 rounded-xl border-2 border-bege-principal/20 bg-white shadow-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {appUser?.avatar_url ? (
+                    <img src={appUser.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="h-6 w-6 text-gray-300" />
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-4xl font-black text-cinza-escuro">Olá, {appUser?.display_name || appUser?.username || 'Usuário'}</h1>
+                  <div className="flex items-center text-xs font-semibold text-cinza-escuro/60 uppercase tracking-wider">
+                    <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse mr-1"></span>Sistema Online
+                  </div>
                 </div>
               </div>
 

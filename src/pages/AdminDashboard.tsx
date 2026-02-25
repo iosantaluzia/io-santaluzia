@@ -23,7 +23,16 @@ import { AdminSidebar } from '@/components/AdminSidebar';
 import { LazyComponents } from '@/components/LazyComponents';
 import { FloatingChat } from '@/components/FloatingChat';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { AvatarPicker } from '@/components/AvatarPicker';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const AdminDashboard = () => {
   const { isAuthenticated, appUser, signOut, loading, error, retry, user } = useAuth();
@@ -34,6 +43,7 @@ const AdminDashboard = () => {
   const [patientIdToOpen, setPatientIdToOpen] = useState<string | null>(null);
   const [patientIdToOpenRecord, setPatientIdToOpenRecord] = useState<string | null>(null);
   const [initialSectionSet, setInitialSectionSet] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   // Definir seção inicial quando appUser for carregado pela primeira vez
   useEffect(() => {
@@ -86,6 +96,27 @@ const AdminDashboard = () => {
   const handleRetry = () => {
     setLoadingTimeout(false);
     retry();
+  };
+
+  const handleUpdateAvatar = async (url: string) => {
+    if (!appUser) return;
+
+    try {
+      const { error } = await supabase
+        .from('app_users')
+        .update({ avatar_url: url })
+        .eq('id', appUser.id);
+
+      if (error) throw error;
+
+      toast.success('Avatar atualizado com sucesso!');
+      setShowAvatarPicker(false);
+      // Recarregar dados do usuário no hook useAuth
+      retry();
+    } catch (err) {
+      console.error('Erro ao atualizar avatar:', err);
+      toast.error('Erro ao salvar avatar no servidor.');
+    }
   };
 
   // Show loading state
@@ -335,8 +366,12 @@ const AdminDashboard = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
-                    <div className="h-8 w-8 rounded-full bg-bege-principal flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-white" />
+                    <div className="h-9 w-9 rounded-xl border-2 border-bege-principal/20 bg-white shadow-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {appUser?.avatar_url ? (
+                        <img src={appUser.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="h-5 w-5 text-gray-400" />
+                      )}
                     </div>
                     {/* Nome e role só em telas maiores */}
                     <div className="hidden sm:flex flex-col text-left">
@@ -345,10 +380,14 @@ const AdminDashboard = () => {
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => setShowAvatarPicker(true)}>
+                    <User className="h-4 w-4 mr-2" />
+                    Escolher Avatar
+                  </DropdownMenuItem>
                   {(appUser?.username?.toLowerCase() === 'matheus' || appUser?.username?.toLowerCase() === 'secretaria') && (
                     <DropdownMenuItem onClick={() => setShowUserManagement(!showUserManagement)}>
-                      <User className="h-4 w-4 mr-2" />
+                      <Settings className="h-4 w-4 mr-2" />
                       Gerenciar Usuários
                     </DropdownMenuItem>
                   )}
@@ -385,6 +424,24 @@ const AdminDashboard = () => {
         {isAuthenticated && appUser && (
           <FloatingChat currentUsername={appUser.username?.toLowerCase() || null} />
         )}
+
+        {/* Modal do Avatar Picker */}
+        <Dialog open={showAvatarPicker} onOpenChange={setShowAvatarPicker}>
+          <DialogContent
+            className="sm:max-w-2xl p-0 overflow-hidden border-none bg-transparent shadow-none"
+            aria-describedby={undefined}
+          >
+            <div className="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
+              <DialogHeader className="p-6 bg-gradient-to-r from-bege-principal/10 to-transparent">
+                <DialogTitle className="text-2xl font-bold text-cinza-escuro">Personalize seu Avatar</DialogTitle>
+              </DialogHeader>
+              <AvatarPicker
+                currentAvatarUrl={appUser?.avatar_url}
+                onAvatarSelect={handleUpdateAvatar}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );

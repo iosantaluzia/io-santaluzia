@@ -6,9 +6,11 @@ import { logger } from '@/utils/logger';
 interface AppUser {
   id: string;
   username: string;
-  role: 'admin' | 'doctor' | 'secretary';
+  role: 'admin' | 'doctor' | 'secretary' | 'financeiro';
   approved: boolean;
   auth_user_id: string | null;
+  display_name?: string | null;
+  avatar_url?: string | null;
 }
 
 interface AuthState {
@@ -170,10 +172,10 @@ export function useAuth() {
       }
 
       // Cache do resultado
-      appUserCache.current[authUserId] = data;
+      appUserCache.current[authUserId] = data as unknown as AppUser;
       setAuthState(prev => ({
         ...prev,
-        appUser: data,
+        appUser: data as unknown as AppUser,
         loading: false,
         error: null
       }));
@@ -202,18 +204,33 @@ export function useAuth() {
 
   const signInWithUsername = async (identifier: string, password_or_dob: string) => {
     try {
-      // 1. Staff check (legacy mapping)
-      const emailMap: Record<string, string> = {
-        'matheus': 'matheus@iosantaluzia.com',
-        'fabiola': 'fabiola@iosantaluzia.com',
-        'secretaria': 'secretaria@iosantaluzia.com',
-        'financeiro': 'financeiro@iosantaluzia.com'
-      };
+      // 1. Check if it's a staff member in app_users
+      const { data: staffUser, error: staffError } = await supabase
+        .from('app_users')
+        .select('username, role')
+        .eq('username', identifier.toLowerCase())
+        .maybeSingle();
 
-      const staffEmail = emailMap[identifier.toLowerCase()];
-      if (staffEmail) {
+      if (staffUser && staffUser.role !== 'patient' as any) {
+        const staffEmail = `${staffUser.username}@iosantaluzia.com.br`;
         return await supabase.auth.signInWithPassword({
           email: staffEmail,
+          password: password_or_dob
+        });
+      }
+
+      // Fallback para mapeamento fixo caso app_users falhe ou seja legado
+      const legacyEmailMap: Record<string, string> = {
+        'matheus': 'matheus@iosantaluzia.com.br',
+        'fabiola': 'fabiola@iosantaluzia.com.br',
+        'secretaria': 'secretaria@iosantaluzia.com.br',
+        'financeiro': 'financeiro@iosantaluzia.com.br'
+      };
+
+      const legacyEmail = legacyEmailMap[identifier.toLowerCase()];
+      if (legacyEmail) {
+        return await supabase.auth.signInWithPassword({
+          email: legacyEmail,
           password: password_or_dob
         });
       }
