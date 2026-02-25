@@ -51,7 +51,7 @@ export function ScheduleBlockModal({ doctorName, onBlock, initialDate }: Schedul
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 text-gray-600 hover:text-red-600 hover:border-red-200 ml-auto">
-                    <Lock className="h-4 w-4" />
+                    <Lock className="h-4 w-4 text-red-500" />
                     Bloquear Horário
                 </Button>
             </DialogTrigger>

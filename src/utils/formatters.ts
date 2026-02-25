@@ -10,15 +10,41 @@ export const formatCPF = (cpf: string): string => {
     return cpf;
 };
 
+const DEFAULT_DDD = '66';
+
+/**
+ * Adiciona DDD padrão (66) se o número não tiver DDD,
+ * e formata no padrão (xx) xxxxx-xxxx ou (xx) xxxx-xxxx.
+ */
 export const formatPhone = (phone: string): string => {
-    const numbers = phone.replace(/\D/g, '');
-    if (numbers.length === 11) {
-        return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else if (numbers.length === 10) {
-        return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    if (!phone) return phone;
+    let digits = phone.replace(/\D/g, '');
+
+    // Número sem DDD: 8 dígitos (fixo) ou 9 dígitos (celular) → adicionar DDD 66
+    if (digits.length === 8) {
+        digits = DEFAULT_DDD + digits;  // ex: 36001234 → 6636001234
+    } else if (digits.length === 9) {
+        digits = DEFAULT_DDD + digits;  // ex: 996001234 → 66996001234
     }
-    return phone;
+
+    // Formatar
+    if (digits.length === 11) {
+        return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (digits.length === 10) {
+        return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+
+    return phone; // retornar original se não reconhecer o padrão
 };
+
+/**
+ * Normaliza telefone para armazenamento: remove formatação,
+ * adiciona DDD 66 se ausente e retorna no formato (xx) xxxxx-xxxx.
+ */
+export const normalizePhoneForStorage = (phone: string): string => {
+    return formatPhone(phone);
+};
+
 
 export const formatCEP = (cep: string): string => {
     const numbers = cep.replace(/\D/g, '');

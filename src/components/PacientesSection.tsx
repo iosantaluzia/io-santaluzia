@@ -529,9 +529,9 @@ export function PacientesSection({
   const filteredPatients = patients;
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold text-cinza-escuro mb-4">Base de Dados de Pacientes</h2>
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
+    <div className="p-2 sm:p-4">
+      <h2 className="text-xl sm:text-2xl font-bold text-cinza-escuro mb-4">Base de Dados de Pacientes</h2>
+      <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm border border-gray-100 min-h-[500px]">
         {/* Abas para Prontuários e Backup - Ocultar quando paciente está selecionado */}
         {!selectedPatient && (
           <div className="flex border-b border-gray-200 mb-4">
@@ -643,6 +643,12 @@ export function PacientesSection({
           }}
           onPatientUpdate={async () => {
             await fetchPatients(0, true);
+          }}
+          onOpenPatientRecord={(id) => {
+            setShowPatientDetailsModal(false);
+            const patient = patients.find(p => p.id === id) || selectedPatientForModal;
+            setSelectedPatientForModal(null);
+            if (patient) setSelectedPatient(patient);
           }}
         />
       )}

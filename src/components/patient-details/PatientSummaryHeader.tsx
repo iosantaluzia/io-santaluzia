@@ -1,8 +1,9 @@
 import React from 'react';
-import { User, Phone, MessageCircle, Mail, Calendar, MapPin, Settings, Save, X } from 'lucide-react';
+import { User, Phone, MessageCircle, Mail, Calendar, MapPin, Settings, Save, X, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
+import { formatPhone } from '@/utils/formatters';
 
 interface PatientSummaryHeaderProps {
     isEditing: boolean;
@@ -42,8 +43,8 @@ export const PatientSummaryHeader = ({
 
     return (
         <div className={`relative ${isEditing ? 'space-y-2' : 'space-y-3'}`}>
-            {/* Botão de Editar */}
-            <div className="absolute top-0 right-0 z-10">
+            {/* Botão de ação: Editar */}
+            <div className="absolute top-0 right-0 z-10 flex items-center gap-2">
                 {!isEditing ? (
                     <Button
                         onClick={() => setIsEditing(true)}
@@ -93,7 +94,7 @@ export const PatientSummaryHeader = ({
                     {(editingPatient.phone || patient.phone) && (
                         <div className="flex items-center gap-3">
                             <Phone className="h-4 w-4 text-gray-600" />
-                            <p className="text-sm text-gray-700">{editingPatient.phone || patient.phone}</p>
+                            <p className="text-sm text-gray-700">{formatPhone(editingPatient.phone || patient.phone || '')}</p>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -198,8 +199,8 @@ export const PatientSummaryHeader = ({
                             />
                         </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="col-span-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                        <div className="sm:col-span-2">
                             <label className="text-[10px] font-bold text-marrom-acentuado uppercase">Endereço</label>
                             <Input
                                 value={editingPatient.address}
@@ -209,9 +210,18 @@ export const PatientSummaryHeader = ({
                             />
                         </div>
                         <div>
+                            <label className="text-[10px] font-bold text-marrom-acentuado uppercase">Cidade</label>
+                            <Input
+                                value={editingPatient.city || ''}
+                                onChange={(e) => setEditingPatient({ ...editingPatient, city: e.target.value })}
+                                className="h-8 text-sm"
+                                placeholder="Cidade"
+                            />
+                        </div>
+                        <div>
                             <label className="text-[10px] font-bold text-marrom-acentuado uppercase">CEP</label>
                             <Input
-                                value={editingPatient.cep}
+                                value={editingPatient.cep || ''}
                                 onChange={(e) => setEditingPatient({ ...editingPatient, cep: e.target.value })}
                                 className="h-8 text-sm"
                                 placeholder="00000-000"
@@ -223,3 +233,4 @@ export const PatientSummaryHeader = ({
         </div>
     );
 };
+

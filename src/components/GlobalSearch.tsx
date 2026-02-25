@@ -1,6 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, User, TestTube, Package, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatPhone } from '@/utils/formatters';
+
+// ─── Normalização ───────────────────────────────────────────────────────────
+// Remove acentos, cedilhas etc., converte para minúsculas e remove espaços extras
+const normalizeStr = (str: string) =>
+  str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove diacríticos
+    .toLowerCase()
+    .trim();
+
+// Pontuação de proximidade: quanto menor o índice do match, maior a prioridade
+const matchScore = (name: string, query: string): number => {
+  const normName = normalizeStr(name);
+  const normQuery = normalizeStr(query);
+  const idx = normName.indexOf(normQuery);
+  if (idx === -1) return -1;
+  // Começa no início da palavra = mais relevante
+  return 1000 - idx;
+};
 
 interface SearchResult {
   type: 'patient' | 'exam' | 'stock';
@@ -10,32 +30,97 @@ interface SearchResult {
   data: any;
 }
 
+interface PatientCache {
+  id: string;
+  name: string;
+  cpf: string | null;
+  phone: string | null;
+}
+
 interface GlobalSearchProps {
   onResultClick?: (result: SearchResult) => void;
   onSectionChange?: (section: string) => void;
 }
+
+// Cache global de pacientes (compartilhado entre montagens do componente)
+let patientCacheStore: PatientCache[] = [];
+let patientCacheLoaded = false;
 
 export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [patientCache, setPatientCache] = useState<PatientCache[]>(patientCacheStore);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fechar dropdown ao clicar fora
+  // ─── Carregar cache de pacientes uma única vez ───────────────────────────
+  useEffect(() => {
+    const loadPatientCache = async () => {
+      if (patientCacheLoaded) return; // já carregado por outra instância
+      try {
+        const { data, error } = await supabase
+          .from('patients')
+          .select('id, name, cpf, phone')
+          .order('name');
+
+        if (!error && data) {
+          patientCacheStore = data as PatientCache[];
+          patientCacheLoaded = true;
+          setPatientCache(patientCacheStore);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar cache de pacientes:', err);
+      }
+    };
+    loadPatientCache();
+  }, []);
+
+  // ─── Fechar dropdown ao clicar fora ─────────────────────────────────────
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Buscar resultados
+  // ─── Buscar pacientes no cache local (sem hit no banco) ─────────────────
+  const searchPatientsLocally = useCallback((query: string): SearchResult[] => {
+    if (!query.trim()) return [];
+
+    const normQuery = normalizeStr(query);
+    const queryClean = normQuery.replace(/\D/g, ''); // só dígitos para CPF/fone
+
+    const scored = patientCache
+      .map(patient => {
+        const score = matchScore(patient.name || '', normQuery);
+        // Fallback: busca por CPF / telefone usando dígitos
+        const cpfMatch = queryClean.length >= 3 && (patient.cpf || '').replace(/\D/g, '').includes(queryClean);
+        const phoneMatch = queryClean.length >= 3 && (patient.phone || '').replace(/\D/g, '').includes(queryClean);
+        return { patient, score: score >= 0 ? score : (cpfMatch || phoneMatch ? 1 : -1) };
+      })
+      .filter(({ score }) => score >= 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8); // máximo 8 pacientes no dropdown
+
+    return scored.map(({ patient }) => ({
+      type: 'patient',
+      id: patient.id,
+      title: patient.name,
+      subtitle: patient.cpf
+        ? patient.cpf
+        : patient.phone
+          ? formatPhone(patient.phone)
+          : '',
+      data: patient,
+    }));
+  }, [patientCache]);
+
+  // ─── Busca geral (exames + estoque via banco; pacientes via cache) ───────
   useEffect(() => {
     const search = async () => {
       if (!searchTerm.trim()) {
@@ -51,26 +136,11 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
       const allResults: SearchResult[] = [];
 
       try {
-        // Buscar Pacientes
-        const { data: patients, error: patientsError } = await supabase
-          .from('patients')
-          .select('id, name, cpf, phone')
-          .or(`name.ilike.%${searchTerm}%,cpf.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`)
-          .limit(5);
+        // Pacientes: filtrado localmente (insensível a acento + scoring)
+        const patientResults = searchPatientsLocally(searchTerm);
+        allResults.push(...patientResults);
 
-        if (!patientsError && patients) {
-          patients.forEach(patient => {
-            allResults.push({
-              type: 'patient',
-              id: patient.id,
-              title: patient.name,
-              subtitle: patient.cpf || patient.phone || '',
-              data: patient
-            });
-          });
-        }
-
-        // Buscar Exames
+        // Exames: busca no banco (não tem problema de acento aqui)
         const { data: exams, error: examsError } = await supabase
           .from('patient_exams')
           .select(`
@@ -81,7 +151,7 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
             patient_id,
             patients!inner(id, name)
           `)
-          .or(`exam_type.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
+          .or(`exam_type.ilike.%${searchLower}%,description.ilike.%${searchLower}%`)
           .limit(5);
 
         if (!examsError && exams) {
@@ -107,7 +177,7 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
           });
         }
 
-        // Buscar Estoque
+        // Estoque
         const { data: stockItems } = await supabase
           .from('inventory')
           .select('*')
@@ -135,16 +205,15 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
       }
     };
 
-    const timeoutId = setTimeout(search, 300); // Debounce de 300ms
+    const timeoutId = setTimeout(search, 200); // Debounce de 200ms
     return () => clearTimeout(timeoutId);
-  }, [searchTerm]);
+  }, [searchTerm, searchPatientsLocally]);
 
   const handleResultClick = (result: SearchResult) => {
     if (onResultClick) {
       onResultClick(result);
     }
 
-    // Navegação padrão baseada no tipo
     if (onSectionChange) {
       switch (result.type) {
         case 'patient':
@@ -165,35 +234,25 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
 
   const getCategoryIcon = (type: string) => {
     switch (type) {
-      case 'patient':
-        return <User className="h-4 w-4" />;
-      case 'exam':
-        return <TestTube className="h-4 w-4" />;
-      case 'stock':
-        return <Package className="h-4 w-4" />;
-      default:
-        return null;
+      case 'patient': return <User className="h-4 w-4" />;
+      case 'exam': return <TestTube className="h-4 w-4" />;
+      case 'stock': return <Package className="h-4 w-4" />;
+      default: return null;
     }
   };
 
   const getCategoryLabel = (type: string) => {
     switch (type) {
-      case 'patient':
-        return 'Pacientes';
-      case 'exam':
-        return 'Exames';
-      case 'stock':
-        return 'Estoque';
-      default:
-        return '';
+      case 'patient': return 'Pacientes';
+      case 'exam': return 'Exames';
+      case 'stock': return 'Estoque';
+      default: return '';
     }
   };
 
-  // Agrupar resultados por categoria
+  // Agrupar por categoria
   const groupedResults = results.reduce((acc, result) => {
-    if (!acc[result.type]) {
-      acc[result.type] = [];
-    }
+    if (!acc[result.type]) acc[result.type] = [];
     acc[result.type].push(result);
     return acc;
   }, {} as Record<string, SearchResult[]>);
@@ -207,7 +266,7 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
         <input
           ref={inputRef}
           type="search"
-          placeholder="Buscar..."
+          placeholder="Buscar paciente, exame, estoque..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => {
@@ -283,4 +342,3 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
     </div>
   );
 }
-

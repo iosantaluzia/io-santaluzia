@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/utils/logger';
 import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments';
 import { AppointmentForm } from './AppointmentForm';
 import { PatientDetailsModal } from './PatientDetailsModal';
@@ -175,15 +176,13 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       const { data: consultations, error } = await query.order('consultation_date', { ascending: true });
 
       if (error) {
-        console.error('Erro ao buscar agendamentos:', error);
+        logger.error('Erro ao buscar agendamentos:', error);
         setTimeSlotsMatheus([]);
         setTimeSlotsFabiola([]);
         return;
       }
 
       if (!consultations || consultations.length === 0) {
-        // Se não houver dados no banco: limpar tudo
-        // console.log('Nenhuma consulta encontrada, limpando slots');
         setTimeSlotsMatheus([]);
         setTimeSlotsFabiola([]);
         setLoading(false);
@@ -370,7 +369,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       const { data: consultations, error } = await query.order('consultation_date', { ascending: true });
 
       if (error) {
-        console.error('Erro ao buscar agendamentos do mês:', error);
+        logger.error('Erro ao buscar agendamentos do mês:', error);
         return;
       }
 
@@ -407,13 +406,12 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
       setMonthAppointments(appointmentsByDate);
     } catch (error) {
-      console.error('Erro ao buscar agendamentos do mês:', error);
+      logger.error('Erro ao buscar agendamentos do mês:', error);
     }
   }, []);
 
   // Buscar agendamentos do mês quando o mês mudar
   useEffect(() => {
-    const monthYear = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
     fetchMonthAppointments(selectedDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate.getFullYear(), selectedDate.getMonth(), fetchMonthAppointments]);
@@ -505,7 +503,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
         .eq('id', consultationId);
 
       if (error) {
-        console.error('Erro ao atualizar status:', error);
+        logger.error('Erro ao atualizar status:', error);
         toast.error('Erro ao atualizar status da consulta');
         return;
       }
@@ -517,7 +515,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       await fetchAppointments(selectedDate);
       await fetchMonthAppointments(selectedDate);
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
+      logger.error('Erro ao atualizar status:', error);
       toast.error('Erro ao atualizar status da consulta');
     }
   };
@@ -575,7 +573,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
       return newPatient.id;
     } catch (error) {
-      console.error('Erro ao obter/criar paciente de bloqueio:', error);
+      logger.error('Erro ao obter/criar paciente de bloqueio:', error);
       throw error;
     }
   };
@@ -645,15 +643,10 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       // O ideal seria fazer o refresh apenas no final, mas aqui não sabemos se é o último.
       // O realtime deve cuidar da atualização visual, ou podemos forçar.
       fetchAppointments(selectedDate);
-      // Se a data do bloqueio for a selecionada, refresh
-      if (date.toDateString() === selectedDate.toDateString()) {
-        fetchAppointments(selectedDate);
-      }
-      // Sempre atualizar o mês para mostrar as bolinhas/cores
       fetchMonthAppointments(selectedDate);
 
     } catch (error) {
-      console.error('Erro ao bloquear horário:', error);
+      logger.error('Erro ao bloquear horário:', error);
       toast.error('Erro ao bloquear horário: ' + (error as any).message);
     }
   };
@@ -671,7 +664,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
       fetchAppointments(selectedDate);
       fetchMonthAppointments(selectedDate);
     } catch (error) {
-      console.error('Erro ao remover bloqueio:', error);
+      logger.error('Erro ao remover bloqueio:', error);
       toast.error('Erro ao remover bloqueio');
     }
   };
@@ -851,7 +844,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           setShowAppointmentForm={setShowAppointmentForm}
         />
 
-        <div className={`w-full ${viewMode === 'all' ? 'lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6' : 'lg:w-2/3'}`}>
+        <div className={`w-full ${viewMode === 'all' ? 'lg:w-2/3 flex flex-col md:grid md:grid-cols-2 gap-6' : 'lg:w-2/3'}`}>
           {(viewMode === 'all' || viewMode === 'matheus') && (
             <DoctorAgendaList
               ref={matheusScrollRef}

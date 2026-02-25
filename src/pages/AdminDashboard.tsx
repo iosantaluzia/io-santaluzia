@@ -258,11 +258,11 @@ const AdminDashboard = () => {
 
         <main className="flex-1 flex flex-col relative">
           {/* Header */}
-          <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 sticky top-0 z-40">
-            {/* Seção Esquerda: SidebarTrigger + Breadcrumb */}
-            <div className="flex items-center space-x-4 flex-shrink-0">
+          <header className="h-14 sm:h-16 bg-white border-b border-gray-200 flex items-center px-2 sm:px-4 sticky top-0 z-40 gap-2">
+            {/* Esquerda: SidebarTrigger + Breadcrumb */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <SidebarTrigger />
-              <Breadcrumb>
+              <Breadcrumb className="hidden sm:block">
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink
@@ -287,41 +287,37 @@ const AdminDashboard = () => {
                   )}
                 </BreadcrumbList>
               </Breadcrumb>
+              {/* Mobile: apenas nome da seção */}
+              <span className="sm:hidden text-sm font-medium text-cinza-escuro">
+                {showUserManagement ? 'Usuários' : getSectionTitle(activeSection)}
+              </span>
             </div>
 
-            {/* Seção Central: Busca Global */}
-            <div className="flex-1 flex justify-center px-4">
+            {/* Central: Busca Global */}
+            <div className="flex-1 flex justify-center px-1 sm:px-4">
               <div className="w-full max-w-2xl">
                 <GlobalSearch
                   onSectionChange={(section) => {
                     setActiveSection(section);
-                    // Limpar estados de navegação quando mudar de seção manualmente
                     if (section !== 'pacientes') {
                       setPatientIdToOpen(null);
                       setPatientToOpenConsultation(null);
                     }
                   }}
                   onResultClick={(result) => {
-                    // Navegar baseado no tipo de resultado
                     if (result.type === 'patient') {
-                      // Navegar para pacientes e abrir o prontuário do paciente específico
-                      setPatientIdToOpen(result.id);
+                      setPatientIdToOpenRecord(result.id);
                       setActiveSection('pacientes');
                     } else if (result.type === 'exam') {
-                      // Para exames, navegar para o paciente que tem o exame
                       const examData = result.data;
-                      // Tentar obter patient_id de diferentes formas
                       const patientId = examData?.patient_id || examData?.patients?.id;
                       if (patientId) {
                         setPatientIdToOpen(patientId);
                         setActiveSection('pacientes');
-                        // TODO: Futuramente, podemos adicionar lógica para abrir diretamente a aba de exames do paciente
                       } else {
-                        // Se não tiver patient_id, apenas navegar para exames
                         setActiveSection('exames');
                       }
                     } else if (result.type === 'stock') {
-                      // Estoque já navega corretamente
                       setActiveSection('estoque');
                     }
                   }}
@@ -329,8 +325,8 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Seção Direita: Notificações, Configurações e Usuário */}
-            <div className="flex items-center space-x-4 flex-shrink-0">
+            {/* Direita: Notificações + Usuário */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button className="p-2 text-gray-600 hover:text-cinza-escuro relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
@@ -338,20 +334,18 @@ const AdminDashboard = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center space-x-2 hover:opacity-80 transition-opacity focus:outline-none text-left">
-                    <div className="h-8 w-8 rounded-full bg-bege-principal flex items-center justify-center">
+                  <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
+                    <div className="h-8 w-8 rounded-full bg-bege-principal flex items-center justify-center flex-shrink-0">
                       <User className="h-4 w-4 text-white" />
                     </div>
-                    <div className="flex flex-col">
+                    {/* Nome e role só em telas maiores */}
+                    <div className="hidden sm:flex flex-col text-left">
                       <span className="text-sm font-medium text-cinza-escuro capitalize">{appUser?.username}</span>
-                      <span className="text-xs text-gray-500">
-                        {getRoleName(appUser?.role || '')}
-                      </span>
+                      <span className="text-xs text-gray-500">{getRoleName(appUser?.role || '')}</span>
                     </div>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {/* Apenas Matheus e secretaria podem gerenciar usuários */}
                   {(appUser?.username?.toLowerCase() === 'matheus' || appUser?.username?.toLowerCase() === 'secretaria') && (
                     <DropdownMenuItem onClick={() => setShowUserManagement(!showUserManagement)}>
                       <User className="h-4 w-4 mr-2" />

@@ -7,13 +7,19 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Info } from 'lucide-react';
+import { Loader2, Info, Calendar as CalendarIcon, Trash2, PlusCircle } from 'lucide-react';
+import { format } from 'date-fns';
 
 const COMMON_LENS_BRANDS = [
     { label: 'ISERT 151 Esférica', prefix: 'Lente ISERT 151 Esférica' },
     { label: 'Vivinex Gemetric (Multifocal)', prefix: 'Lente Vivinex Gemetric Asférica Multifocal' },
     { label: 'Vivinex Impress (Monofocal)', prefix: 'Lente Vivinex Impress Asférica Monofocal' },
 ];
+
+interface ExpirationBatch {
+    date: string;
+    quantity: number;
+}
 
 interface InventoryItemModalProps {
     isOpen: boolean;
@@ -29,7 +35,13 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
         category: '',
         quantity: 0,
         min_stock: 0,
-        unit: 'unidade'
+        unit: 'unidade',
+        expirations: [] as ExpirationBatch[]
+    });
+
+    const [newBatch, setNewBatch] = useState<ExpirationBatch>({
+        date: '',
+        quantity: 0
     });
 
     useEffect(() => {
@@ -39,7 +51,8 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                 category: itemToEdit.category || '',
                 quantity: itemToEdit.quantity || 0,
                 min_stock: itemToEdit.min_stock || itemToEdit.minStock || 0,
-                unit: itemToEdit.unit || 'unidade'
+                unit: itemToEdit.unit || 'unidade',
+                expirations: Array.isArray(itemToEdit.expirations) ? itemToEdit.expirations : []
             });
         } else {
             setFormData({
@@ -47,27 +60,71 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                 category: '',
                 quantity: 0,
                 min_stock: 0,
-                unit: 'unidade'
+                unit: 'unidade',
+                expirations: []
             });
         }
     }, [itemToEdit, isOpen]);
+
+    // Lógica de auto-categorização para IOL
+    useEffect(() => {
+        const name = formData.name.toLowerCase();
+        if (name.includes('isert') || name.includes('vivinex')) {
+            if (formData.category !== 'IOL') {
+                setFormData(prev => ({ ...prev, category: 'IOL' }));
+            }
+        }
+    }, [formData.name]);
+
+    const handleAddBatch = () => {
+        if (!newBatch.date || newBatch.quantity <= 0) {
+            toast.error('Informe uma data e quantidade válida para o lote.');
+            return;
+        }
+
+        const updatedExpirations = [...formData.expirations, newBatch];
+        const totalQuantity = updatedExpirations.reduce((sum, b) => sum + b.quantity, 0);
+
+        setFormData({
+            ...formData,
+            expirations: updatedExpirations,
+            quantity: totalQuantity
+        });
+
+        setNewBatch({ date: '', quantity: 0 });
+        toast.success('Lote adicionado!');
+    };
+
+    const handleRemoveBatch = (index: number) => {
+        const updatedExpirations = formData.expirations.filter((_, i) => i !== index);
+        const totalQuantity = updatedExpirations.reduce((sum, b) => sum + b.quantity, 0);
+
+        setFormData({
+            ...formData,
+            expirations: updatedExpirations,
+            quantity: totalQuantity
+        });
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            const dataToSave = {
+                name: formData.name,
+                category: formData.category,
+                quantity: formData.quantity,
+                min_stock: formData.min_stock,
+                unit: formData.unit,
+                expirations: formData.expirations
+            };
+
             if (itemToEdit?.id && typeof itemToEdit.id === 'string' && itemToEdit.id.length > 10) {
                 // Update existing item
                 const { error } = await supabase
                     .from('inventory')
-                    .update({
-                        name: formData.name,
-                        category: formData.category,
-                        quantity: formData.quantity,
-                        min_stock: formData.min_stock,
-                        unit: formData.unit
-                    })
+                    .update(dataToSave)
                     .eq('id', itemToEdit.id);
 
                 if (error) throw error;
@@ -76,15 +133,7 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                 // Insert new item
                 const { error } = await supabase
                     .from('inventory')
-                    .insert([
-                        {
-                            name: formData.name,
-                            category: formData.category,
-                            quantity: formData.quantity,
-                            min_stock: formData.min_stock,
-                            unit: formData.unit
-                        }
-                    ]);
+                    .insert([dataToSave]);
 
                 if (error) throw error;
                 toast.success('Item adicionado ao estoque!');
@@ -94,15 +143,17 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
             onClose();
         } catch (error: any) {
             console.error('Erro ao salvar item:', error);
-            toast.error('Erro ao salvar item: ' + error.message);
+            toast.error('Erro ao salvar item. Verifique se a coluna expirations foi criada no banco de dados.');
         } finally {
             setLoading(false);
         }
     };
 
+    const categories = ['Colírios', 'Lentes', 'IOL', 'Escritório', 'Centro Cirúrgico', 'Consultório', 'Limpeza', 'Outros'];
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{itemToEdit ? 'Editar Item' : 'Novo Item de Estoque'}</DialogTitle>
                 </DialogHeader>
@@ -118,21 +169,17 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                 <SelectValue placeholder="Selecione uma categoria" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Colírios">Colírios</SelectItem>
-                                <SelectItem value="Lentes">Lentes</SelectItem>
-                                <SelectItem value="Escritório">Escritório</SelectItem>
-                                <SelectItem value="Centro Cirúrgico">Centro Cirúrgico</SelectItem>
-                                <SelectItem value="Consultório">Consultório</SelectItem>
-                                <SelectItem value="Limpeza">Limpeza</SelectItem>
-                                <SelectItem value="Outros">Outros</SelectItem>
+                                {categories.map(cat => (
+                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
 
-                    {formData.category === 'Lentes' && !itemToEdit && (
+                    {(formData.category === 'Lentes' || formData.category === 'IOL') && !itemToEdit && (
                         <div className="space-y-2 p-3 bg-bege-principal/5 rounded-md border border-bege-principal/20">
                             <Label className="text-marrom-acentuado text-xs flex items-center gap-1 font-semibold">
-                                <Info className="h-3 w-3" /> Lentes cadastradas:
+                                <Info className="h-3 w-3" /> Sugestões de Marcas:
                             </Label>
                             <div className="grid grid-cols-2 gap-2 mt-1">
                                 {COMMON_LENS_BRANDS.map((brand) => (
@@ -147,22 +194,6 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                         {brand.label}
                                     </Button>
                                 ))}
-                                <div className="col-span-2 flex gap-2 mt-1">
-                                    <Input
-                                        placeholder="Cadastrar nova marca..."
-                                        className="h-8 text-xs bg-white border-bege-principal/20 focus-visible:ring-bege-principal"
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                const target = e.target as HTMLInputElement;
-                                                if (target.value.trim()) {
-                                                    setFormData({ ...formData, name: `Lente ${target.value.trim()} ` });
-                                                    target.value = '';
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </div>
                             </div>
                         </div>
                     )}
@@ -171,19 +202,87 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                         <Label htmlFor="name">Nome do Item</Label>
                         <Input
                             id="name"
-                            placeholder={formData.category === 'Lentes' ? "Ex: Lente ... +20.00" : "Ex: Colírio Hipromelose"}
+                            placeholder={(formData.category === 'Lentes' || formData.category === 'IOL') ? "Ex: Lente ... +20.00" : "Ex: Colírio Hipromelose"}
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
                         />
-                        {formData.category === 'Lentes' && (
+                        {(formData.category === 'Lentes' || formData.category === 'IOL') && (
                             <p className="text-[10px] text-gray-400 italic">Dica: Inclua a marca e o grau (ex: +22.50)</p>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="border-t border-gray-100 pt-4 mt-4">
+                        <Label className="text-sm font-bold mb-3 block">Gerenciar Lotes e Validades</Label>
+
+                        <div className="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <div className="grid grid-cols-5 gap-2 items-end">
+                                <div className="col-span-3 space-y-1">
+                                    <Label htmlFor="batchDate" className="text-[10px] uppercase text-gray-500">Data de Validade</Label>
+                                    <Input
+                                        id="batchDate"
+                                        type="date"
+                                        value={newBatch.date}
+                                        onChange={(e) => setNewBatch({ ...newBatch, date: e.target.value })}
+                                        className="h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="col-span-1 space-y-1">
+                                    <Label htmlFor="batchQty" className="text-[10px] uppercase text-gray-500">Qtd</Label>
+                                    <Input
+                                        id="batchQty"
+                                        type="number"
+                                        min="1"
+                                        value={newBatch.quantity || ''}
+                                        onChange={(e) => setNewBatch({ ...newBatch, quantity: parseInt(e.target.value) || 0 })}
+                                        className="h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="col-span-1">
+                                    <Button
+                                        type="button"
+                                        onClick={handleAddBatch}
+                                        size="sm"
+                                        className="w-full h-9 bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white"
+                                    >
+                                        <PlusCircle className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {formData.expirations.length > 0 && (
+                                <div className="mt-3 space-y-2 max-h-40 overflow-y-auto pr-1">
+                                    {formData.expirations.map((batch, idx) => (
+                                        <div key={idx} className="flex items-center justify-between bg-white p-2 rounded border border-gray-200 text-xs">
+                                            <div className="flex items-center gap-2">
+                                                <CalendarIcon className="h-3 w-3 text-gray-400" />
+                                                <span className="font-medium">
+                                                    {batch.date ? format(new Date(batch.date + 'T12:00:00'), 'dd/MM/yyyy') : '-'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="bg-gray-100 px-2 py-0.5 rounded font-semibold">{batch.quantity} {formData.unit}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveBatch(idx)}
+                                                    className="text-red-400 hover:text-red-600 p-1"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-2 px-1">
+                            A quantidade total será calculada automaticamente a partir dos lotes acima.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="space-y-2">
-                            <Label htmlFor="quantity">Quantidade Atual</Label>
+                            <Label htmlFor="quantity">Quantidade Total</Label>
                             <Input
                                 id="quantity"
                                 type="number"
@@ -191,6 +290,8 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                 value={formData.quantity}
                                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
                                 required
+                                readOnly={formData.expirations.length > 0}
+                                className={formData.expirations.length > 0 ? "bg-gray-50 text-gray-500" : ""}
                             />
                         </div>
                         <div className="space-y-2">
@@ -216,7 +317,7 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                         />
                     </div>
 
-                    <DialogFooter className="pt-4">
+                    <DialogFooter className="pt-4 sticky bottom-0 bg-white">
                         <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                             Cancelar
                         </Button>

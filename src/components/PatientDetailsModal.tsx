@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { formatCurrencyInput } from '@/utils/currency';
 import { translateStatus, getStatusColor, examTypeLabels } from '@/utils/statusUtils';
+import { FileText } from 'lucide-react';
 import { PatientSummaryHeader } from './patient-details/PatientSummaryHeader';
 import { ConsultationHistoryList } from './patient-details/ConsultationHistoryList';
 import { AppointmentDetails } from './patient-details/AppointmentDetails';
@@ -544,8 +545,8 @@ export function PatientDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95dvh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-center text-xl font-semibold text-medical-primary">
               Detalhes do Paciente
             </DialogTitle>
@@ -556,7 +557,7 @@ export function PatientDetailsModal({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 overflow-hidden flex flex-col">
+          <div className="space-y-4 overflow-y-auto flex-1 pr-1">
             <div className={`grid overflow-hidden ${isEditing ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-2 gap-6'}`}>
 
               <PatientSummaryHeader
@@ -586,6 +587,20 @@ export function PatientDetailsModal({
                 />
               )}
             </div>
+
+            {!isEditing && onOpenPatientRecord && patientId && (
+              <div className="pt-3 border-t border-gray-100 mt-2">
+                <Button
+                  onClick={() => { onOpenPatientRecord(patientId); onClose(); }}
+                  className="w-full bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white flex items-center justify-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  {isDoctor
+                    ? 'Ver Prontuário Completo'
+                    : 'Ver Cadastro Completo'}
+                </Button>
+              </div>
+            )}
 
             {!isEditing && (patient.consultationId || patient.time || patient.appointmentDate) && (
               <AppointmentDetails

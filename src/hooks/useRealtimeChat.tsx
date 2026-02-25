@@ -266,20 +266,22 @@ export function useRealtimeChat(currentUsername: string | null) {
       if (channelRef.current) {
         const channelState = channelRef.current.state;
         if (channelState !== 'joined' && channelState !== 'joining') {
-          // console.warn('⚠️ Canal Realtime desconectado, tentando reconectar...');
           setIsConnected(false);
-          // Tentar reconectar
           channelRef.current.subscribe();
-        } else {
-          // console.log('✅ Canal Realtime ainda conectado:', channelState);
         }
       }
     }, 30000);
 
+    // Polling de fallback: recarrega mensagens a cada 10s para garantir
+    // que novas mensagens apareçam mesmo que o Realtime não entregue via broadcast.
+    const pollingInterval = setInterval(() => {
+      loadMessages();
+    }, 10000);
+
     // Limpeza ao desmontar
     return () => {
-      // console.log('🧹 Limpando canais Realtime...');
       clearInterval(connectionCheckInterval);
+      clearInterval(pollingInterval);
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;

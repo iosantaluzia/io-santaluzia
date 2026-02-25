@@ -34,7 +34,8 @@ export const AppointmentDetails = ({
 }: AppointmentDetailsProps) => {
     return (
         <div className="bg-marrom-acentuado/10 p-4 rounded-lg relative border border-marrom-acentuado/20">
-            <div className="absolute top-3 right-3 flex gap-2">
+            {/* Botões de ação - no mobile ficam em linha quebrada no topo */}
+            <div className="flex flex-wrap gap-2 mb-3 sm:mb-0 sm:absolute sm:top-3 sm:right-3">
                 {patient.consultationId && (
                     <>
                         <Button
