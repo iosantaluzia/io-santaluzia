@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { Edit, Save, X, Trash2, Plus, User } from 'lucide-react';
+import { Edit, Save, X, Trash2, Plus, User, CheckCircle2 } from 'lucide-react';
 
 interface AppUser {
   id: string;
@@ -38,8 +38,9 @@ export function UserManagement() {
     role: 'secretary' as 'admin' | 'doctor' | 'secretary' | 'financeiro'
   });
 
-  // Verificar se o usuário tem permissão (apenas matheus e secretaria)
-  const canManageUsers = appUser?.username?.toLowerCase() === 'matheus' || appUser?.username?.toLowerCase() === 'secretaria';
+  // Permissions: All can see the section, but only admins can manage others
+  const isAdmin = appUser?.role === 'admin' || appUser?.username?.toLowerCase() === 'matheus';
+  const canFullManage = isAdmin;
 
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'doctor' | 'secretary' | 'financeiro'>('all');
 
@@ -282,6 +283,26 @@ export function UserManagement() {
     },
   });
 
+  // Aprovar usuário
+  const approveUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase
+        .from('app_users')
+        .update({ approved: true })
+        .eq('id', userId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['app_users'] });
+      toast.success('Usuário aprovado com sucesso');
+    },
+    onError: (error: any) => {
+      console.error('Error approving user:', error);
+      toast.error('Erro ao aprovar usuário: ' + (error.message || 'Erro desconhecido'));
+    },
+  });
+
   const handleEditUser = (user: AppUser) => {
     setEditingUser(user);
     setEditFormData({
@@ -342,17 +363,7 @@ export function UserManagement() {
     }
   };
 
-  // Verificar permissão de acesso
-  if (!canManageUsers) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <div className="text-center">
-          <p className="text-lg text-gray-600 mb-2">Acesso Negado</p>
-          <p className="text-sm text-gray-500">Apenas Matheus e Secretaria podem gerenciar usuários.</p>
-        </div>
-      </div>
-    );
-  }
+  // No longer blocking access, just filtering content below
 
   if (isLoading) {
     return (
@@ -365,14 +376,18 @@ export function UserManagement() {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-cinza-escuro">Gerenciamento de Usuários</h2>
-        <Button
-          onClick={() => setShowAddUser(true)}
-          className="bg-medical-primary text-white hover:bg-medical-primary/90"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar Usuário
-        </Button>
+        <h2 className="text-2xl font-bold text-cinza-escuro">
+          Equipe do Instituto
+        </h2>
+        {isAdmin && (
+          <Button
+            onClick={() => setShowAddUser(true)}
+            className="bg-medical-primary text-white hover:bg-medical-primary/90"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Usuário
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -422,7 +437,34 @@ export function UserManagement() {
         {users
           .filter(user => roleFilter === 'all' || user.role === roleFilter)
           .map((user) => (
-            <Card key={user.id || user.username} className="flex flex-col">
+            <Card key={user.id || user.username} className="flex flex-col relative">
+              <div className="absolute top-2 right-2 flex gap-1 z-10">
+                {(isAdmin || user.id === appUser?.id) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEditUser(user)}
+                    className="text-gray-400 hover:text-medical-primary hover:bg-medical-primary/10 transition-colors h-8 w-8"
+                    title={user.id === appUser?.id ? "Editar Meu Perfil" : "Editar Usuário"}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                {isAdmin && user.id !== appUser?.id && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setEditingUser(user);
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
+                    title="Excluir Usuário"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
               <CardContent className="p-4 flex flex-col flex-1">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start gap-4">
@@ -444,16 +486,20 @@ export function UserManagement() {
                   </div>
 
                   <div className="flex flex-col space-y-2 mt-auto">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditUser(user)}
-                      disabled={editUserMutation.isPending}
-                      className="w-full"
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
-                    </Button>
+                    {isAdmin && !user.approved && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => approveUserMutation.mutate(user.id)}
+                        disabled={approveUserMutation.isPending}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        Aprovar Acesso
+                      </Button>
+                    )}
+
+
 
                     <div className="text-xs text-gray-600 pt-2 border-t">
                       <p>Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
@@ -595,9 +641,6 @@ export function UserManagement() {
                 placeholder="Digite o username (ex: joao)"
                 disabled={createUserMutation.isPending}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                O email será gerado automaticamente como: {newUserFormData.username || 'username'}@iosantaluzia.com.br
-              </p>
             </div>
             <div>
               <Label htmlFor="new-display-name">Nome de Exibição</Label>

@@ -204,39 +204,35 @@ export function useAuth() {
 
   const signInWithUsername = async (identifier: string, password_or_dob: string) => {
     try {
+      const cleanIdentifier = identifier.trim().toLowerCase();
+      const cleanPassword = password_or_dob.trim();
+
       // 1. Check if it's a staff member in app_users
       const { data: staffUser, error: staffError } = await supabase
         .from('app_users')
-        .select('username, role')
-        .eq('username', identifier.toLowerCase())
+        .select('username, role, approved')
+        .eq('username', cleanIdentifier)
         .maybeSingle();
 
       if (staffUser && staffUser.role !== 'patient' as any) {
-        const staffEmail = `${staffUser.username}@iosantaluzia.com.br`;
-        return await supabase.auth.signInWithPassword({
+        if (!staffUser.approved) {
+          return { data: null, error: { message: 'Seu acesso ainda não foi aprovado pela administração.' } };
+        }
+
+        const staffEmail = `${cleanIdentifier}@iosantaluzia.com.br`;
+        const result = await supabase.auth.signInWithPassword({
           email: staffEmail,
-          password: password_or_dob
+          password: cleanPassword
         });
+
+        if (!result.error) {
+          // Forçar atualização do estado local imediatamente
+          await fetchAppUserSafely(result.data.user.id);
+        }
+        return result;
       }
 
-      // Fallback para mapeamento fixo caso app_users falhe ou seja legado
-      const legacyEmailMap: Record<string, string> = {
-        'matheus': 'matheus@iosantaluzia.com.br',
-        'fabiola': 'fabiola@iosantaluzia.com.br',
-        'secretaria': 'secretaria@iosantaluzia.com.br',
-        'financeiro': 'financeiro@iosantaluzia.com.br'
-      };
-
-      const legacyEmail = legacyEmailMap[identifier.toLowerCase()];
-      if (legacyEmail) {
-        return await supabase.auth.signInWithPassword({
-          email: legacyEmail,
-          password: password_or_dob
-        });
-      }
-
-      // 2. Patient check
-      const cleanIdentifier = identifier.trim();
+      // Fallback para CPF/Paciente
       const cleanCPF = cleanIdentifier.replace(/\D/g, '');
 
       // Encontrar paciente por CPF ou Email

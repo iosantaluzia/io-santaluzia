@@ -51,11 +51,11 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
               <div className="flex items-center space-x-3 mb-2">
                 <div className="h-12 w-12 rounded-xl border-2 border-bege-principal/20 bg-white shadow-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {appUser?.avatar_url ? (
-                    <img src={appUser.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="h-6 w-6 text-gray-300" />
-                  )}
+                  <img
+                    src={appUser?.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${appUser?.username}&backgroundColor=b6e3f4`}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
                   <h1 className="text-4xl font-black text-cinza-escuro">Olá, {appUser?.display_name || appUser?.username || 'Usuário'}</h1>

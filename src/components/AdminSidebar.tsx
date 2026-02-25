@@ -9,8 +9,8 @@ import {
   HandCoins,
   Stethoscope,
   Mail,
-  Menu,
-  FileCheck
+  FileCheck,
+  Truck
 } from 'lucide-react';
 import {
   Sidebar,
@@ -27,14 +27,15 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 
 const allSidebarItems = [
-  { title: "Visão Geral", url: "#overview", icon: LayoutDashboard, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Agendamentos", url: "#agendamentos", icon: Calendar, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Pacientes", url: "#pacientes", icon: Users, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Exames", url: "#exames", icon: FileText, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Documentos", url: "#documentos", icon: FileCheck, roles: ['admin', 'doctor'] }, // Apenas médicos e admins
-  { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary'] },
-  { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor'], allowedUsers: ['financeiro'] },
-  { title: "Email", url: "#email", icon: Mail, roles: ['admin'], allowedUsers: ['financeiro'] }, // Só para financeiro
+  { title: "Visão Geral", url: "#overview", icon: LayoutDashboard, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
+  { title: "Agendamentos", url: "#agendamentos", icon: Calendar, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
+  { title: "Pacientes", url: "#pacientes", icon: Users, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
+  { title: "Exames", url: "#exames", icon: FileText, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
+  { title: "Documentos", url: "#documentos", icon: FileCheck, roles: ['admin', 'doctor'] },
+  { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
+  { title: "Fornecedores", url: "#fornecedores", icon: Truck, roles: ['admin', 'secretary', 'financeiro'] },
+  { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor', 'financeiro'] },
+  { title: "Email", url: "#email", icon: Mail, roles: ['admin', 'financeiro'], disabled: true },
 ];
 
 interface AdminSidebarProps {
@@ -53,9 +54,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
 
     return allSidebarItems.filter(item => {
       const hasRole = item.roles.includes(appUser.role);
-      const isAllowedUser = item.allowedUsers?.includes(appUser.username);
-
-      return hasRole || isAllowedUser;
+      return hasRole;
     });
   }, [appUser]);
 
@@ -80,13 +79,19 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                   <SidebarMenuButton
                     asChild
                     isActive={activeSection === item.url.replace('#', '')}
+                    disabled={item.disabled}
                   >
                     <button
-                      onClick={() => handleSectionClick(item.url)}
-                      className="w-full flex items-center"
+                      onClick={() => !item.disabled && handleSectionClick(item.url)}
+                      className={`w-full flex items-center ${item.disabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                     >
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      {!isCollapsed && (
+                        <div className="flex items-center gap-2">
+                          <span>{item.title}</span>
+                          {item.disabled && <span className="text-[10px] font-normal italic opacity-60">(Em breve)</span>}
+                        </div>
+                      )}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

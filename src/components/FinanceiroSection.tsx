@@ -80,6 +80,14 @@ export function FinanceiroSection() {
     fetchFinancialData();
   }, [dateRange]);
 
+  const normalizeDoctorName = (name: string | null): string => {
+    if (!name) return 'Médico Desconhecido';
+    const n = name.toLowerCase().trim();
+    if (n.includes('matheus')) return 'Matheus Roque';
+    if (n.includes('fabiola')) return 'Fabiola Roque';
+    return name;
+  };
+
   const fetchFinancialData = async () => {
     try {
       // Mostrar loading de tela cheia apenas no primeiro carregamento
@@ -131,12 +139,17 @@ export function FinanceiroSection() {
       }
 
       // Organizar dados por médico
-      const doctorsData: Record<string, FinancialData> = {};
-      const doctorsSet = new Set<string>();
+      const doctorsData: Record<string, FinancialData> = {
+        'matheus-roque': { name: 'Matheus Roque', monthlyRevenue: 0, dailyAverage: 0, pendingPayments: 0, totalPatients: 0, transactions: [] },
+        'fabiola-roque': { name: 'Fabiola Roque', monthlyRevenue: 0, dailyAverage: 0, pendingPayments: 0, totalPatients: 0, transactions: [] }
+      };
+
+      const doctorsSet = new Set<string>(['Matheus Roque', 'Fabiola Roque']);
 
       consultations?.forEach(consultation => {
-        const doctorKey = consultation.doctor_name?.toLowerCase().replace(/\s+/g, '-').replace('.', '') || 'desconhecido';
-        const doctorName = consultation.doctor_name || 'Médico Desconhecido';
+        const rawName = consultation.doctor_name || 'Médico Desconhecido';
+        const doctorName = normalizeDoctorName(rawName);
+        const doctorKey = doctorName.toLowerCase().replace(/\s+/g, '-').replace('.', '');
 
         doctorsSet.add(doctorName);
 
@@ -260,16 +273,17 @@ export function FinanceiroSection() {
       const doctorKeys = Object.keys(financialData).filter(key =>
         key !== 'all' && financialData[key].name.toLowerCase().includes(appUser.username?.toLowerCase() || '')
       );
+      // Se for médico, forçar o retorno apenas dos dados dele, nunca 'all'
       return doctorKeys.length > 0 ? financialData[doctorKeys[0]] : emptyData;
-    } else if (appUser?.role === 'admin' || appUser?.username === 'financeiro') {
+    } else if (appUser?.role === 'admin' || appUser?.role === 'financeiro' || appUser?.username === 'financeiro') {
       // Admin e financeiro veem dados consolidados ou filtrados
       return financialData[selectedDoctor] || financialData['all'] || emptyData;
     }
-    return financialData['all'] || emptyData;
+    return emptyData; // Não admin/financeiro/médico não vê nada
   };
 
   const currentFinancialData = getFinancialData();
-  const canViewAllDoctors = appUser?.role === 'admin' || appUser?.username === 'financeiro';
+  const canViewAllDoctors = appUser?.role === 'admin' || appUser?.role === 'financeiro' || appUser?.username === 'financeiro';
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

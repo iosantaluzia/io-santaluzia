@@ -50,7 +50,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
   const [viewMode, setViewMode] = useState<'all' | 'matheus' | 'fabiola'>(getInitialViewMode());
 
-  // Atualizar viewMode quando appUser mudar
+  // Atualizar viewMode quando appUser mudar e travar se for médico
   useEffect(() => {
     if (appUser?.role === 'doctor') {
       const username = appUser.username?.toLowerCase();
@@ -62,7 +62,7 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     } else {
       setViewMode('all');
     }
-  }, [appUser]);
+  }, [appUser, setViewMode]);
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [showPatientDetails, setShowPatientDetails] = useState(false);

@@ -37,23 +37,27 @@ import { toast } from 'sonner';
 const AdminDashboard = () => {
   const { isAuthenticated, appUser, signOut, loading, error, retry, user } = useAuth();
   const [activeSection, setActiveSection] = useState('agendamentos');
-  const [showUserManagement, setShowUserManagement] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [patientToOpenConsultation, setPatientToOpenConsultation] = useState<{ patientId: string; consultationId?: string } | null>(null);
   const [patientIdToOpen, setPatientIdToOpen] = useState<string | null>(null);
   const [patientIdToOpenRecord, setPatientIdToOpenRecord] = useState<string | null>(null);
   const [initialSectionSet, setInitialSectionSet] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const isAdmin = appUser?.role === 'admin' || appUser?.username?.toLowerCase() === 'matheus';
 
   // Definir seção inicial quando appUser for carregado pela primeira vez
   useEffect(() => {
     if (appUser && isAuthenticated && !initialSectionSet) {
-      const username = appUser.username?.toLowerCase();
-      // Médicos e secretaria abrem em agendamentos
-      if (username === 'matheus' || username === 'fabiola' || username === 'secretaria') {
+      const role = appUser.role;
+      // Médicos, secretaria e financeiro abrem em agendamentos
+      if (role === 'doctor' || role === 'secretary' || role === 'financeiro') {
         setActiveSection('agendamentos');
-        setInitialSectionSet(true);
+      } else {
+        setActiveSection('overview');
       }
+      setInitialSectionSet(true);
     }
   }, [appUser, isAuthenticated, initialSectionSet]);
 
@@ -74,7 +78,6 @@ const AdminDashboard = () => {
     try {
       // Limpar estados locais primeiro
       setActiveSection('overview');
-      setShowUserManagement(false);
 
       // Fazer logout do Supabase
       await signOut();
@@ -118,6 +121,7 @@ const AdminDashboard = () => {
       toast.error('Erro ao salvar avatar no servidor.');
     }
   };
+
 
   // Show loading state
   if (loading && !loadingTimeout) {
@@ -201,7 +205,9 @@ const AdminDashboard = () => {
       documentos: 'Documentos',
       estoque: 'Estoque',
       financeiro: 'Financeiro',
-      email: 'Email'
+      email: 'Email',
+      fornecedores: 'Fornecedores',
+      usuarios: isAdmin ? 'Gerenciar Usuários' : 'Minha Conta'
     };
     return titles[section as keyof typeof titles] || 'Painel';
   };
@@ -210,18 +216,17 @@ const AdminDashboard = () => {
     const roles = {
       admin: 'Administrador',
       doctor: 'Médico',
-      secretary: 'Secretária'
+      secretary: 'Secretária',
+      financeiro: 'Financeiro'
     };
     return roles[role as keyof typeof roles] || role;
   };
 
   const renderContent = () => {
     try {
-      if (showUserManagement) {
-        return <LazyComponents.UserManagement />;
-      }
-
       switch (activeSection) {
+        case 'usuarios':
+          return <LazyComponents.UserManagement />;
         case 'overview':
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
         case 'agendamentos':
@@ -263,10 +268,11 @@ const AdminDashboard = () => {
         case 'estoque':
           return <LazyComponents.EstoqueSection />;
         case 'financeiro':
-          if (appUser?.role === 'secretary') return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
           return <LazyComponents.FinanceiroSection />;
         case 'email':
           return <LazyComponents.EmailSection />;
+        case 'fornecedores':
+          return <LazyComponents.SuppliersSection />;
         default:
           return <LazyComponents.DashboardOverview onSectionChange={setActiveSection} />;
       }
@@ -298,20 +304,17 @@ const AdminDashboard = () => {
                   <BreadcrumbItem>
                     <BreadcrumbLink
                       className="cursor-pointer"
-                      onClick={() => {
-                        setActiveSection('overview');
-                        setShowUserManagement(false);
-                      }}
+                      onClick={() => setActiveSection('overview')}
                     >
                       Admin
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  {(activeSection !== 'overview' || showUserManagement) && (
+                  {activeSection !== 'overview' && (
                     <>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem>
                         <BreadcrumbPage>
-                          {showUserManagement ? 'Gerenciar Usuários' : getSectionTitle(activeSection)}
+                          {getSectionTitle(activeSection)}
                         </BreadcrumbPage>
                       </BreadcrumbItem>
                     </>
@@ -320,7 +323,7 @@ const AdminDashboard = () => {
               </Breadcrumb>
               {/* Mobile: apenas nome da seção */}
               <span className="sm:hidden text-sm font-medium text-cinza-escuro">
-                {showUserManagement ? 'Usuários' : getSectionTitle(activeSection)}
+                {getSectionTitle(activeSection)}
               </span>
             </div>
 
@@ -367,11 +370,11 @@ const AdminDashboard = () => {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
                     <div className="h-9 w-9 rounded-xl border-2 border-bege-principal/20 bg-white shadow-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {appUser?.avatar_url ? (
-                        <img src={appUser.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="h-5 w-5 text-gray-400" />
-                      )}
+                      <img
+                        src={appUser?.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${appUser?.username}&backgroundColor=b6e3f4`}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     {/* Nome e role só em telas maiores */}
                     <div className="hidden sm:flex flex-col text-left">
@@ -385,12 +388,10 @@ const AdminDashboard = () => {
                     <User className="h-4 w-4 mr-2" />
                     Escolher Avatar
                   </DropdownMenuItem>
-                  {(appUser?.username?.toLowerCase() === 'matheus' || appUser?.username?.toLowerCase() === 'secretaria') && (
-                    <DropdownMenuItem onClick={() => setShowUserManagement(!showUserManagement)}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Gerenciar Usuários
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuItem onClick={() => setActiveSection('usuarios')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    {isAdmin ? 'Gerenciar Usuários' : 'Minha Conta'}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sair
@@ -442,8 +443,9 @@ const AdminDashboard = () => {
             </div>
           </DialogContent>
         </Dialog>
+
       </div>
-    </SidebarProvider>
+    </SidebarProvider >
   );
 };
 

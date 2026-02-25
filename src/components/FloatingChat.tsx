@@ -435,7 +435,7 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
 
       {/* Janela de chat */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[520px] h-[600px] flex flex-col">
+        <div className="fixed bottom-6 right-6 z-50 w-[600px] h-[600px] flex flex-col">
           <Card className="flex flex-col h-full shadow-2xl rounded-t-lg overflow-hidden">
             <CardHeader className="flex-shrink-0 pb-3 bg-medical-primary border-b-0 rounded-t-lg">
               <div className="flex items-center justify-between">
@@ -466,19 +466,19 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Lista de usuários */}
-              <div className="w-48 border-r flex-shrink-0 bg-gray-50 flex flex-col">
+              <div className="w-64 border-r flex-shrink-0 bg-gray-50 flex flex-col">
                 <ScrollArea className="flex-1">
                   <div className="p-2 space-y-1">
                     <Button
                       variant={selectedUser === null ? 'default' : 'ghost'}
                       size="sm"
-                      className="w-full justify-start text-xs"
+                      className="w-full justify-start text-sm py-5"
                       onClick={() => {
                         setSelectedUser(null);
                         markAsRead(); // Marcar mensagens do grupo como lidas ao abrir "Todos"
                       }}
                     >
-                      <MessageCircle className="h-3 w-3 mr-1" />
+                      <MessageCircle className="h-4 w-4 mr-2" />
                       Todos
                     </Button>
                     <div className="border-t border-medical-primary/30 my-1" />
@@ -504,11 +504,11 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                               setSelectedUser(username);
                               markAsRead(username);
                             }}
-                            className={`w-full flex items-center gap-2 p-2 rounded-lg text-xs transition-colors hover:bg-gray-100 relative ${selectedUser === username ? 'bg-medical-primary/10 font-semibold text-medical-primary' : 'text-gray-600'
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl text-sm transition-colors hover:bg-gray-100 relative ${selectedUser === username ? 'bg-medical-primary/10 font-bold text-medical-primary' : 'text-gray-600'
                               }`}
                           >
                             <div className="relative flex-shrink-0">
-                              <div className="h-8 w-8 rounded-lg bg-white border border-gray-100 overflow-hidden flex items-center justify-center shadow-sm">
+                              <div className="h-11 w-11 rounded-xl bg-white border border-gray-100 overflow-hidden flex items-center justify-center shadow-sm">
                                 <img
                                   src={getAvatarUrl(registeredUser!)}
                                   alt=""
@@ -521,8 +521,8 @@ export function FloatingChat({ currentUsername }: FloatingChatProps) {
                               />
                             </div>
                             <div className="flex-1 min-w-0 text-left">
-                              <div className="truncate font-medium">{getDisplayName(username)}</div>
-                              <div className="text-[10px] opacity-70 truncate capitalize">{getRoleLabel(registeredUser?.role)}</div>
+                              <div className="truncate font-bold text-sm">{getDisplayName(username)}</div>
+                              <div className="text-xs opacity-70 truncate capitalize">{getRoleLabel(registeredUser?.role)}</div>
                             </div>
                             {unread > 0 && (
                               <Badge className="h-4 px-1 text-[10px] bg-red-500 min-w-[1.2rem] flex items-center justify-center">

@@ -196,13 +196,24 @@ export function AvatarPicker({ currentAvatarUrl, onAvatarSelect }: AvatarPickerP
     const [shirt, setShirt] = useState(MICAH_OPTIONS.shirt[1].id);
     const [backgroundColor, setBackgroundColor] = useState(MICAH_OPTIONS.backgroundColor[0].id);
 
-    // Novas cores v9
     const [eyebrowsColor, setEyebrowsColor] = useState('000000');
     const [eyesColor, setEyesColor] = useState('000000');
+    const [mouthColor, setMouthColor] = useState('000000');
     const [facialHairColor, setFacialHairColor] = useState('000000');
     const [glassesColor, setGlassesColor] = useState('000000');
-    const [mouthColor, setMouthColor] = useState('000000');
     const [shirtColor, setShirtColor] = useState('ffffff');
+    const [earringsColor, setEarringsColor] = useState('000000');
+
+    // Estado para controlar quais seletores de cor estão visíveis
+    const [visibleColors, setVisibleColors] = useState<Record<string, boolean>>({
+        hair: true,
+        backgroundColor: true,
+        shirt: true
+    });
+
+    const toggleColor = (id: string) => {
+        setVisibleColors(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -253,8 +264,11 @@ export function AvatarPicker({ currentAvatarUrl, onAvatarSelect }: AvatarPickerP
         `&shirt=${shirt}` +
         `&shirtColor=${shirtColor}` +
         `&backgroundColor=${backgroundColor}` +
+        `&facialHairProbability=${facialHair === 'none' ? 0 : 100}` +
         (facialHair !== 'none' ? `&facialHair=${facialHair}&facialHairColor=${facialHairColor}` : '') +
+        `&glassesProbability=${glasses === 'none' ? 0 : 100}` +
         (glasses !== 'none' ? `&glasses=${glasses}&glassesColor=${glassesColor}` : '') +
+        `&earringsProbability=${earrings === 'none' ? 0 : 100}` +
         (earrings !== 'none' ? `&earrings=${earrings}` : '');
 
     const handleRandomize = () => {
@@ -406,27 +420,84 @@ export function AvatarPicker({ currentAvatarUrl, onAvatarSelect }: AvatarPickerP
 
                         <TabsContent value="hair" className="m-0 mt-2 space-y-8 pb-4">
                             <section>
-                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Estilo de Corte</h3>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Estilo de Corte</h3>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => toggleColor('hair')}
+                                        className={`h-7 w-7 rounded-lg ${visibleColors.hair ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                    >
+                                        <Palette className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <ControlGrid options={MICAH_OPTIONS.hair.filter(h => h.gender === gender)} current={hair} onChange={setHair} />
                             </section>
-                            <section>
-                                <CompactColorPicker label="Cor do Cabelo" current={hairColor} onChange={setHairColor} />
-                            </section>
+                            {visibleColors.hair && (
+                                <section className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <CompactColorPicker label="Cor do Cabelo" current={hairColor} onChange={setHairColor} />
+                                </section>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="face" className="m-0 mt-2 space-y-8 pb-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <section className="space-y-6">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Olhos</h3>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Olhos</h3>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => toggleColor('eyes')}
+                                            className={`h-7 w-7 rounded-lg ${visibleColors.eyes ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                        >
+                                            <Palette className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                     <ControlGrid options={MICAH_OPTIONS.eyes} current={eyes} onChange={setEyes} />
+                                    {visibleColors.eyes && (
+                                        <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <CompactColorPicker label="Cor dos Olhos" current={eyesColor} onChange={setEyesColor} />
+                                        </div>
+                                    )}
                                 </section>
                                 <section className="space-y-6">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Mural de Sorrisos</h3>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Mural de Sorrisos</h3>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => toggleColor('mouth')}
+                                            className={`h-7 w-7 rounded-lg ${visibleColors.mouth ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                        >
+                                            <Palette className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                     <ControlGrid options={MICAH_OPTIONS.mouth} current={mouth} onChange={setMouth} />
+                                    {visibleColors.mouth && (
+                                        <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <CompactColorPicker label="Cor da Boca" current={mouthColor} onChange={setMouthColor} />
+                                        </div>
+                                    )}
                                 </section>
                                 <section className="space-y-6">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Sobrancelhas</h3>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Sobrancelhas</h3>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => toggleColor('eyebrows')}
+                                            className={`h-7 w-7 rounded-lg ${visibleColors.eyebrows ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                        >
+                                            <Palette className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                     <ControlGrid options={MICAH_OPTIONS.eyebrows} current={eyebrows} onChange={setEyebrows} />
+                                    {visibleColors.eyebrows && (
+                                        <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <CompactColorPicker label="Cor das Sobrancelhas" current={eyebrowsColor} onChange={setEyebrowsColor} />
+                                        </div>
+                                    )}
                                 </section>
                                 <section>
                                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Nariz</h3>
@@ -436,22 +507,70 @@ export function AvatarPicker({ currentAvatarUrl, onAvatarSelect }: AvatarPickerP
                         </TabsContent>
 
                         <TabsContent value="style" className="m-0 mt-2 space-y-8 pb-4">
-                            <section className="space-y-6">
-                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Vestimenta</h3>
+                            <section className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Vestimenta</h3>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => toggleColor('shirt')}
+                                        className={`h-7 w-7 rounded-lg ${visibleColors.shirt ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                    >
+                                        <Palette className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <ControlGrid options={MICAH_OPTIONS.shirt} current={shirt} onChange={setShirt} />
-                                <CompactColorPicker label="Cor do Traje" current={shirtColor} onChange={setShirtColor} />
+                                {visibleColors.shirt && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <CompactColorPicker label="Cor do Traje" current={shirtColor} onChange={setShirtColor} />
+                                    </div>
+                                )}
                             </section>
-                            <section>
-                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 font-bold">Barba / Detalhes Faciais</h3>
+
+                            <section className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Barba / Detalhes Faciais</h3>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => toggleColor('facialHair')}
+                                        className={`h-7 w-7 rounded-lg ${visibleColors.facialHair ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                    >
+                                        <Palette className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <ControlGrid options={MICAH_OPTIONS.facialHair} current={facialHair} onChange={setFacialHair} />
+                                {visibleColors.facialHair && facialHair !== 'none' && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <CompactColorPicker label="Cor da Barba" current={facialHairColor} onChange={setFacialHairColor} />
+                                    </div>
+                                )}
                             </section>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <section>
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Óculos</h3>
+                                <section className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Óculos</h3>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => toggleColor('glasses')}
+                                            className={`h-7 w-7 rounded-lg ${visibleColors.glasses ? 'text-bege-principal bg-bege-principal/10' : 'text-gray-300'}`}
+                                        >
+                                            <Palette className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                     <ControlGrid options={MICAH_OPTIONS.glasses} current={glasses} onChange={setGlasses} />
+                                    {visibleColors.glasses && glasses !== 'none' && (
+                                        <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <CompactColorPicker label="Cor da Armação" current={glassesColor} onChange={setGlassesColor} />
+                                        </div>
+                                    )}
                                 </section>
-                                <section>
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Acessórios</h3>
+                                <section className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Acessórios</h3>
+                                    </div>
                                     <ControlGrid options={MICAH_OPTIONS.earrings} current={earrings} onChange={setEarrings} />
                                 </section>
                             </div>

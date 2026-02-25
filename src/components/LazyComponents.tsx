@@ -10,6 +10,7 @@ const FinanceiroSectionLazy = lazy(() => import('./FinanceiroSection').then(modu
 const DashboardOverviewLazy = lazy(() => import('./DashboardOverview').then(module => ({ default: module.DashboardOverview })));
 const UserManagementLazy = lazy(() => import('./UserManagement').then(module => ({ default: module.UserManagement })));
 const EmailSectionLazy = lazy(() => import('./EmailSection').then(module => ({ default: module.EmailSection })));
+const SuppliersSectionLazy = lazy(() => import('./SuppliersSection').then(module => ({ default: module.SuppliersSection })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-8">
@@ -121,6 +122,11 @@ export const LazyComponents = {
   EmailSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <EmailSectionLazy />
+    </Suspense>
+  ),
+  SuppliersSection: () => (
+    <Suspense fallback={<LoadingSpinner />}>
+      <SuppliersSectionLazy />
     </Suspense>
   ),
 };
