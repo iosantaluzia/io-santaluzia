@@ -77,32 +77,28 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
     }, [formData.name]);
 
     const handleAddBatch = () => {
-        if (!newBatch.date || newBatch.quantity <= 0) {
-            toast.error('Informe uma data e quantidade válida para o lote.');
+        if (!newBatch.date) {
+            toast.error('Informe uma data de validade.');
             return;
         }
 
-        const updatedExpirations = [...formData.expirations, newBatch];
-        const totalQuantity = updatedExpirations.reduce((sum, b) => sum + b.quantity, 0);
+        const updatedExpirations = [...formData.expirations, { ...newBatch, quantity: 0 }];
 
         setFormData({
             ...formData,
-            expirations: updatedExpirations,
-            quantity: totalQuantity
+            expirations: updatedExpirations
         });
 
         setNewBatch({ date: '', quantity: 0 });
-        toast.success('Lote adicionado!');
+        toast.success('Validade adicionada!');
     };
 
     const handleRemoveBatch = (index: number) => {
         const updatedExpirations = formData.expirations.filter((_, i) => i !== index);
-        const totalQuantity = updatedExpirations.reduce((sum, b) => sum + b.quantity, 0);
 
         setFormData({
             ...formData,
-            expirations: updatedExpirations,
-            quantity: totalQuantity
+            expirations: updatedExpirations
         });
     };
 
@@ -217,24 +213,13 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
 
                         <div className="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <div className="grid grid-cols-5 gap-2 items-end">
-                                <div className="col-span-3 space-y-1">
+                                <div className="col-span-4 space-y-1">
                                     <Label htmlFor="batchDate" className="text-[10px] uppercase text-gray-500">Data de Validade</Label>
                                     <Input
                                         id="batchDate"
                                         type="date"
                                         value={newBatch.date}
                                         onChange={(e) => setNewBatch({ ...newBatch, date: e.target.value })}
-                                        className="h-9 text-sm"
-                                    />
-                                </div>
-                                <div className="col-span-1 space-y-1">
-                                    <Label htmlFor="batchQty" className="text-[10px] uppercase text-gray-500">Qtd</Label>
-                                    <Input
-                                        id="batchQty"
-                                        type="number"
-                                        min="1"
-                                        value={newBatch.quantity || ''}
-                                        onChange={(e) => setNewBatch({ ...newBatch, quantity: parseInt(e.target.value) || 0 })}
                                         className="h-9 text-sm"
                                     />
                                 </div>
@@ -261,7 +246,6 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className="bg-gray-100 px-2 py-0.5 rounded font-semibold">{batch.quantity} {formData.unit}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemoveBatch(idx)}
@@ -275,9 +259,6 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                 </div>
                             )}
                         </div>
-                        <p className="text-[10px] text-gray-500 mt-2 px-1">
-                            A quantidade total será calculada automaticamente a partir dos lotes acima.
-                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
@@ -290,8 +271,6 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
                                 value={formData.quantity}
                                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
                                 required
-                                readOnly={formData.expirations.length > 0}
-                                className={formData.expirations.length > 0 ? "bg-gray-50 text-gray-500" : ""}
                             />
                         </div>
                         <div className="space-y-2">

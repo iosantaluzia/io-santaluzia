@@ -183,6 +183,9 @@ export function SuppliersSection() {
 
     return (
         <div className="p-4 md:p-6 space-y-6">
+            <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-bold text-cinza-escuro">Fornecedores</h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
                 <Card className="bg-gradient-to-br from-white to-gray-50 border-none shadow-sm">
                     <CardContent className="p-4 flex items-center justify-between">
