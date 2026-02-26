@@ -38,6 +38,8 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
         emissorTipo: 'PJ_MATHEUS',
     });
 
+    const [nfeSuccessData, setNfeSuccessData] = useState<any>(null);
+
     // Clicar fora para fechar resultados
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -119,8 +121,9 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
             if (error) throw error;
 
             // Sucesso e Nota Retornada pelo Back-end!
+            setNfeSuccessData(data);
             setStep(2);
-            toast.success(`Nota Fiscal nº ${data.numero} emitida com sucesso!`);
+            toast.success(`Nota Fiscal nº ${data.numero || 'emitida'} com sucesso!`);
         } catch (error: any) {
             console.error('Erro ao emitir NFe:', error);
             toast.error('Erro na comunicação com a API de NFS-e. Verifique se a função está rodando.');
@@ -297,17 +300,27 @@ export function NfeEmissionModal({ isOpen, onClose, defaultPatientName = '', def
                         </p>
 
                         <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg w-full text-left mt-4 text-sm max-w-sm mx-auto">
-                            <p><span className="font-semibold">Nº da Nota:</span> 2026000142</p>
-                            <p><span className="font-semibold">Tomador:</span> {formData.patientName || 'Não informado'}</p>
-                            <p><span className="font-semibold">Valor:</span> R$ {Number(formData.amount).toFixed(2).replace('.', ',')}</p>
-                            <p><span className="font-semibold">Data e Hora:</span> {new Date().toLocaleString('pt-BR')}</p>
+                            <p><span className="font-semibold">Nº da Nota:</span> {nfeSuccessData?.numero || 'Gerando...'}</p>
+                            <p><span className="font-semibold">Tomador:</span> {nfeSuccessData?.paciente || formData.patientName || 'Não informado'}</p>
+                            <p><span className="font-semibold">Valor:</span> R$ {Number(nfeSuccessData?.valor_total || formData.amount).toFixed(2).replace('.', ',')}</p>
+                            <p><span className="font-semibold">Código Validação:</span> {nfeSuccessData?.codigo_verificacao || '-'}</p>
+                            <p><span className="font-semibold">Data e Hora:</span> {nfeSuccessData?.data_emissao ? new Date(nfeSuccessData.data_emissao).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR')}</p>
                         </div>
 
                         <div className="flex gap-3 w-full mt-6 justify-center">
                             <Button variant="outline" className="flex-1" onClick={resetAndClose}>
                                 Fechar
                             </Button>
-                            <Button className="flex-1 bg-bege-principal hover:bg-bege-principal/90 text-white">
+                            <Button
+                                className="flex-1 bg-bege-principal hover:bg-bege-principal/90 text-white"
+                                onClick={() => {
+                                    if (nfeSuccessData?.link_pdf) {
+                                        window.open(nfeSuccessData.link_pdf, '_blank');
+                                    } else {
+                                        toast.info("A visualização do PDF estará disponível após validação completa da prefeitura.");
+                                    }
+                                }}
+                            >
                                 <FileText className="mr-2 h-4 w-4" />
                                 Ver PDF
                             </Button>
