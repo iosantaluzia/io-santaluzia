@@ -103,7 +103,12 @@ export function EstoqueSection() {
 
         // Normalize categories to match the new system
         let category = item.category || 'Outros';
-        if (category === 'Material Escritório' || category === 'Papelaria') {
+
+        // Specific check for IOL keywords (ensure they are always in IOL category)
+        const name = (item.name || '').toLowerCase();
+        if (name.includes('isert') || name.includes('vivinex') || name.includes('impress')) {
+          category = 'IOL';
+        } else if (category === 'Material Escritório' || category === 'Papelaria') {
           category = 'Escritório';
         } else if (category === 'Medicamentos') {
           category = 'Colírios';

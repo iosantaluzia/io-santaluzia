@@ -69,7 +69,7 @@ export function InventoryItemModal({ isOpen, onClose, itemToEdit, onSave }: Inve
     // Lógica de auto-categorização para IOL
     useEffect(() => {
         const name = formData.name.toLowerCase();
-        if (name.includes('isert') || name.includes('vivinex')) {
+        if (name.includes('isert') || name.includes('vivinex') || name.includes('impress')) {
             if (formData.category !== 'IOL') {
                 setFormData(prev => ({ ...prev, category: 'IOL' }));
             }
