@@ -51,8 +51,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (appUser && isAuthenticated && !initialSectionSet) {
       const role = appUser.role;
-      // Médicos, secretaria e financeiro abrem em agendamentos
-      if (role === 'doctor' || role === 'secretary' || role === 'financeiro') {
+      const username = appUser.username?.toLowerCase();
+
+      // Médicos (incluindo Matheus) e secretaria abrem em agendamentos
+      if (role === 'doctor' || role === 'secretary' || username === 'matheus') {
         setActiveSection('agendamentos');
       } else {
         setActiveSection('overview');
@@ -213,8 +215,9 @@ const AdminDashboard = () => {
   };
 
   const getRoleName = (role: string) => {
+    if (appUser?.username?.toLowerCase() === 'matheus') return 'Médico';
     const roles = {
-      admin: 'Administrador',
+      admin: 'Médico',
       doctor: 'Médico',
       secretary: 'Secretária',
       financeiro: 'Financeiro'

@@ -239,40 +239,40 @@ export function PrescriptionEditor({ templates = [], onOpenManager, initialPatie
             <div className={`w-full ${isCompact ? 'md:w-full flex-grow' : 'md:w-2/3'} bg-gray-100 p-4 md:p-8 rounded-lg flex justify-center overflow-auto print:p-0 print:bg-white print:overflow-visible print:block`}>
                 {/* Papel (A4 Aspect Ratio) */}
                 <div
-                    className={`${isCompact ? 'transform scale-[0.6] sm:scale-[0.7] lg:scale-[0.8] origin-top mb-[-40%] sm:mb-[-30%] lg:mb-[-20%]' : ''} print:transform-none print:mb-0`}
+                    className={`${isCompact ? 'transform scale-[0.6] sm:scale-[0.7] lg:scale-[0.8] origin-top mb-[-40%] sm:mb-[-30%] lg:mb-[-20%]' : ''} prescription-container-wrapper print:transform-none print:mb-0`}
                     style={!isCompact && previewScale !== 1 ? {
                         transform: `scale(${previewScale})`,
                         transformOrigin: 'top center',
                         marginBottom: `${(previewScale - 1) * 100 * 2.97}px`
                     } : undefined}
                 >
-                    <div id="prescription-print-area" className="relative bg-white w-[21cm] min-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden print:overflow-visible print:min-h-[26cm]">
+                    <div id="prescription-print-area" className="relative bg-white w-[21cm] min-h-[29.7cm] print:h-[29.7cm] print:min-h-[29.7cm] print:max-h-[29.7cm] shadow-xl border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-full flex flex-col font-sans overflow-hidden print:overflow-hidden">
 
                         {/* Marca d'água no fundo da página inteira */}
                         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5 print:overflow-hidden">
                             <img src="/uploads/circlebg.png" alt="" className="w-[85%] max-w-lg object-contain" />
                         </div>
-                        <div className="relative z-10 flex flex-col h-full flex-grow p-10 px-14 md:px-20 print:p-10 print:px-24">
+                        <div className="relative z-10 flex flex-col h-full flex-grow p-10 px-14 md:px-20 print:p-8 print:pt-14 print:px-14">
                             {/* Cabeçalho do Documento */}
-                            <div className="flex flex-col items-center mb-10 w-full shrink-0">
-                                <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-[120px] object-contain mb-3" />
+                            <div className="flex flex-col items-center mb-6 print:mb-3 w-full shrink-0">
+                                <img src="/uploads/logoiosantaluzia-removebg-preview.png" alt="Instituto de Olhos Santa Luzia" className="h-[120px] print:h-[100px] object-contain mb-3 print:mb-1" />
                                 <p className="text-[#857053] font-medium text-[13px] text-center tracking-wide leading-tight">
                                     • Córnea • Catarata • Ceratocone • Lentes de Contato<br />
                                     • Cirurgia Refrativa • Oftalmopediatria
                                 </p>
-                                <div className="w-full border-b-[1.5px] border-[#857053] mt-5"></div>
+                                <div className="w-full border-b-[1.5px] border-[#857053] mt-5 print:mt-3"></div>
                             </div>
 
                             {/* Corpo da Receita */}
-                            <div className="flex-grow flex flex-col text-cinza-escuro print:px-8">
-                                <h2 className="text-xl font-bold text-center mb-8 uppercase tracking-widest text-[#161a1d]">
+                            <div className="flex-grow flex flex-col text-cinza-escuro print:px-4">
+                                <h2 className="text-xl font-bold text-center mb-4 print:mb-2 uppercase tracking-widest text-[#161a1d]">
                                     {documentType === 'receituario' ? 'Receituário' :
                                         documentType === 'solicitacao_exame' ? 'Solicitação de Exame' :
                                             'Laudo Médico'}
                                 </h2>
 
                                 {patientName && (
-                                    <div className="mb-6 flex items-end gap-2 text-[15px]">
+                                    <div className="mb-6 print:mb-3 flex items-end gap-2 text-[15px]">
                                         <span className="font-semibold text-gray-800">Paciente:</span>
                                         <span className="font-medium inline-block flex-1 border-b-[1px] border-gray-400 print:border-gray-800 border-dotted leading-none">{patientName}</span>
                                     </div>
@@ -281,14 +281,17 @@ export function PrescriptionEditor({ templates = [], onOpenManager, initialPatie
                                 <Textarea
                                     value={prescriptionContent}
                                     onChange={(e) => setPrescriptionContent(e.target.value)}
-                                    className="w-full flex-grow min-h-[400px] text-[15px] p-0 border-none focus-visible:ring-0 resize-none font-sans text-cinza-escuro bg-transparent leading-relaxed print:resize-none print:p-0 outline-none"
+                                    className="w-full flex-grow min-h-[100px] text-[15px] p-0 border-none focus-visible:ring-0 resize-none font-sans text-cinza-escuro bg-transparent leading-relaxed print:hidden outline-none"
                                     placeholder="PARA USO EM CLÍNICA MÉDICA&#10;&#10;Adicione os medicamentos usando a busca ao lado ou digite livremente aqui..."
                                 />
+                                <div className="hidden print:block w-full flex-grow min-h-[50px] print:max-h-[18cm] print:overflow-hidden text-[15px] p-0 border-none font-sans text-cinza-escuro bg-transparent leading-relaxed whitespace-pre-wrap">
+                                    {prescriptionContent}
+                                </div>
                             </div>
 
-                            {/* Assinatura, Data e Rodapé */}
-                            <div className="mt-8 shrink-0">
-                                <div className="flex justify-end pr-8 mb-6">
+                            {/* Assinatura, Data e Rodapé - Posicionado de forma absoluta na impressão para garantir 1 página */}
+                            <div className="mt-8 print:mt-0 print:absolute print:bottom-16 print:left-14 print:right-14 shrink-0">
+                                <div className="flex justify-end pr-8 mb-6 print:mb-3">
                                     <p className="text-cinza-escuro text-[15px]">{currentDate}</p>
                                 </div>
 

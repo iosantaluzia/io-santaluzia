@@ -333,10 +333,11 @@ export function UserManagement() {
     setEditFormData({ username: '', display_name: '', password: '' });
   };
 
-  const getRoleBadgeColor = (role: string) => {
+  const getRoleBadgeColor = (role: string, username?: string) => {
+    if (username?.toLowerCase() === 'matheus') return 'bg-blue-100 text-blue-800';
     switch (role) {
       case 'admin':
-        return 'bg-red-100 text-red-800';
+        return 'bg-blue-100 text-blue-800';
       case 'doctor':
         return 'bg-blue-100 text-blue-800';
       case 'secretary':
@@ -348,10 +349,11 @@ export function UserManagement() {
     }
   };
 
-  const getRoleLabel = (role: string) => {
+  const getRoleLabel = (role: string, username?: string) => {
+    if (username?.toLowerCase() === 'matheus') return 'Médico';
     switch (role) {
       case 'admin':
-        return 'Administrador';
+        return 'Médico'; // Fallback to Médico for admins if any
       case 'doctor':
         return 'Médico';
       case 'secretary':
@@ -423,19 +425,15 @@ export function UserManagement() {
         >
           Financeiro
         </Button>
-        <Button
-          variant={roleFilter === 'admin' ? 'default' : 'outline'}
-          onClick={() => setRoleFilter('admin')}
-          size="sm"
-          className="rounded-full px-4"
-        >
-          Administradores
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users
-          .filter(user => roleFilter === 'all' || user.role === roleFilter)
+          .filter(user => {
+            if (roleFilter === 'all') return true;
+            if (roleFilter === 'doctor' && user.username === 'matheus') return true;
+            return user.role === roleFilter;
+          })
           .map((user) => (
             <Card key={user.id || user.username} className="flex flex-col relative">
               <div className="absolute top-2 right-2 flex gap-1 z-10">
@@ -478,8 +476,8 @@ export function UserManagement() {
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg mb-1">{user.display_name || user.username}</h3>
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge className={getRoleBadgeColor(user.role)}>
-                          {getRoleLabel(user.role)}
+                        <Badge className={getRoleBadgeColor(user.role, user.username)}>
+                          {getRoleLabel(user.role, user.username)}
                         </Badge>
                       </div>
                     </div>
@@ -501,10 +499,10 @@ export function UserManagement() {
 
 
 
-                    <div className="text-xs text-gray-600 pt-2 border-t">
+                    <div className="text-xs text-gray-600 pt-2 border-t flex justify-between items-center gap-2">
                       <p>Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
                       {user.last_login && (
-                        <p className="mt-1">Último login: {new Date(user.last_login).toLocaleString('pt-BR')}</p>
+                        <p>Último login: {new Date(user.last_login).toLocaleString('pt-BR')}</p>
                       )}
                     </div>
                   </div>

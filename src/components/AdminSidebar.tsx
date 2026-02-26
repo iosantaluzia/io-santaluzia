@@ -53,6 +53,8 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
     if (!appUser) return [];
 
     return allSidebarItems.filter(item => {
+      // Matheus sempre tem acesso a tudo
+      if (appUser.username?.toLowerCase() === 'matheus') return true;
       const hasRole = item.roles.includes(appUser.role);
       return hasRole;
     });

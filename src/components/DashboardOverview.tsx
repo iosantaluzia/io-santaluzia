@@ -31,22 +31,6 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Coluna Esquerda: Título, Pesquisa e Botões */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            {/* Botões de Ação Rápida - Topo */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowAppointmentForm(true)}
-                className="bg-gradient-to-b from-white to-gray-50 text-cinza-escuro h-8 relative inline-flex items-center px-3 py-1.5 group text-sm font-medium leading-5 rounded-md shadow-[0_0_0_1px_rgba(0,0,0,0.1)_inset,0_0.5px_0.5px_rgba(0,0,0,0.05)_inset,0_-0.5px_0.5px_rgba(0,0,0,0.05)_inset,0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bege-principal/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-              >
-                <Plus className="size-3.5 mr-1.5" /> Novo Agendamento
-              </button>
-              <button
-                onClick={() => onSectionChange('financeiro')}
-                className="text-cinza-escuro hover:text-bege-principal flex items-center h-8 px-3 py-1.5 text-sm font-medium"
-              >
-                <ClipboardPen className="size-3.5 mr-1.5" /> Relatórios
-              </button>
-            </div>
-
             {/* Seção Superior: Título, Status e Informações */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
               <div className="flex items-center space-x-3 mb-2">
@@ -73,28 +57,44 @@ export function DashboardOverview({ onSectionChange }: DashboardOverviewProps) {
                   <span className="text-xl font-bold text-cinza-escuro">Instituto Santa Luzia</span>
                 </div>
               </div>
-
-              <p className="text-gray-600 text-sm md:text-base max-w-2xl">
-                Seu centro de comando para uma gestão eficiente e focada no paciente.
-              </p>
             </div>
 
-            {/* Lista de Espera e Códigos Úteis */}
-            <div className="flex justify-center lg:justify-start gap-2">
-              <button
-                onClick={() => setShowWaitlist(true)}
-                className="bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-              >
-                <Clock className="h-4 w-4" />
-                Lista de Espera
-              </button>
-              <button
-                onClick={() => setShowUsefulCodes(true)}
-                className="bg-medical-primary hover:bg-medical-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-              >
-                <Tag className="h-4 w-4" />
-                Códigos Úteis
-              </button>
+            {/* Botões de Ação Rápida */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-center lg:justify-start gap-2">
+                <button
+                  onClick={() => setShowWaitlist(true)}
+                  className="bg-marrom-acentuado hover:bg-marrom-acentuado/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 min-w-[160px] justify-center lg:justify-start"
+                >
+                  <Clock className="h-4 w-4" />
+                  Lista de Espera
+                </button>
+                <button
+                  onClick={() => setShowUsefulCodes(true)}
+                  className="bg-medical-primary hover:bg-medical-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 min-w-[160px] justify-center lg:justify-start"
+                >
+                  <Tag className="h-4 w-4" />
+                  Códigos Úteis
+                </button>
+              </div>
+              <div className="flex justify-center lg:justify-start gap-2">
+                <button
+                  onClick={() => setShowAppointmentForm(true)}
+                  className="bg-bege-principal hover:bg-bege-principal/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 min-w-[160px] justify-center lg:justify-start"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Agendamento
+                </button>
+                {(appUser?.role === 'doctor' || appUser?.role === 'financeiro' || appUser?.role === 'admin') && (
+                  <button
+                    onClick={() => onSectionChange('financeiro')}
+                    className="bg-cinza-escuro/80 hover:bg-cinza-escuro text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 min-w-[160px] justify-center lg:justify-start"
+                  >
+                    <ClipboardPen className="h-4 w-4" />
+                    Relatórios
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

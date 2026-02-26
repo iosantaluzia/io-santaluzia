@@ -36,12 +36,16 @@ interface AppointmentSlot {
 
 export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation, onOpenConsultationForPatient, onOpenPatientRecord }: AgendamentosSectionProps) {
   const { appUser } = useAuth();
+  const isAdmin = appUser?.role === 'admin' || appUser?.username?.toLowerCase() === 'matheus';
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Médicos veem automaticamente apenas sua própria agenda
   const getInitialViewMode = (): 'all' | 'matheus' | 'fabiola' => {
+    const username = appUser?.username?.toLowerCase();
+    if (username === 'matheus') return 'matheus';
+    if (username === 'fabiola') return 'fabiola';
+
     if (appUser?.role === 'doctor') {
-      const username = appUser.username?.toLowerCase();
       if (username === 'matheus') return 'matheus';
       if (username === 'fabiola') return 'fabiola';
     }
@@ -52,8 +56,12 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
 
   // Atualizar viewMode quando appUser mudar e travar se for médico
   useEffect(() => {
-    if (appUser?.role === 'doctor') {
-      const username = appUser.username?.toLowerCase();
+    const username = appUser?.username?.toLowerCase();
+    if (username === 'matheus') {
+      setViewMode('matheus');
+    } else if (username === 'fabiola') {
+      setViewMode('fabiola');
+    } else if (appUser?.role === 'doctor') {
       if (username === 'matheus') {
         setViewMode('matheus');
       } else if (username === 'fabiola') {
@@ -804,8 +812,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-cinza-escuro">Agendamentos</h2>
-        {/* Médicos não podem alternar entre agendas - veem apenas a sua */}
-        {appUser?.role !== 'doctor' && (
+        {/* Médicos não podem alternar entre agendas - veem apenas a sua (exceto Matheus que é admin) */}
+        {(appUser?.role !== 'doctor' || isAdmin) && (
           <Button
             onClick={() => {
               if (viewMode === 'all') {
