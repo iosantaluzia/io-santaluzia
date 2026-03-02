@@ -122,9 +122,12 @@ export const PatientSummaryHeader = ({
                             <p className="text-sm text-gray-700">
                                 Data de Nascimento: {
                                     editingPatient.date_of_birth
-                                        ? new Date(editingPatient.date_of_birth).toLocaleDateString('pt-BR')
-                                        : patient.birthDate
+                                        ? (editingPatient.date_of_birth.includes('-')
+                                            ? editingPatient.date_of_birth.split('T')[0].split('-').reverse().join('/')
+                                            : editingPatient.date_of_birth)
+                                        : (patient.birthDate || '-')
                                 }
+
                             </p>
                         </div>
                     )}

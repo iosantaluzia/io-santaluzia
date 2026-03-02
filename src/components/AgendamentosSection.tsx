@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Columns, PanelLeft } from 'lucide-react';
+import { formatDateBR } from '@/utils/formatters';
+
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -225,8 +227,9 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           cep: patient?.cep || '',
           city: patient?.city || '',
           birthDate: patient?.date_of_birth
-            ? new Date(patient.date_of_birth).toLocaleDateString('pt-BR')
+            ? formatDateBR(patient.date_of_birth)
             : '',
+
           observations: consultation.observations || '',
           patientId: consultation.patient_id,
           appointmentDate: consultation.consultation_date,

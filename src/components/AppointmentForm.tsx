@@ -12,7 +12,8 @@ import { getNumericValue } from '@/utils/currency';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
 import { getDoctorDisplayName } from '@/utils/doctorNames';
-import { formatCPF, formatPhone, formatCEP } from '@/utils/formatters';
+import { formatCPF, formatPhone, formatCEP, formatDateBR } from '@/utils/formatters';
+
 
 // Sub-components
 import { AppointmentFormFields } from './agendamentos/AppointmentFormFields';
@@ -73,8 +74,10 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         ...prev,
         name: initialPatientData.name || prev.name,
         cpf: initialPatientData.cpf ? formatCPF(initialPatientData.cpf) : prev.cpf,
-        date_of_birth: initialPatientData.date_of_birth || prev.date_of_birth,
+        date_of_birth: initialPatientData.date_of_birth ? formatDateBR(initialPatientData.date_of_birth) : prev.date_of_birth,
+
         phone: initialPatientData.phone ? formatPhone(initialPatientData.phone) : prev.phone,
+
         email: initialPatientData.email || prev.email,
         address: initialPatientData.address || prev.address,
         cep: initialPatientData.cep ? formatCEP(initialPatientData.cep) : prev.cep,

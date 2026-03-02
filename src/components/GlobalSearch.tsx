@@ -2,25 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, User, TestTube, Package, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPhone } from '@/utils/formatters';
+import { searchPatientsInCache, loadPatientCache } from '@/utils/patientCache';
 
-// ─── Normalização ───────────────────────────────────────────────────────────
-// Remove acentos, cedilhas etc., converte para minúsculas e remove espaços extras
-const normalizeStr = (str: string) =>
-  str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // remove diacríticos
-    .toLowerCase()
-    .trim();
-
-// Pontuação de proximidade: quanto menor o índice do match, maior a prioridade
-const matchScore = (name: string, query: string): number => {
-  const normName = normalizeStr(name);
-  const normQuery = normalizeStr(query);
-  const idx = normName.indexOf(normQuery);
-  if (idx === -1) return -1;
-  // Começa no início da palavra = mais relevante
-  return 1000 - idx;
-};
 
 interface SearchResult {
   type: 'patient' | 'exam' | 'stock';
@@ -30,50 +13,21 @@ interface SearchResult {
   data: any;
 }
 
-interface PatientCache {
-  id: string;
-  name: string;
-  cpf: string | null;
-  phone: string | null;
-}
-
 interface GlobalSearchProps {
   onResultClick?: (result: SearchResult) => void;
   onSectionChange?: (section: string) => void;
 }
-
-// Cache global de pacientes (compartilhado entre montagens do componente)
-let patientCacheStore: PatientCache[] = [];
-let patientCacheLoaded = false;
 
 export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [patientCache, setPatientCache] = useState<PatientCache[]>(patientCacheStore);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // ─── Carregar cache de pacientes uma única vez ───────────────────────────
   useEffect(() => {
-    const loadPatientCache = async () => {
-      if (patientCacheLoaded) return; // já carregado por outra instância
-      try {
-        const { data, error } = await supabase
-          .from('patients')
-          .select('id, name, cpf, phone')
-          .order('name');
-
-        if (!error && data) {
-          patientCacheStore = data as PatientCache[];
-          patientCacheLoaded = true;
-          setPatientCache(patientCacheStore);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar cache de pacientes:', err);
-      }
-    };
     loadPatientCache();
   }, []);
 
@@ -90,24 +44,9 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
 
   // ─── Buscar pacientes no cache local (sem hit no banco) ─────────────────
   const searchPatientsLocally = useCallback((query: string): SearchResult[] => {
-    if (!query.trim()) return [];
+    const patients = searchPatientsInCache(query);
 
-    const normQuery = normalizeStr(query);
-    const queryClean = normQuery.replace(/\D/g, ''); // só dígitos para CPF/fone
-
-    const scored = patientCache
-      .map(patient => {
-        const score = matchScore(patient.name || '', normQuery);
-        // Fallback: busca por CPF / telefone usando dígitos
-        const cpfMatch = queryClean.length >= 3 && (patient.cpf || '').replace(/\D/g, '').includes(queryClean);
-        const phoneMatch = queryClean.length >= 3 && (patient.phone || '').replace(/\D/g, '').includes(queryClean);
-        return { patient, score: score >= 0 ? score : (cpfMatch || phoneMatch ? 1 : -1) };
-      })
-      .filter(({ score }) => score >= 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8); // máximo 8 pacientes no dropdown
-
-    return scored.map(({ patient }) => ({
+    return patients.map((patient) => ({
       type: 'patient',
       id: patient.id,
       title: patient.name,
@@ -118,7 +57,8 @@ export function GlobalSearch({ onResultClick, onSectionChange }: GlobalSearchPro
           : '',
       data: patient,
     }));
-  }, [patientCache]);
+  }, []);
+
 
   // ─── Busca geral (exames + estoque via banco; pacientes via cache) ───────
   useEffect(() => {

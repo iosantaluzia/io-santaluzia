@@ -10,7 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { formatPhone } from '@/utils/formatters';
+import { formatPhone, formatDateBR } from '@/utils/formatters';
+
 
 interface Patient {
   id: string;
@@ -85,12 +86,21 @@ export function PatientDetails({ patient, onBack, onSectionChange }: PatientDeta
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return '?';
     const today = new Date();
-    const birth = new Date(birthDate);
+    // Use string split to avoid timezone shifts
+    const birthParts = birthDate.split('T')[0].split('-');
+    if (birthParts.length !== 3) return '?';
+
+    const year = parseInt(birthParts[0]);
+    const month = parseInt(birthParts[1]) - 1;
+    const day = parseInt(birthParts[2]);
+
+    const birth = new Date(year, month, day);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
     return age;
   };
+
 
   const handleNewConsultationSaved = () => {
     setShowNewConsultation(false);
@@ -223,7 +233,8 @@ export function PatientDetails({ patient, onBack, onSectionChange }: PatientDeta
                 {localPatient.date_of_birth && (
                   <p className="text-gray-600 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {calculateAge(localPatient.date_of_birth)} anos • {new Date(localPatient.date_of_birth).toLocaleDateString('pt-BR')}
+                    {calculateAge(localPatient.date_of_birth)} anos • {formatDateBR(localPatient.date_of_birth)}
+
                   </p>
                 )}
                 {localPatient.cpf && (

@@ -9,6 +9,8 @@ import { PatientDetails } from './PatientDetails';
 import { NewConsultationForm } from './NewConsultationForm';
 import { PatientDetailsModal } from './PatientDetailsModal';
 import { formatCPF, formatPhone } from '@/utils/formatters';
+import { searchPatientsInCache, loadPatientCache } from '@/utils/patientCache';
+
 
 // Sub-components
 import { PatientFilterBar } from './pacientes/PatientFilterBar';
@@ -317,7 +319,6 @@ export function PacientesSection({
   const searchPatients = async (term: string) => {
     try {
       setLoading(true);
-      setPatients([]);
 
       const searchTerm = term.toLowerCase().trim();
       if (!searchTerm) {
@@ -326,60 +327,13 @@ export function PacientesSection({
         return;
       }
 
-      // Buscar por nome usando ILIKE (case insensitive e busca por partes)
-      const { data: nameResults, error: nameError } = await supabase
-        .from('patients')
-        .select('*')
-        .ilike('name', `%${searchTerm}%`)
-        .order('name')
-        .limit(500); // Aumentar limite para resultados mais completos
+      // Garante que o cache está carregado
+      await loadPatientCache();
 
-      if (nameError) {
-        console.error('Erro ao buscar por nome:', nameError);
-      }
+      // Utiliza o cache compartilhado que já suporta acentos, CPF e Telefone
+      const results = searchPatientsInCache(term);
 
-      // Buscar por CPF (remover formatação)
-      const searchClean = term.replace(/\D/g, '');
-      let cpfResults: any[] = [];
-      if (searchClean) {
-        const { data: cpfData, error: cpfError } = await supabase
-          .from('patients')
-          .select('*')
-          .like('cpf', `%${searchClean}%`)
-          .order('name')
-          .limit(500);
-
-        if (cpfError) {
-          console.error('Erro ao buscar por CPF:', cpfError);
-        } else {
-          cpfResults = cpfData || [];
-        }
-      }
-
-      // Buscar por telefone (remover formatação)
-      let phoneResults: any[] = [];
-      if (searchClean) {
-        const { data: phoneData, error: phoneError } = await supabase
-          .from('patients')
-          .select('*')
-          .like('phone', `%${searchClean}%`)
-          .order('name')
-          .limit(500);
-
-        if (phoneError) {
-          console.error('Erro ao buscar por telefone:', phoneError);
-        } else {
-          phoneResults = phoneData || [];
-        }
-      }
-
-      // Combinar resultados e remover duplicatas
-      const allResults = [...(nameResults || []), ...cpfResults, ...phoneResults];
-      const uniqueResults = allResults.filter((patient, index, self) =>
-        index === self.findIndex(p => p.id === patient.id)
-      );
-
-      setPatients(uniqueResults);
+      setPatients(results);
       setHasMore(false); // Desabilitar scroll infinito durante busca
 
     } catch (error) {
@@ -389,6 +343,7 @@ export function PacientesSection({
       setLoading(false);
     }
   };
+
 
   // Carregar mais pacientes quando chegar ao final
   const loadMore = useCallback(() => {

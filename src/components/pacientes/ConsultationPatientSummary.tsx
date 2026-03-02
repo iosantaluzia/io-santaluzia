@@ -1,7 +1,8 @@
 import React from 'react';
 import { User, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { calculateDetailedAge } from '@/utils/formatters';
+import { calculateDetailedAge, formatDateBR } from '@/utils/formatters';
+
 
 interface ConsultationPatientSummaryProps {
     patient: {
@@ -24,8 +25,9 @@ export function ConsultationPatientSummary({ patient, onEditPatient }: Consultat
                     <div>
                         <h3 className="text-lg font-semibold text-cinza-escuro">{patient.name}</h3>
                         <p className="text-gray-600">
-                            CPF: {patient.cpf || '-'} • Nascimento: {new Date(patient.date_of_birth).toLocaleDateString('pt-BR')} ({calculateDetailedAge(patient.date_of_birth)})
+                            CPF: {patient.cpf || '-'} • Nascimento: {formatDateBR(patient.date_of_birth)} ({calculateDetailedAge(patient.date_of_birth)})
                         </p>
+
                     </div>
                 </div>
                 {onEditPatient && (

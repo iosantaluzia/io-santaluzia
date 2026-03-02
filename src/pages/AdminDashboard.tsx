@@ -272,6 +272,8 @@ const AdminDashboard = () => {
           return <LazyComponents.EstoqueSection />;
         case 'financeiro':
           return <LazyComponents.FinanceiroSection />;
+        case 'estatisticas':
+          return <LazyComponents.Statistics />;
         case 'email':
           return <LazyComponents.EmailSection />;
         case 'fornecedores':

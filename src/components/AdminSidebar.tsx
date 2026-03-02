@@ -10,7 +10,8 @@ import {
   Stethoscope,
   Mail,
   FileCheck,
-  Truck
+  Truck,
+  BarChart3
 } from 'lucide-react';
 import {
   Sidebar,
@@ -35,6 +36,7 @@ const allSidebarItems = [
   { title: "Estoque", url: "#estoque", icon: Boxes, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
   { title: "Fornecedores", url: "#fornecedores", icon: Truck, roles: ['admin', 'secretary', 'financeiro'] },
   { title: "Financeiro", url: "#financeiro", icon: HandCoins, roles: ['admin', 'doctor', 'financeiro'] },
+  { title: "Estatísticas", url: "#estatisticas", icon: BarChart3, roles: ['admin', 'doctor', 'secretary', 'financeiro'] },
   { title: "Email", url: "#email", icon: Mail, roles: ['admin', 'financeiro'], disabled: true },
 ];
 

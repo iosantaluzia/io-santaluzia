@@ -6,9 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatCurrencyInput } from '@/utils/currency';
-import { formatCPF, formatPhone } from '@/utils/formatters';
+import { formatCPF, formatPhone, formatDateBR } from '@/utils/formatters';
+
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
+import { loadPatientCache, searchPatientsInCache } from '@/utils/patientCache';
 
 interface AppointmentFormFieldsProps {
     formData: any;
@@ -40,6 +42,8 @@ export function AppointmentFormFields({
             }
         };
 
+        loadPatientCache(); // Carrega o cache ao montar o componente
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -64,18 +68,30 @@ export function AppointmentFormFields({
         }
 
         try {
-            let supabaseQuery = supabase.from('patients').select('*');
-
             if (type === 'name') {
-                supabaseQuery = supabaseQuery.ilike('name', `%${query}%`);
-            } else {
-                const numericCPF = query.replace(/\D/g, '');
-                // Busca tanto pelo termo digitado quanto pelo numérico puro para garantir que encontre
+                // Garante que o cache está carregado antes de pesquisar
+                await loadPatientCache();
+
+                // Utiliza o cache local para buscas por nome (suporta ignorar acentos)
+                const results = searchPatientsInCache(query);
+                setSearchResults(results);
+                setShowResults(results.length > 0);
+                setSearchType('name');
+                return;
+            }
+
+            // Busca por CPF continua direto no banco por ser numérico
+            let supabaseQuery = supabase.from('patients').select('*');
+            const numericCPF = query.replace(/\D/g, '');
+            // Busca tanto pelo termo digitado quanto pelo numérico puro para garantir que encontre
+            if (numericCPF && (numericCPF.length >= 3 || query.length >= 3)) {
                 if (numericCPF && numericCPF !== query) {
                     supabaseQuery = supabaseQuery.or(`cpf.ilike.%${query}%,cpf.ilike.%${numericCPF}%`);
                 } else {
                     supabaseQuery = supabaseQuery.ilike('cpf', `%${query}%`);
                 }
+            } else {
+                return;
             }
 
             const { data, error } = await supabaseQuery.limit(5);
@@ -90,6 +106,7 @@ export function AppointmentFormFields({
         }
     };
 
+
     const handleSelectPatient = (patient: any) => {
         logger.info('Selecting patient for autofill:', patient.name);
 
@@ -103,23 +120,9 @@ export function AppointmentFormFields({
         if (patient.id) handleInputChange('patientId', patient.id);
 
         if (patient.date_of_birth) {
-            try {
-                const parts = patient.date_of_birth.split('-');
-                if (parts.length >= 3) {
-                    const year = parts[0];
-                    const month = parts[1];
-                    const day = parts[2].substring(0, 2);
-                    handleInputChange('date_of_birth', `${day}/${month}/${year}`);
-                } else {
-                    const dob = new Date(patient.date_of_birth);
-                    if (!isNaN(dob.getTime())) {
-                        handleInputChange('date_of_birth', dob.toLocaleDateString('pt-BR'));
-                    }
-                }
-            } catch (e) {
-                logger.error('Error formatting date of birth:', e);
-            }
+            handleInputChange('date_of_birth', formatDateBR(patient.date_of_birth));
         }
+
         setShowResults(false);
     };
 

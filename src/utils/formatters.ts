@@ -63,7 +63,8 @@ export const calculateAge = (dateOfBirth: string | null | undefined): string => 
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
         age--;
     }
-    return `${date.toLocaleDateString('pt-BR')} (${age} anos)`;
+    return `${formatDateBR(dateOfBirth)} (${age} anos)`;
+
 };
 
 export const calculateDetailedAge = (birthDate: string): string => {
@@ -95,4 +96,34 @@ export const calculateDetailedAge = (birthDate: string): string => {
     }
 
     return `${years} anos, ${months} meses, ${days} dias`;
+};
+
+/**
+ * Normaliza uma string removendo acentos, cedilhas e convertendo para minúsculas.
+ * Útil para buscas insensíveis a acentuação.
+ */
+export const normalizeStr = (str: string): string =>
+    (str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // remove diacríticos
+        .toLowerCase()
+        .trim();
+
+/**
+ * Formata uma data para o padrão brasileiro (DD/MM/YYYY) de forma segura,
+ * evitando problemas de fuso horário comuns com `new Date().toLocaleDateString()`.
+ * Aceita strings no formato YYYY-MM-DD ou ISO.
+ */
+export const formatDateBR = (date: string | null | undefined): string => {
+    if (!date) return '';
+    // Pegar apenas a parte da data se for ISO
+    const dateStr = date.split('T')[0];
+    if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        // Se for YYYY-MM-DD
+        if (parts.length === 3 && parts[0].length === 4) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    }
+    return date;
 };

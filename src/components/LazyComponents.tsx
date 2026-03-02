@@ -9,7 +9,7 @@ const EstoqueSectionLazy = lazy(() => import('./EstoqueSection').then(module => 
 const FinanceiroSectionLazy = lazy(() => import('./FinanceiroSection').then(module => ({ default: module.FinanceiroSection })));
 const DashboardOverviewLazy = lazy(() => import('./DashboardOverview').then(module => ({ default: module.DashboardOverview })));
 const UserManagementLazy = lazy(() => import('./UserManagement').then(module => ({ default: module.UserManagement })));
-const EmailSectionLazy = lazy(() => import('./EmailSection').then(module => ({ default: module.EmailSection })));
+const StatisticsLazy = lazy(() => import('./Statistics').then(module => ({ default: module.Statistics })));
 const SuppliersSectionLazy = lazy(() => import('./SuppliersSection').then(module => ({ default: module.SuppliersSection })));
 
 const LoadingSpinner = () => (
@@ -119,6 +119,11 @@ export const LazyComponents = {
     </Suspense>
   ),
 
+  Statistics: () => (
+    <Suspense fallback={<LoadingSpinner />}>
+      <StatisticsLazy />
+    </Suspense>
+  ),
   EmailSection: () => (
     <Suspense fallback={<LoadingSpinner />}>
       <EmailSectionLazy />
