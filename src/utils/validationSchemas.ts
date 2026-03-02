@@ -78,7 +78,10 @@ export const appointmentFormSchema = z.object({
     const num = typeof val === 'string' ? parseCurrency(val) : val;
     return isNaN(num) || num < 0 ? undefined : num;
   }),
-  notes: z.string().max(1000, 'Observações muito longas').optional()
+  notes: z.string().max(1000, 'Observações muito longas').optional(),
+  payment_received: z.boolean().optional().default(false),
+  payment_method: z.string().optional().or(z.literal('')),
+  patientId: z.string().optional()
 });
 
 // Consultation form schema

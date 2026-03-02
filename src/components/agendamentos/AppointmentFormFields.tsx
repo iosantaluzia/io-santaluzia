@@ -94,6 +94,7 @@ export function AppointmentFormFields({
         if (patient.address) handleInputChange('address', patient.address);
         if (patient.cep) handleInputChange('cep', patient.cep);
         if (patient.city) handleInputChange('city', patient.city);
+        if (patient.id) handleInputChange('patientId', patient.id);
 
         if (patient.date_of_birth) {
             try {

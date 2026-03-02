@@ -62,7 +62,8 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
     amount: '',
     payment_received: false,
     payment_method: '',
-    notes: ''
+    notes: '',
+    patientId: ''
   });
 
   // Pré-preencher dados quando initialPatientData ou initialAppointmentType mudarem
@@ -78,6 +79,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         address: initialPatientData.address || prev.address,
         cep: initialPatientData.cep || prev.cep,
         city: initialPatientData.city || prev.city,
+        patientId: (initialPatientData as any).id || (initialPatientData as any).patientId || prev.patientId,
         appointmentType: initialAppointmentType || prev.appointmentType || 'consulta'
       }));
     } else if (isOpen && !initialPatientData) {
@@ -97,7 +99,8 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         amount: '',
         payment_received: false,
         payment_method: '',
-        notes: ''
+        notes: '',
+        patientId: ''
       });
     }
   }, [isOpen, initialPatientData, initialAppointmentType]);
@@ -165,35 +168,37 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
       }
 
       // Buscar ou criar paciente
-      let patientId: string | null = null;
+      let patientId: string | null = validatedData.patientId || null;
 
-      // Buscar paciente existente por CPF ou nome/telefone
-      if (validatedData.cpf && validatedData.cpf.trim() !== '') {
-        // Buscar por CPF primeiro
-        const { data: existingPatient, error: searchError } = await (supabase as any)
-          .from('patients')
-          .select('id, name')
-          .eq('cpf', validatedData.cpf)
-          .maybeSingle();
+      // Se não temos um patientId do autocomplete, buscar paciente existente por CPF ou nome/telefone
+      if (!patientId) {
+        if (validatedData.cpf && validatedData.cpf.trim() !== '') {
+          // Buscar por CPF primeiro
+          const { data: existingPatient, error: searchError } = await (supabase as any)
+            .from('patients')
+            .select('id, name')
+            .eq('cpf', validatedData.cpf)
+            .maybeSingle();
 
-        if (existingPatient) {
-          patientId = existingPatient.id;
-        }
-      } else {
-        // Se não há CPF, tentar buscar por nome e telefone para evitar duplicatas
-        const { data: existingPatients, error: searchError } = await (supabase as any)
-          .from('patients')
-          .select('id, name, phone')
-          .eq('name', validatedData.name)
-          .eq('phone', validatedData.phone)
-          .limit(1);
+          if (existingPatient) {
+            patientId = existingPatient.id;
+          }
+        } else {
+          // Se não há CPF, tentar buscar por nome e telefone para evitar duplicatas
+          const { data: existingPatients, error: searchError } = await (supabase as any)
+            .from('patients')
+            .select('id, name, phone')
+            .eq('name', validatedData.name)
+            .eq('phone', validatedData.phone)
+            .limit(1);
 
-        if (existingPatients && existingPatients.length > 0) {
-          patientId = existingPatients[0].id;
+          if (existingPatients && existingPatients.length > 0) {
+            patientId = existingPatients[0].id;
+          }
         }
       }
 
-      // Preparar dados do paciente
+      // Preparar dados do paciente para salvar/atualizar
       const patientData: any = {
         name: validatedData.name,
         phone: validatedData.phone,
@@ -213,7 +218,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         patientData.date_of_birth = validatedData.date_of_birth;
       }
 
-      // Se não encontrou paciente existente, criar novo paciente
+      // Se não encontrou paciente existente (nem por autocomplete nem por busca), criar novo paciente
       if (!patientId) {
         const { data: newPatient, error: patientError } = await (supabase as any)
           .from('patients')
@@ -300,7 +305,8 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         amount: '',
         payment_received: false,
         payment_method: '',
-        notes: ''
+        notes: '',
+        patientId: ''
       });
 
       onClose();
