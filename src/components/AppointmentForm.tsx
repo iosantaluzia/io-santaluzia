@@ -72,12 +72,12 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
       setFormData(prev => ({
         ...prev,
         name: initialPatientData.name || prev.name,
-        cpf: initialPatientData.cpf || prev.cpf,
+        cpf: initialPatientData.cpf ? formatCPF(initialPatientData.cpf) : prev.cpf,
         date_of_birth: initialPatientData.date_of_birth || prev.date_of_birth,
-        phone: initialPatientData.phone || prev.phone,
+        phone: initialPatientData.phone ? formatPhone(initialPatientData.phone) : prev.phone,
         email: initialPatientData.email || prev.email,
         address: initialPatientData.address || prev.address,
-        cep: initialPatientData.cep || prev.cep,
+        cep: initialPatientData.cep ? formatCEP(initialPatientData.cep) : prev.cep,
         city: initialPatientData.city || prev.city,
         patientId: (initialPatientData as any).id || (initialPatientData as any).patientId || prev.patientId,
         appointmentType: initialAppointmentType || prev.appointmentType || 'consulta'

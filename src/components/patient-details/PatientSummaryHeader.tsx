@@ -3,7 +3,7 @@ import { User, Phone, MessageCircle, Mail, Calendar, MapPin, Settings, Save, X, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { formatPhone } from '@/utils/formatters';
+import { formatPhone, formatCPF, formatCEP } from '@/utils/formatters';
 
 interface PatientSummaryHeaderProps {
     isEditing: boolean;
@@ -86,7 +86,7 @@ export const PatientSummaryHeader = ({
                                 {editingPatient.name || patient.name}
                             </p>
                             {(editingPatient.cpf || patient.cpf) && (
-                                <p className="text-sm text-gray-600">CPF: {editingPatient.cpf || patient.cpf}</p>
+                                <p className="text-sm text-gray-600">CPF: {formatCPF(editingPatient.cpf || patient.cpf)}</p>
                             )}
                         </div>
                     </div>
@@ -136,7 +136,7 @@ export const PatientSummaryHeader = ({
                                 {editingPatient.address && <p>{editingPatient.address}</p>}
                                 {(editingPatient.cep || editingPatient.city) && (
                                     <p className="text-gray-600">
-                                        {editingPatient.cep && `CEP: ${editingPatient.cep}`}
+                                        {editingPatient.cep && `CEP: ${formatCEP(editingPatient.cep)}`}
                                         {editingPatient.cep && editingPatient.city && ' • '}
                                         {editingPatient.city}
                                     </p>
@@ -164,9 +164,10 @@ export const PatientSummaryHeader = ({
                             <label className="text-[10px] font-bold text-marrom-acentuado uppercase">CPF</label>
                             <Input
                                 value={editingPatient.cpf}
-                                onChange={(e) => setEditingPatient({ ...editingPatient, cpf: e.target.value })}
+                                onChange={(e) => setEditingPatient({ ...editingPatient, cpf: formatCPF(e.target.value) })}
                                 className="h-8 text-sm"
                                 placeholder="000.000.000-00"
+                                maxLength={14}
                             />
                         </div>
                         <div>
@@ -184,7 +185,7 @@ export const PatientSummaryHeader = ({
                             <label className="text-[10px] font-bold text-marrom-acentuado uppercase">Telefone</label>
                             <Input
                                 value={editingPatient.phone}
-                                onChange={(e) => setEditingPatient({ ...editingPatient, phone: e.target.value })}
+                                onChange={(e) => setEditingPatient({ ...editingPatient, phone: formatPhone(e.target.value) })}
                                 className="h-8 text-sm"
                                 placeholder="(00) 00000-0000"
                             />
@@ -222,9 +223,10 @@ export const PatientSummaryHeader = ({
                             <label className="text-[10px] font-bold text-marrom-acentuado uppercase">CEP</label>
                             <Input
                                 value={editingPatient.cep || ''}
-                                onChange={(e) => setEditingPatient({ ...editingPatient, cep: e.target.value })}
+                                onChange={(e) => setEditingPatient({ ...editingPatient, cep: formatCEP(e.target.value) })}
                                 className="h-8 text-sm"
                                 placeholder="00000-000"
+                                maxLength={9}
                             />
                         </div>
                     </div>

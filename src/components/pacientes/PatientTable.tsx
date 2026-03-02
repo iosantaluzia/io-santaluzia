@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { calculateAge, formatPhone } from '@/utils/formatters';
+import { calculateAge, formatPhone, formatCPF } from '@/utils/formatters';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { Clock, Users } from 'lucide-react';
@@ -172,7 +172,7 @@ export function PatientTable({
                                             }}
                                         >
                                             <td className="py-3 px-6 text-left font-medium">{patient.name}</td>
-                                            <td className="py-3 px-6 text-left">{patient.cpf || '-'}</td>
+                                            <td className="py-3 px-6 text-left">{patient.cpf ? formatCPF(patient.cpf) : '-'}</td>
                                             <td className="py-3 px-6 text-left">
                                                 {calculateAge(patient.date_of_birth)}
                                             </td>

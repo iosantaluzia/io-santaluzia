@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatCurrencyInput } from '@/utils/currency';
+import { formatCPF, formatPhone } from '@/utils/formatters';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
@@ -159,8 +160,13 @@ export function AppointmentFormFields({
                                         handleSelectPatient(patient);
                                     }}
                                 >
-                                    <span className="font-medium text-gray-900">{patient.name}</span>
-                                    <span className="text-gray-500">{patient.cpf}</span>
+                                    <div className="flex justify-between items-center w-full">
+                                        <span className="font-medium text-gray-900">{patient.name}</span>
+                                        <div className="flex flex-col items-end text-[10px] text-gray-500">
+                                            <span>{patient.cpf ? formatCPF(patient.cpf) : ''}</span>
+                                            {patient.phone && <span>{formatPhone(patient.phone)}</span>}
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -196,7 +202,7 @@ export function AppointmentFormFields({
                                         handleSelectPatient(patient);
                                     }}
                                 >
-                                    <div className="font-medium text-gray-900">{patient.cpf}</div>
+                                    <div className="font-medium text-gray-900">{patient.cpf ? formatCPF(patient.cpf) : ''}</div>
                                     <div className="text-gray-500">{patient.name}</div>
                                 </div>
                             ))}

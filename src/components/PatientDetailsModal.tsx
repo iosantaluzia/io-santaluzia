@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { formatCurrencyInput } from '@/utils/currency';
 import { translateStatus, getStatusColor, examTypeLabels } from '@/utils/statusUtils';
+import { formatCPF, formatPhone, formatCEP } from '@/utils/formatters';
 import { FileText } from 'lucide-react';
 import { PatientSummaryHeader } from './patient-details/PatientSummaryHeader';
 import { ConsultationHistoryList } from './patient-details/ConsultationHistoryList';
@@ -160,11 +161,11 @@ export function PatientDetailsModal({
           const parsedAddress = parseAddress(data.address || '');
           setEditingPatient({
             name: data.name,
-            cpf: data.cpf || '',
-            phone: data.phone || '',
+            cpf: data.cpf ? formatCPF(data.cpf) : '',
+            phone: data.phone ? formatPhone(data.phone) : '',
             email: data.email || '',
             address: parsedAddress.address || data.address || '',
-            cep: parsedAddress.cep,
+            cep: parsedAddress.cep ? formatCEP(parsedAddress.cep) : '',
             city: parsedAddress.city,
             date_of_birth: data.date_of_birth || ''
           });
@@ -192,11 +193,11 @@ export function PatientDetailsModal({
           const parsedAddress = parseAddress(data.address || '');
           setEditingPatient({
             name: data.name,
-            cpf: data.cpf || '',
-            phone: data.phone || '',
+            cpf: data.cpf ? formatCPF(data.cpf) : '',
+            phone: data.phone ? formatPhone(data.phone) : '',
             email: data.email || '',
             address: parsedAddress.address || data.address || '',
-            cep: parsedAddress.cep,
+            cep: parsedAddress.cep ? formatCEP(parsedAddress.cep) : '',
             city: parsedAddress.city,
             date_of_birth: data.date_of_birth || ''
           });
@@ -212,11 +213,11 @@ export function PatientDetailsModal({
     const parsedAddress = parseAddress(addressData);
     setEditingPatient({
       name: patient.name,
-      cpf: patient.cpf || '',
-      phone: patient.phone || '',
+      cpf: patient.cpf ? formatCPF(patient.cpf) : '',
+      phone: patient.phone ? formatPhone(patient.phone) : '',
       email: patient.email || '',
       address: parsedAddress.address,
-      cep: parsedAddress.cep,
+      cep: parsedAddress.cep ? formatCEP(parsedAddress.cep) : '',
       city: parsedAddress.city,
       date_of_birth: patient.birthDate
         ? patient.birthDate.split('/').reverse().join('-')
