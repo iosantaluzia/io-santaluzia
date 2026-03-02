@@ -164,9 +164,9 @@ export function PatientDetailsModal({
             cpf: data.cpf ? formatCPF(data.cpf) : '',
             phone: data.phone ? formatPhone(data.phone) : '',
             email: data.email || '',
-            address: parsedAddress.address || data.address || '',
-            cep: parsedAddress.cep ? formatCEP(parsedAddress.cep) : '',
-            city: parsedAddress.city,
+            address: data.address || '',
+            cep: data.cep ? formatCEP(data.cep) : (parsedAddress.cep ? formatCEP(parsedAddress.cep) : ''),
+            city: data.city || parsedAddress.city || '',
             date_of_birth: data.date_of_birth || ''
           });
           return data.id;
@@ -196,9 +196,9 @@ export function PatientDetailsModal({
             cpf: data.cpf ? formatCPF(data.cpf) : '',
             phone: data.phone ? formatPhone(data.phone) : '',
             email: data.email || '',
-            address: parsedAddress.address || data.address || '',
-            cep: parsedAddress.cep ? formatCEP(parsedAddress.cep) : '',
-            city: parsedAddress.city,
+            address: data.address || '',
+            cep: data.cep ? formatCEP(data.cep) : (parsedAddress.cep ? formatCEP(parsedAddress.cep) : ''),
+            city: data.city || parsedAddress.city || '',
             date_of_birth: data.date_of_birth || ''
           });
           return data.id;
@@ -216,11 +216,13 @@ export function PatientDetailsModal({
       cpf: patient.cpf ? formatCPF(patient.cpf) : '',
       phone: patient.phone ? formatPhone(patient.phone) : '',
       email: patient.email || '',
-      address: parsedAddress.address,
-      cep: parsedAddress.cep ? formatCEP(parsedAddress.cep) : '',
-      city: parsedAddress.city,
+      address: patient.address || parsedAddress.address || '',
+      cep: patient.cep ? formatCEP(patient.cep) : (parsedAddress.cep ? formatCEP(parsedAddress.cep) : ''),
+      city: patient.city || parsedAddress.city || '',
       date_of_birth: patient.birthDate
-        ? patient.birthDate.split('/').reverse().join('-')
+        ? (patient.birthDate.includes('/')
+          ? patient.birthDate.split('/').reverse().join('-')
+          : patient.birthDate)
         : ''
     });
     return patient.patientId || null;
@@ -295,7 +297,9 @@ export function PatientDetailsModal({
             cpf: editingPatient.cpf,
             phone: editingPatient.phone,
             email: editingPatient.email,
-            address: fullAddress,
+            address: editingPatient.address,
+            city: editingPatient.city,
+            cep: editingPatient.cep?.replace(/\D/g, ''),
             date_of_birth: editingPatient.date_of_birth || null
           })
           .eq('id', patientId);
@@ -311,7 +315,9 @@ export function PatientDetailsModal({
             cpf: editingPatient.cpf,
             phone: editingPatient.phone,
             email: editingPatient.email,
-            address: fullAddress,
+            address: editingPatient.address,
+            city: editingPatient.city,
+            cep: editingPatient.cep?.replace(/\D/g, ''),
             date_of_birth: editingPatient.date_of_birth || null
           })
           .select()
