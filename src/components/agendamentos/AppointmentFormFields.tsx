@@ -69,7 +69,12 @@ export function AppointmentFormFields({
                 supabaseQuery = supabaseQuery.ilike('name', `%${query}%`);
             } else {
                 const numericCPF = query.replace(/\D/g, '');
-                supabaseQuery = supabaseQuery.ilike('cpf', `%${numericCPF}%`);
+                // Busca tanto pelo termo digitado quanto pelo numérico puro para garantir que encontre
+                if (numericCPF && numericCPF !== query) {
+                    supabaseQuery = supabaseQuery.or(`cpf.ilike.%${query}%,cpf.ilike.%${numericCPF}%`);
+                } else {
+                    supabaseQuery = supabaseQuery.ilike('cpf', `%${query}%`);
+                }
             }
 
             const { data, error } = await supabaseQuery.limit(5);

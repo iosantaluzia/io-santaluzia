@@ -173,27 +173,39 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
       // Se não temos um patientId do autocomplete, buscar paciente existente por CPF ou nome/telefone
       if (!patientId) {
         if (validatedData.cpf && validatedData.cpf.trim() !== '') {
-          // Buscar por CPF primeiro
-          const { data: existingPatient, error: searchError } = await (supabase as any)
-            .from('patients')
-            .select('id, name')
-            .eq('cpf', validatedData.cpf)
-            .maybeSingle();
-
-          if (existingPatient) {
-            patientId = existingPatient.id;
-          }
-        } else {
-          // Se não há CPF, tentar buscar por nome e telefone para evitar duplicatas
+          // Buscar por CPF (formatado ou apenas números) para evitar duplicidade
+          const cleanCPF = validatedData.cpf.replace(/\D/g, '');
           const { data: existingPatients, error: searchError } = await (supabase as any)
             .from('patients')
-            .select('id, name, phone')
-            .eq('name', validatedData.name)
-            .eq('phone', validatedData.phone)
+            .select('id, name')
+            .or(`cpf.eq."${validatedData.cpf}",cpf.eq."${cleanCPF}"`)
+            .order('created_at', { ascending: true }) // Preferir o registro mais antigo (com histórico)
             .limit(1);
 
           if (existingPatients && existingPatients.length > 0) {
             patientId = existingPatients[0].id;
+          }
+        }
+
+        // Se ainda não encontrou (ou não tinha CPF), tentar por nome e telefone
+        if (!patientId) {
+          const cleanPhone = validatedData.phone?.replace(/\D/g, '');
+
+          let query = (supabase as any)
+            .from('patients')
+            .select('id, name, phone')
+            .eq('name', validatedData.name);
+
+          // Tentar busca flexível pelo telefone
+          if (cleanPhone) {
+            const { data: phoneMatches } = await query
+              .or(`phone.eq."${validatedData.phone}",phone.eq."${cleanPhone}",phone.ilike.%${cleanPhone.slice(-8)}%`)
+              .order('created_at', { ascending: true })
+              .limit(1);
+
+            if (phoneMatches && phoneMatches.length > 0) {
+              patientId = phoneMatches[0].id;
+            }
           }
         }
       }
