@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, Phone, Mail, MapPin, Clock, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatCurrencyInput } from '@/utils/currency';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface AppointmentFormFieldsProps {
     formData: any;
@@ -22,34 +24,178 @@ export function AppointmentFormFields({
     paymentMethodPopoverOpen,
     setPaymentMethodPopoverOpen
 }: AppointmentFormFieldsProps) {
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [showResults, setShowResults] = useState(false);
+    const [searchType, setSearchType] = useState<'name' | 'cpf' | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchQueryType, setSearchQueryType] = useState<'name' | 'cpf' | null>(null);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setShowResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (searchTerm && searchQueryType) {
+                searchPatients(searchTerm, searchQueryType);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm, searchQueryType]);
+
+    const searchPatients = async (query: string, type: 'name' | 'cpf') => {
+        if (!query || query.length < 3) {
+            setSearchResults([]);
+            setShowResults(false);
+            return;
+        }
+
+        try {
+            let supabaseQuery = supabase.from('patients').select('*');
+
+            if (type === 'name') {
+                supabaseQuery = supabaseQuery.ilike('name', `%${query}%`);
+            } else {
+                const numericCPF = query.replace(/\D/g, '');
+                supabaseQuery = supabaseQuery.ilike('cpf', `%${numericCPF}%`);
+            }
+
+            const { data, error } = await supabaseQuery.limit(5);
+
+            if (error) throw error;
+
+            setSearchResults(data || []);
+            setShowResults(data && data.length > 0);
+            setSearchType(type);
+        } catch (error) {
+            logger.error('Error searching patients:', error);
+        }
+    };
+
+    const handleSelectPatient = (patient: any) => {
+        logger.info('Selecting patient for autofill:', patient.name);
+
+        handleInputChange('name', patient.name);
+        if (patient.cpf) handleInputChange('cpf', patient.cpf);
+        if (patient.phone) handleInputChange('phone', patient.phone);
+        if (patient.email) handleInputChange('email', patient.email);
+        if (patient.address) handleInputChange('address', patient.address);
+        if (patient.cep) handleInputChange('cep', patient.cep);
+        if (patient.city) handleInputChange('city', patient.city);
+
+        if (patient.date_of_birth) {
+            try {
+                const parts = patient.date_of_birth.split('-');
+                if (parts.length >= 3) {
+                    const year = parts[0];
+                    const month = parts[1];
+                    const day = parts[2].substring(0, 2);
+                    handleInputChange('date_of_birth', `${day}/${month}/${year}`);
+                } else {
+                    const dob = new Date(patient.date_of_birth);
+                    if (!isNaN(dob.getTime())) {
+                        handleInputChange('date_of_birth', dob.toLocaleDateString('pt-BR'));
+                    }
+                }
+            } catch (e) {
+                logger.error('Error formatting date of birth:', e);
+            }
+        }
+        setShowResults(false);
+    };
+
     return (
-        <div className="col-span-8 space-y-2">
+        <div className="col-span-8 space-y-2" ref={containerRef}>
             {/* Primeira linha: Nome e CPF */}
             <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
+                <div className="col-span-2 relative">
                     <Label htmlFor="name" className="text-xs font-medium leading-tight">Nome Completo *</Label>
                     <div className="relative mt-0.5">
                         <Input
                             id="name"
                             value={formData.name}
-                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            onChange={(e) => {
+                                handleInputChange('name', e.target.value);
+                                setSearchTerm(e.target.value);
+                                setSearchQueryType('name');
+                            }}
+                            onFocus={() => {
+                                if (formData.name.length >= 3) setShowResults(true);
+                            }}
                             placeholder="Nome do paciente"
                             className="pl-7 h-8 text-xs"
                             required
+                            autoComplete="off"
                         />
                         <User className="h-3 w-3 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
                     </div>
+
+                    {showResults && searchType === 'name' && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                            {searchResults.map((patient) => (
+                                <div
+                                    key={patient.id}
+                                    className="px-3 py-2 text-xs hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault(); // Prevent blur
+                                        handleSelectPatient(patient);
+                                    }}
+                                >
+                                    <span className="font-medium text-gray-900">{patient.name}</span>
+                                    <span className="text-gray-500">{patient.cpf}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
-                <div>
+                <div className="relative">
                     <Label htmlFor="cpf" className="text-xs font-medium leading-tight">CPF</Label>
                     <Input
                         id="cpf"
                         value={formData.cpf}
-                        onChange={(e) => handleInputChange('cpf', e.target.value)}
+                        onChange={(e) => {
+                            handleInputChange('cpf', e.target.value);
+                            setSearchTerm(e.target.value);
+                            setSearchQueryType('cpf');
+                        }}
+                        onFocus={() => {
+                            if (formData.cpf.length >= 3) setShowResults(true);
+                        }}
                         placeholder="000.000.000-00"
                         maxLength={14}
                         className="h-8 text-xs mt-0.5"
+                        autoComplete="off"
                     />
+
+                    {showResults && searchType === 'cpf' && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                            {searchResults.map((patient) => (
+                                <div
+                                    key={patient.id}
+                                    className="px-3 py-2 text-xs hover:bg-gray-100 cursor-pointer"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault(); // Prevent blur
+                                        handleSelectPatient(patient);
+                                    }}
+                                >
+                                    <div className="font-medium text-gray-900">{patient.cpf}</div>
+                                    <div className="text-gray-500">{patient.name}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

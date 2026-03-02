@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { appointmentFormSchema } from '@/utils/validationSchemas';
 import { logger } from '@/utils/logger';
@@ -111,15 +111,16 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
 
 
   const handleInputChange = (field: string, value: string) => {
+    let formattedValue = value;
     if (field === 'cpf') {
-      value = formatCPF(value);
+      formattedValue = formatCPF(value);
     } else if (field === 'phone') {
-      value = formatPhone(value);
+      formattedValue = formatPhone(value);
     } else if (field === 'cep') {
-      value = formatCEP(value);
+      formattedValue = formatCEP(value);
     }
 
-    setFormData({ ...formData, [field]: value });
+    setFormData(prev => ({ ...prev, [field]: formattedValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -197,7 +198,9 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
         name: validatedData.name,
         phone: validatedData.phone,
         email: validatedData.email || null,
-        address: validatedData.address || null
+        address: validatedData.address || null,
+        cep: validatedData.cep || null,
+        city: validatedData.city || null
       };
 
       // Adicionar CPF apenas se foi fornecido
@@ -320,6 +323,9 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
             <CalendarIcon className="h-5 w-5" />
             Novo Agendamento em {format(appointmentDate, "dd 'de' MMMM", { locale: ptBR })}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Preencha os dados abaixo para agendar uma nova consulta ou exame.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-2">
@@ -336,7 +342,7 @@ export function AppointmentForm({ isOpen, onClose, selectedDate, initialPatientD
               appointmentDate={appointmentDate}
               setAppointmentDate={setAppointmentDate}
               notes={formData.notes}
-              onNotesChange={(notes) => setFormData({ ...formData, notes })}
+              onNotesChange={(notes) => setFormData(prev => ({ ...prev, notes }))}
             />
           </div>
 

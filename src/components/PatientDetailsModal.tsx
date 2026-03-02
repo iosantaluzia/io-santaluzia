@@ -24,6 +24,8 @@ interface PatientDetailsModalProps {
     phone?: string;
     email?: string;
     address?: string;
+    cep?: string;
+    city?: string;
     birthDate?: string;
     observations?: string;
     patientId?: string;
@@ -97,8 +99,8 @@ export function PatientDetailsModal({
     phone: string;
     email: string;
     address: string;
-    cep?: string;
-    city?: string;
+    cep: string;
+    city: string;
     date_of_birth?: string;
   }>({
     name: patient.name,
@@ -106,6 +108,8 @@ export function PatientDetailsModal({
     phone: patient.phone || '',
     email: patient.email || '',
     address: patient.address || '',
+    cep: patient.cep || '',
+    city: patient.city || '',
   });
 
   const [saving, setSaving] = useState(false);
@@ -147,9 +151,9 @@ export function PatientDetailsModal({
       try {
         const { data, error } = await supabase
           .from('patients')
-          .select('id, name, cpf, phone, email, address, date_of_birth')
+          .select('id, name, cpf, phone, email, address, cep, city, date_of_birth')
           .eq('id', patient.patientId)
-          .maybeSingle();
+          .maybeSingle() as any;
 
         if (data) {
           setPatientId(data.id);
@@ -177,9 +181,9 @@ export function PatientDetailsModal({
         const cleanCPF = patient.cpf.replace(/\D/g, '');
         const { data, error } = await supabase
           .from('patients')
-          .select('id, name, cpf, phone, email, address, date_of_birth')
+          .select('id, name, cpf, phone, email, address, cep, city, date_of_birth')
           .or(`cpf.eq."${patient.cpf}",cpf.eq."${cleanCPF}"`)
-          .maybeSingle();
+          .maybeSingle() as any;
 
         if (error) throw error;
 
@@ -531,6 +535,8 @@ export function PatientDetailsModal({
       phone: editingPatient.phone || patient.phone,
       email: editingPatient.email || patient.email,
       address: editingPatient.address || patient.address,
+      cep: editingPatient.cep || patient.cep,
+      city: editingPatient.city || patient.city,
     };
     onClose();
     onScheduleReturn(pData);

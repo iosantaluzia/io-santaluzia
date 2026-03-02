@@ -4,7 +4,8 @@ import { AppointmentSlotItem } from './AppointmentSlotItem';
 import { ScheduleBlockModal } from './ScheduleBlockModal';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AppointmentSlot {
     time: string;
@@ -49,7 +50,23 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
     onRemoveBlock,
     selectedDate
 }, ref) => {
-    const [hideFreeSlots, setHideFreeSlots] = useState(false);
+    const { appUser, updatePreferences } = useAuth();
+    const [hideFreeSlots, setHideFreeSlots] = useState(appUser?.preferences?.hideFreeSlots || false);
+
+    // Sync from appUser preferences when they change (e.g. after login)
+    useEffect(() => {
+        if (appUser?.preferences?.hideFreeSlots !== undefined) {
+            setHideFreeSlots(appUser.preferences.hideFreeSlots);
+        }
+    }, [appUser?.preferences?.hideFreeSlots]);
+
+    const handleToggleHideFreeSlots = async () => {
+        const newValue = !hideFreeSlots;
+        setHideFreeSlots(newValue);
+        if (updatePreferences) {
+            await updatePreferences({ hideFreeSlots: newValue });
+        }
+    };
 
     // Gerar horários padrão: 07:30 às 17:30 (intervalos de 30 min)
     const standardTimes: string[] = [];
@@ -99,10 +116,10 @@ export const DoctorAgendaList = forwardRef<HTMLDivElement, DoctorAgendaListProps
                     <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => setHideFreeSlots(!hideFreeSlots)}
+                        onClick={handleToggleHideFreeSlots}
                         className={`h-9 w-9 transition-all ${hideFreeSlots
-                                ? 'bg-bege-principal/10 border-bege-principal text-bege-principal shadow-sm'
-                                : 'text-gray-400 hover:text-bege-principal'
+                            ? 'bg-bege-principal/10 border-bege-principal text-bege-principal shadow-sm'
+                            : 'text-gray-400 hover:text-bege-principal'
                             }`}
                         title={hideFreeSlots ? "Mostrar horários livres" : "Ocultar horários livres"}
                     >

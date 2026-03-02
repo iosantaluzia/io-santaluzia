@@ -26,6 +26,8 @@ interface AppointmentSlot {
   phone?: string;
   email?: string;
   address?: string;
+  cep?: string;
+  city?: string;
   birthDate?: string;
   observations?: string;
   patientId?: string;
@@ -165,11 +167,13 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
             phone,
             email,
             address,
+            cep,
+            city,
             date_of_birth
           )
         `)
         .gte('consultation_date', startOfDay.toISOString())
-        .lte('consultation_date', endOfDay.toISOString());
+        .lte('consultation_date', endOfDay.toISOString()) as any;
 
       // Filtrar por médico se for médico
       if (appUser?.role === 'doctor') {
@@ -218,6 +222,8 @@ export function AgendamentosSection({ onSectionChange, onOpenPatientConsultation
           phone: patient?.phone || '',
           email: patient?.email || '',
           address: patient?.address || '',
+          cep: patient?.cep || '',
+          city: patient?.city || '',
           birthDate: patient?.date_of_birth
             ? new Date(patient.date_of_birth).toLocaleDateString('pt-BR')
             : '',

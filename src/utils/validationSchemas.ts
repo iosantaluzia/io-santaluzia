@@ -110,6 +110,8 @@ export const patientFormSchema = z.object({
   phone: phoneSchema.optional().or(z.literal('')),
   email: emailSchema.optional().or(z.literal('')),
   address: z.string().max(500).optional(),
+  cep: cepSchema.optional().or(z.literal('')),
+  city: z.string().max(100).optional(),
   emergency_contact: z.string().max(255).optional(),
   emergency_phone: phoneSchema.optional().or(z.literal('')),
   medical_history: z.string().max(5000).optional(),

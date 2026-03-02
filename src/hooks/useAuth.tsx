@@ -11,6 +11,10 @@ interface AppUser {
   auth_user_id: string | null;
   display_name?: string | null;
   avatar_url?: string | null;
+  preferences?: {
+    hideFreeSlots?: boolean;
+    [key: string]: any;
+  } | null;
 }
 
 interface AuthState {
@@ -392,11 +396,50 @@ export function useAuth() {
     }
   };
 
+  const updatePreferences = async (preferences: Partial<NonNullable<AppUser['preferences']>>) => {
+    if (!authState.appUser) return;
+
+    try {
+      const newPreferences = {
+        ...(authState.appUser.preferences || {}),
+        ...preferences
+      };
+
+      const { error } = await supabase
+        .from('app_users')
+        .update({ preferences: newPreferences } as any)
+        .eq('id', authState.appUser.id);
+
+      if (error) throw error;
+
+      // Atualizar estado local
+      const updatedAppUser = {
+        ...authState.appUser,
+        preferences: newPreferences
+      };
+
+      if (authState.appUser.auth_user_id) {
+        appUserCache.current[authState.appUser.auth_user_id] = updatedAppUser;
+      }
+
+      setAuthState(prev => ({
+        ...prev,
+        appUser: updatedAppUser
+      }));
+
+      return { success: true };
+    } catch (error) {
+      logger.error('Error updating preferences:', error);
+      return { success: false, error };
+    }
+  };
+
   return {
     ...authState,
     signInWithUsername,
     signOut,
     retry,
+    updatePreferences,
     isAuthenticated: !!authState.user && !!authState.appUser && authState.appUser.approved
   };
 }
