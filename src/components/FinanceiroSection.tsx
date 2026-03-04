@@ -15,6 +15,9 @@ import { PatientDetailsModal } from './PatientDetailsModal';
 import { NfeEmissionModal } from './NfeEmissionModal';
 import { NfeList } from './NfeList';
 import { toast } from 'sonner';
+import { ConvenioManagementModal } from './pacientes/ConvenioManagementModal';
+import { ContasPagarModal } from './Financeiro/ContasPagarModal';
+import { ConvenioPricesModal } from './Financeiro/ConvenioPricesModal';
 
 interface FinancialData {
   name: string;
@@ -46,6 +49,7 @@ export function FinanceiroSection() {
   const [selectedPatientForModal, setSelectedPatientForModal] = useState<any>(null);
   const [showPatientDetailsModal, setShowPatientDetailsModal] = useState(false);
   const [isNfeModalOpen, setIsNfeModalOpen] = useState(false);
+  const [activeView, setActiveView] = useState<'dashboard' | 'convenio' | 'contas-pagar' | 'prices'>('dashboard');
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date())
@@ -316,12 +320,29 @@ export function FinanceiroSection() {
     );
   }
 
+  if (activeView === 'convenio') {
+    return <ConvenioManagementModal isInline onClose={() => setActiveView('dashboard')} />;
+  }
+
+  if (activeView === 'contas-pagar') {
+    return <ContasPagarModal isInline onClose={() => setActiveView('dashboard')} />;
+  }
+
+  if (activeView === 'prices') {
+    return <ConvenioPricesModal isInline onClose={() => setActiveView('dashboard')} />;
+  }
+
   return (
-    <div className={cn("p-4 transition-opacity duration-200", isRefetching && "opacity-60")}>
+    <div className="p-4 transition-opacity duration-200">
       <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-cinza-escuro">Relatórios Financeiros</h2>
-          {isRefetching && <Loader2 className="h-5 w-5 animate-spin text-bege-principal" />}
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-cinza-escuro">
+            <TrendingUp className="h-6 w-6 text-medical-primary" />
+            Dashboard Financeiro
+          </h2>
+          <p className="text-sm text-gray-500">
+            {format(dateRange?.from || new Date(), "MMMM yyyy", { locale: ptBR })}
+          </p>
         </div>
 
         {canViewAllDoctors && (
@@ -423,20 +444,29 @@ export function FinanceiroSection() {
           <span className="font-semibold text-center leading-tight">Emitir Notas<br />Fiscais</span>
         </button>
 
-        <div className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center gap-3 opacity-60 cursor-not-allowed min-h-[140px]">
-          <LineChart className="h-8 w-8 text-gray-400" />
-          <span className="font-semibold text-gray-500 text-center leading-tight">Relatórios<br />Avançados<br /><span className="text-xs font-normal">Em breve</span></span>
-        </div>
+        <button
+          className="bg-blue-600/10 p-4 rounded-lg shadow-sm border border-blue-200 flex flex-col items-center justify-center gap-3 hover:bg-blue-600 hover:text-white transition-all text-blue-600 group min-h-[140px]"
+          onClick={() => setActiveView('convenio')}
+        >
+          <FileText className="h-8 w-8 group-hover:scale-110 transition-transform" />
+          <span className="font-semibold text-center leading-tight">Gestão de<br />Convênios</span>
+        </button>
 
-        <div className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center gap-3 opacity-60 cursor-not-allowed min-h-[140px]">
-          <CreditCard className="h-8 w-8 text-gray-400" />
-          <span className="font-semibold text-gray-500 text-center leading-tight">Integração<br />Cartões<br /><span className="text-xs font-normal">Em breve</span></span>
-        </div>
+        <button
+          className="bg-yellow-600/10 p-4 rounded-lg shadow-sm border border-yellow-200 flex flex-col items-center justify-center gap-3 hover:bg-yellow-600 hover:text-white transition-all text-yellow-600 group min-h-[140px]"
+          onClick={() => setActiveView('contas-pagar')}
+        >
+          <Wallet className="h-8 w-8 group-hover:scale-110 transition-transform" />
+          <span className="font-semibold text-center leading-tight">Contas a<br />Pagar</span>
+        </button>
 
-        <div className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center gap-3 opacity-60 cursor-not-allowed min-h-[140px]">
-          <Wallet className="h-8 w-8 text-gray-400" />
-          <span className="font-semibold text-gray-500 text-center leading-tight">Contas a<br />Pagar<br /><span className="text-xs font-normal">Em breve</span></span>
-        </div>
+        <button
+          className="bg-green-600/10 p-4 rounded-lg shadow-sm border border-green-200 flex flex-col items-center justify-center gap-3 hover:bg-green-600 hover:text-white transition-all text-green-600 group min-h-[140px]"
+          onClick={() => setActiveView('prices')}
+        >
+          <DollarSign className="h-8 w-8 group-hover:scale-110 transition-transform" />
+          <span className="font-semibold text-center leading-tight">Tabela de<br />Preços Convênios</span>
+        </button>
       </div>
 
       <Tabs defaultValue="transacoes" className="w-full">

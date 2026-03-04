@@ -318,9 +318,10 @@ export function AppointmentFormFields({
                                     <SelectValue placeholder="Selecione o convênio" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Unimed">Unimed</SelectItem>
-                                    <SelectItem value="Unimed 279">Unimed 279</SelectItem>
-                                    <SelectItem value="Unimed Intercâmbio">Unimed Intercâmbio</SelectItem>
+                                    <SelectItem value="unimed_estadual">Unimed Estadual</SelectItem>
+                                    <SelectItem value="unimed_nacional">Unimed Nacional</SelectItem>
+                                    <SelectItem value="unimed_seguros">Unimed Seguros</SelectItem>
+                                    <SelectItem value="unimed_local">Unimed Local</SelectItem>
                                 </SelectContent>
                             </Select>
                         </>
